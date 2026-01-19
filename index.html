@@ -1101,38 +1101,46 @@
     </section>
     
     <!-- Basic Information Section -->
-    <section class="section">
-        <h2>ข้อมูลพื้นฐาน</h2>
-        <div class="input-group">
-            <div class="input-field">
-                <label for="bw">น้ำหนักตัว (BW)</label>
-                <div class="input-with-unit">
-                    <input type="number" inputmode="decimal" id="bw" step="0.01" 
-                           placeholder="กรอกน้ำหนักตัว"/>
-                    <span class="unit">kg</span>
-                </div>
-            </div>
-            <div class="input-field">
-                <label for="rate">Rate TPN</label>
-                <div class="input-with-unit">
-                    <input type="number" inputmode="decimal" id="rate" step="0.1" 
-                           placeholder="กรอกอัตราการให้"/>
-                    <span class="unit">ml/hr</span>
-                </div>
+<section class="section">
+    <h2>ข้อมูลพื้นฐาน</h2>
+    <div class="input-group">
+        <div class="input-field">
+            <label for="bw">น้ำหนักตัว (BW)</label>
+            <div class="input-with-unit">
+                <input type="text" inputmode="decimal" id="bw" 
+                       placeholder="กรอกน้ำหนักตัว"/>
+                <span class="unit">kg</span>
             </div>
         </div>
-        <div class="input-group">
-            <div class="input-field">
-                <label for="bag">ปริมาตร Bag TPN (คำนวนอัตโนมัติ)</label>
-                <div class="input-with-unit">
-                    <input type="number" inputmode="numeric" id="bag" step="1" 
-                           placeholder="คำนวนจาก Rate"/>
-                    <span class="unit">ml</span>
-                </div>
+        <div class="input-field">
+            <label for="total-volume">Total volume (รวม Fat)</label>
+            <div class="input-with-unit">
+                <input type="text" inputmode="numeric" id="total-volume" 
+                       placeholder="กรอก Total volume"/>
+                <span class="unit">ml</span>
             </div>
-            <div class="input-field"><!-- spacer --></div>
         </div>
-    </section>
+    </div>
+    
+    <div class="input-group">
+        <div class="input-field">
+            <label for="pn-volume">PN volume (คำนวณอัตโนมัติ)</label>
+            <div class="input-with-unit">
+                <input type="text" inputmode="decimal" id="pn-volume" 
+                       placeholder="คำนวณจาก Total volume"/>
+                <span class="unit">ml</span>
+            </div>
+        </div>
+        <div class="input-field">
+            <label for="rate">Rate TPN</label>
+            <div class="input-with-unit">
+                <input type="text" inputmode="decimal" id="rate" 
+                       placeholder="คำนวณจาก PN volume"/>
+                <span class="unit">ml/hr</span>
+            </div>
+        </div>
+    </div>
+</section>
     
     <!-- Macronutrients Section -->
     <section class="section">
@@ -1149,14 +1157,25 @@
                 </div>
             </div>
             <div class="input-field">
-                <label for="fat">Fat</label>
-                <div class="input-with-unit">
-                    <input type="number" inputmode="decimal" id="fat" step="0.1" 
-                           placeholder="กรอกปริมาณไขมัน"/>
-                    <span class="unit">g/kg/day</span>
-                </div>
-            </div>
+    <label for="fat">Fat</label>
+    <div class="input-with-unit">
+        <input type="text" inputmode="decimal" id="fat" 
+               placeholder="กรอกปริมาณไขมัน"/>
+        <span class="unit">g/kg/day</span>
+    </div>
+    
+    <!-- ✅ Vitalipid Deduction Section -->
+    <div style="margin-top:15px; padding:15px; background:#fef3c7; border-radius:8px; border:2px solid #fcd34d;">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.95em; color:#92400e; margin-bottom:10px;">
+            <input type="checkbox" id="deduct-vitalipid" style="transform:scale(1.2); cursor:pointer;">
+            <span style="font-weight:600;">☐ หัก fat Vitalipid 0.4 g/kg/day</span>
+        </label>
+        <div style="background:white; padding:10px 12px; border-radius:6px; border:1px solid #f59e0b;">
+            <span style="font-weight:600; color:#92400e;">Fat หลังหัก:</span>
+            <span id="fat-after-deduct" style="font-weight:700; color:#dc2626; margin-left:8px;">0 g/kg/day</span>
         </div>
+    </div>
+</div>
         
         <div class="input-group">
             <div class="input-field">
@@ -1463,84 +1482,21 @@
                 </div>
             </div>
             
-            <!-- Cernevit -->
-            <div class="calc-row" style="display:flex; flex-direction:column; align-items:stretch; 
-                                          border-bottom:1px solid #f1f5f9; padding-bottom:15px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <div class="calc-label bold">Cernevit® (max 3 ml/day)</div>
-                    <div class="calc-result" id="cernevit-volume" 
-                         style="background:#dcfce7; color:#166534; border:1px solid #86efac;">
-                        0 ml
-                    </div>
-                </div>
-                <div class="frequency-selection">
-                    <h4>ความถี่ในการให้:</h4>
-                    <label class="frequency-option">
-                        <input type="radio" name="cernevit-freq" value="daily" checked>
-                        <span class="frequency-option-label">Per day</span>
-                    </label>
-                    <label class="frequency-option">
-                        <input type="radio" name="cernevit-freq" value="mwf">
-                        <span class="frequency-option-label">Mon Wed Fri</span>
-                    </label>
-                    <label class="frequency-option">
-                        <input type="radio" name="cernevit-freq" value="weekly">
-                        <span class="frequency-option-label">Per week</span>
-                    </label>
-                    <div class="day-selector" id="cernevit-day-selector">
-                        <select id="cernevit-day">
-                            <option value="1">Monday</option>
-                            <option value="2">Tuesday</option>
-                            <option value="3">Wednesday</option>
-                            <option value="4">Thursday</option>
-                            <option value="5">Friday</option>
-                            <option value="6">Saturday</option>
-                            <option value="0">Sunday</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Vitamin K -->
-            <div class="calc-row" style="display:flex; flex-direction:column; align-items:stretch;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <div class="calc-label bold">Vitamin K (max 0.5 ml/day)</div>
-                </div>
-                <div class="frequency-selection">
-                    <h4>เลือกวิธีการให้:</h4>
-                    <label class="frequency-option" id="vitamin-k-daily-option">
-                        <input type="radio" name="vitamin-k-choice" value="daily">
-                        <span class="frequency-option-label">Per day</span>
-                        <span class="source-option-value" id="vitamin-k-daily" style="margin-left:10px;">
-                            0 ml
-                        </span>
-                    </label>
-                    <label class="frequency-option">
-                        <input type="radio" name="vitamin-k-choice" value="weekly">
-                        <span class="frequency-option-label">Per week</span>
-                        <span class="source-option-value" id="vitamin-k-weekly" style="margin-left:10px;">
-                            0 ml
-                        </span>
-                    </label>
-                    <div class="day-selector" id="vitamin-k-day-selector">
-                        <select id="vitamin-k-day">
-                            <option value="1">Monday</option>
-                            <option value="2">Tuesday</option>
-                            <option value="3">Wednesday</option>
-                            <option value="4">Thursday</option>
-                            <option value="5">Friday</option>
-                            <option value="6">Saturday</option>
-                            <option value="0">Sunday</option>
-                        </select>
-                    </div>
-                    <label class="frequency-option">
-                        <input type="radio" name="vitamin-k-choice" value="none" checked>
-                        <span class="frequency-option-label" style="color: #dc2626; font-weight: 600;">ไม่เติม</span>
-                    </label>
-                </div>
-            </div>
+            <!-- Vitalipid -->
+<div class="calc-row" style="display:flex; flex-direction:column; align-items:stretch; 
+                              border-bottom:1px solid #f1f5f9; padding-bottom:15px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div class="calc-label bold">Vitalipid</div>
+        <div class="calc-result" id="vitalipid-volume" 
+             style="background:#dcfce7; color:#166534; border:1px solid #86efac;">
+            0 ml
         </div>
-    </section>
+    </div>
+    <div style="font-size:0.85em; color:#64748b; font-style:italic; padding:0 16px;">
+        คำนวณจาก: 4 × BW (kg)
+    </div>
+</div>
+            
     <!-- Add Zinc Section -->
 <section class="section">
     <h2>Add Zinc</h2>
@@ -1668,41 +1624,6 @@
         </div>
     </section>
     
-    <!-- Milk Calories Section -->
-    <section class="section">
-        <h2>คำนวน Calories จากนม (feed)</h2>
-        <div class="input-group">
-            <div class="input-field">
-                <label for="milk">ปริมาตรนม</label>
-                <div class="input-with-unit">
-                    <input type="number" inputmode="numeric" id="milk" step="1" 
-                           placeholder="กรอกปริมาตรนม"/>
-                    <span class="unit">ml</span>
-                </div>
-            </div>
-            <div class="input-field">
-                <label for="total-milk">x 8 feed =</label>
-                <div class="input-with-unit">
-                    <input type="number" inputmode="numeric" id="total-milk" step="1" 
-                           placeholder="รวมปริมาตรนม"/>
-                    <span class="unit">ml</span>
-                </div>
-            </div>
-        </div>
-        <div class="calculation-section">
-            <div class="calc-row">
-                <div class="calc-label">TF จากการกินนม</div>
-                <div class="calc-result" id="tf-from-milk">0 ml/kg/day</div>
-                <div></div>
-            </div>
-            <div class="calc-row">
-                <div class="calc-label">Calories จากนม</div>
-                <div class="calc-result" id="milk-calories-kg">0 kcal/kg/day</div>
-                <div></div>
-            </div>
-        </div>
-    </section>
-    
     <!-- Sterile Water Section -->
     <section class="total-section" id="sterile-water-section" 
              style="background:linear-gradient(135deg,#06b6d4 0%,#0891b2 100%);">
@@ -1821,6 +1742,50 @@
     };
 
     // ===== Auto Calculate Bag Volume =====
+    // ===== Auto Calculate PN Volume and Rate =====
+function updatePNVolumeAndRate() {
+    const totalVol = parseFloat(document.getElementById('total-volume')?.value) || 0;
+    const bw = parseFloat(document.getElementById('bw')?.value) || 0;
+    const fatInput = parseFloat(document.getElementById('fat')?.value) || 0;
+    const deductVitalipid = document.getElementById('deduct-vitalipid')?.checked || false;
+
+    // Calculate effective fat
+const effectiveFat = deductVitalipid ? Math.max(0, fatInput - 0.4) : fatInput;
+    
+    // คำนวณ effective fat
+    let effectiveFat = fatInput;
+    if (deductVitalipid) {
+        effectiveFat = Math.max(0, fatInput - 0.4);
+    }
+    
+    // แสดง fat หลังหัก
+    const fatAfterDeductEl = document.getElementById('fat-after-deduct');
+    if (fatAfterDeductEl) {
+        fatAfterDeductEl.textContent = effectiveFat.toFixed(1) + ' g/kg/day';
+    }
+    
+    // คำนวณ Fat volume
+    const fatVol = effectiveFat * bw * 5;
+    
+    // คำนวณ Vitalipid volume
+    const vitalipidVol = deductVitalipid ? (4 * bw) : 0;
+    
+    // PN volume = Total volume - (Fat volume + Vitalipid volume)
+    const pnVol = Math.max(0, totalVol - fatVol - vitalipidVol);
+    const pnVolumeEl = document.getElementById('pn-volume');
+    if (pnVolumeEl) {
+        pnVolumeEl.value = pnVol.toFixed(1);
+    }
+    
+    // Rate = PN volume / 24
+    const rate = pnVol > 0 ? (pnVol / 24) : 0;
+    const rateEl = document.getElementById('rate');
+    if (rateEl) {
+        rateEl.value = rate.toFixed(1);
+    }
+    
+    calculateTPN();
+}
     function calculateBagVolume(rate) {
         if (!rate || rate <= 0) return 0;
         const rawVolume = rate * 24 + 20;
@@ -2203,14 +2168,16 @@ if (picc) {
 
     // ===== Main TPN Calculation Function =====
     function calculateTPN() {
-        const bw = parseFloat(document.getElementById('bw').value) || 0;
-        const rate = parseFloat(document.getElementById('rate').value) || 0;
-        const bag = parseFloat(document.getElementById('bag').value) || 0;
-        const protein = parseFloat(document.getElementById('protein').value) || 0;
-        const dextrose = parseFloat(document.getElementById('dextrose').value) || 0;
-        const fat = parseFloat(document.getElementById('fat').value) || 0;
-        const milk = parseFloat(document.getElementById('milk').value) || 0;
-        const totalMilk = parseFloat(document.getElementById('total-milk').value) || (milk * 8);
+        function calculateTPN() {
+    const bw = parseFloat(document.getElementById('bw').value) || 0;
+    const totalVolume = parseFloat(document.getElementById('total-volume').value) || 0;
+    const pnVolume = parseFloat(document.getElementById('pn-volume').value) || 0;
+    const rate = parseFloat(document.getElementById('rate').value) || 0;
+    const protein = parseFloat(document.getElementById('protein').value) || 0;
+    const dextrose = parseFloat(document.getElementById('dextrose').value) || 0;
+    const fatInput = parseFloat(document.getElementById('fat').value) || 0;
+    const deductVitalipid = document.getElementById('deduct-vitalipid')?.checked || false;
+    // ลบบรรทัด milk, totalMilk ออก
         const p = parseFloat(document.getElementById('p').value) || 0;
         const na = parseFloat(document.getElementById('na').value) || 0;
         const k = parseFloat(document.getElementById('k').value) || 0;
@@ -2230,18 +2197,15 @@ if (picc) {
         }
 
         const proteinCal_raw = bw * protein * 4;
-        const proteinOsm_raw = bag > 0 ? (protein * bw * 1000 * 10) / bag : 0;
+        const proteinOsm_raw = pnVolume > 0 ? (protein * bw * 1000 * 10) / pnVolume : 0;
 
-        const dextroseVol_raw = ((dextrose * bag) / 100) * 2;
-        const dextroseCal_raw = (dextrose * bag * 3.4) / 100;
-        const dextroseOsm_raw = bag > 0 ? (dextrose * 1000 * 5) / 100 : 0;
+        const dextroseVol_raw = ((dextrose * pnVolume) / 100) * 2;
+        const dextroseCal_raw = (dextrose * pnVolume * 3.4) / 100;
+        const dextroseOsm_raw = pnVolume > 0 ? (dextrose * 1000 * 5) / 100 : 0;
         const gir_raw = (bw > 0) ? (dextrose * rate) / (6 * bw) : 0;
 
-        const fatVol_1 = r1(fat * bw * 5);
-        const fatCal_raw = fat * bw * 10;
-
-        const tfMilk_raw = (bw > 0) ? totalMilk / bw : 0;
-
+        const fatVol_1 = r1(effectiveFat * bw * 5);
+        const fatCal_raw = effectiveFat * bw * 10;
         const pVol_1 = r1(p * bw);
         const naFromGly = pVol_1 * 2;
         const naReq_raw = na * bw;
@@ -2280,21 +2244,7 @@ if (picc) {
             cernExceeded = true;
         }
         const cern_1 = includeCernevit ? r1(cern_raw) : 0;
-
-        const vitK_day_raw_calc = (10 * bw / 1000) * 0.5;
-        let vitK_day_raw = vitK_day_raw_calc;
-        let vitKExceeded = false;
-        if (vitK_day_raw > 0.5) {
-            vitK_day_raw = 0.5;
-            vitKExceeded = true;
-        }
-        const vitK_week_raw = vitK_day_raw * 7;
-
-        const vkChoice = document.querySelector('input[name="vitamin-k-choice"]:checked')?.value || 'daily';
-        const vkDay = document.getElementById('vitamin-k-day')?.value || '1';
-        let includeVitaminK = false;
-        if (vkChoice === 'daily') includeVitaminK = true;
-        else if (vkChoice === 'weekly') includeVitaminK = shouldIncludeMicronutrient('weekly', vkDay, orderDate);
+        const vitalipid_1 = deductVitalipid ? r1(4 * bw) : 0;
 
         const picc = document.getElementById('picc-line-checkbox')?.checked || false;
 const heparinConcentration = document.querySelector('input[name="heparin-concentration"]:checked')?.value || '1';
@@ -2314,7 +2264,7 @@ const hep_disp_1 = picc ? hep_calc_1 : 0;
         totalUsed += caVol_1;
         totalUsed += mgVol_2;
         totalUsed += pedit_1;
-        totalUsed += cern_1;
+        totalUsed += vitalipid_1;
         totalUsed += hep_disp_1;
         totalUsed += additionalVolume;
 
@@ -2327,9 +2277,6 @@ const hep_disp_1 = picc ? hep_calc_1 : 0;
         if (kSource === 'kcl') totalUsed += kclVol_1;
         if (kSource === 'k-acetate') totalUsed += kAcVol_1;
 
-        if (includeVitaminK) {
-            if (vkChoice === 'daily') totalUsed += vitK_day_raw;
-            else if (vkChoice === 'weekly') totalUsed += vitK_week_raw;
         }
 // ===== Zinc Calculation =====
         let zincVolume = 0;
@@ -2343,9 +2290,8 @@ const hep_disp_1 = picc ? hep_calc_1 : 0;
         // เพิ่ม zinc volume ใน totalUsed
         totalUsed += zincVolume;
 
-        const swVol = Math.floor(bag - totalUsed);
-        const elyteOsm_raw = bag > 0 ? ((na + k) * bw * 2 * 1000) / bag : 0;
-        const totalOsm_raw = proteinOsm_raw + dextroseOsm_raw + elyteOsm_raw;
+        const swVol = Math.floor(pnVolume - totalUsed);
+const elyteOsm_raw = pnVolume > 0 ? ((na + k) * bw * 2 * 1000) / pnVolume : 0;
 
         // Update DOM (ต้อง update ตารางก่อน เพื่อใช้ค่าที่แสดงในการคำนวณ)
         document.getElementById('protein-volume').textContent = r1(proteinVol_raw).toFixed(1);
