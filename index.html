@@ -150,21 +150,21 @@
        <p id="hospitalName" class="text-blue-100 text-sm">โรงพยาบาลศรีนครินทร์</p>
       </div>
      </div>
-     <div class="flex items-center gap-2"><button id="historyBtn" onclick="goToHistory()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium backdrop-blur-sm"> 📋 ประวัติการสั่ง TPN </button> <button onclick="resetForm()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium backdrop-blur-sm"> 🔄 รีเซ็ต </button> <button onclick="window.print()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium backdrop-blur-sm"> ��️ พิมพ์ </button>
+     <div class="flex items-center gap-2"><button id="historyBtn" onclick="goToHistory()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium backdrop-blur-sm"> 📋 ประวัติการสั่ง TPN </button> <button onclick="resetForm()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium backdrop-blur-sm"> 🔄 รีเซ็ต </button> <button onclick="window.print()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium backdrop-blur-sm"> พิมพ์ </button>
      </div>
     </div>
    </header><!-- Main Content -->
    <main id="mainContent" class="max-w-6xl mx-auto p-4 md:p-6 space-y-6"><!-- Order Date & Patient Info -->
     <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
-     <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">📋 ข้อมู��ทั่วไป</h2>
+     <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">📋 ข้อมูลทั่วไป</h2>
      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"><!-- Order Date -->
       <div><label class="block text-sm font-medium text-gray-700 mb-1">วันที่ Order TPN</label> <input type="date" id="orderDate" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all bg-white">
       </div><!-- HN -->
       <div><label class="block text-sm font-medium text-gray-700 mb-1">HN (สแกนบาร์โค้ดได้)</label> <input type="text" id="hn" placeholder="สแกนหรือพิมพ์ HN" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" autofocus>
       </div><!-- Patient Name -->
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">ชื่อ-��า���สกุล</label> <input type="text" id="patientName" placeholder="ชื่อ ���ามสกุล" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all">
+      <div><label class="block text-sm font-medium text-gray-700 mb-1">ชื่อ-นามสกุล</label> <input type="text" id="patientName" placeholder="ชื่อ นามสกุล" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all">
       </div><!-- Ward -->
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">Ward</label> <input type="text" id="ward" placeholder="หอผู้ป่���ย" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all">
+      <div><label class="block text-sm font-medium text-gray-700 mb-1">Ward</label> <input type="text" id="ward" placeholder="หอผู้ป่วย" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all">
       </div>
      </div>
     </section><!-- Route Selection -->
@@ -193,7 +193,7 @@
        <div class="relative"><input type="number" id="fatTarget" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-24" inputmode="decimal" oninput="calculateAll()"> <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">g/kg/day</span>
        </div>
       </div>
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">Net Fat ส��ทธิ</label>
+      <div><label class="block text-sm font-medium text-gray-700 mb-1">Net Fat สุทธิ</label>
        <div class="relative"><input type="number" id="netFat" step="0.1" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-blue-50 pr-24 font-semibold text-blue-700" readonly inputmode="decimal"> <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">g/kg/day</span>
        </div>
       </div>
@@ -249,7 +249,7 @@
        </div>
       </div>
       <div id="girWarning" class="hidden mt-2 text-sm text-amber-700 bg-amber-100 px-3 py-2 rounded-lg">
-       ⚠️ GIR สูงเกินไป (ปกติ 4-6 mg/kg/min สำหรับ���ารก, 2-4 mg/kg/min สำหรับเด็กโ��)
+       ⚠️ GIR สูงเกินไป (ปกติ 4-6 mg/kg/min สำหรับทารก, 2-4 mg/kg/min สำหรับเด็กโต)
       </div>
      </div>
     </section><!-- Product Selection -->
@@ -263,10 +263,10 @@
           <p class="text-xs text-gray-500">สำหรับอายุ 0-1 เดือน</p>
          </div></label> <label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-purple-100 transition-all border border-transparent hover:border-purple-300"> <input type="radio" name="proteinProduct" value="amiparen" onchange="calculateAll()">
          <div><span class="font-medium text-gray-800">10% Amiparen®</span>
-          <p class="text-xs text-gray-500">��ำหรับอายุ &gt; 1 เดือน</p>
+          <p class="text-xs text-gray-500">สำหรับอายุ &gt; 1 เดือน</p>
          </div></label> <label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-purple-100 transition-all border border-transparent hover:border-purple-300"> <input type="radio" name="proteinProduct" value="aminoplasmal" onchange="calculateAll()">
          <div><span class="font-medium text-gray-800">15% Aminoplasmal®</span>
-          <p class="text-xs text-gray-500">ความ���ข้มข้��สูง (ปริมาณน้อยกว่า)</p>
+          <p class="text-xs text-gray-500">ความเข้มข้นสูง (ปริมาณน้อยกว่า)</p>
          </div></label>
        </div>
       </div><!-- Fat Product -->
@@ -383,7 +383,7 @@
           </div>
           <div class="flex items-center gap-2"><span class="text-sm font-medium text-gray-700">Heparin Volume:</span> <span id="heparinVolume" class="text-lg font-bold text-pink-700">0.00</span> <span class="text-gray-600">ml (÷ 500)</span>
           </div>
-         </div><label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-pink-100 border border-transparent hover:border-pink-300"> <input type="radio" name="heparin" value="no" class="mt-1" checked onchange="calculateAll()"> <span class="font-medium text-gray-800">ไม่�����ติม Heparin</span> </label>
+         </div><label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-pink-100 border border-transparent hover:border-pink-300"> <input type="radio" name="heparin" value="no" class="mt-1" checked onchange="calculateAll()"> <span class="font-medium text-gray-800">ไม่เติม Heparin</span> </label>
         </div>
        </div>
       </div><!-- Add Other -->
@@ -406,9 +406,9 @@
       <table class="w-full text-sm">
        <thead>
         <tr class="table-header text-white">
-         <th class="px-4 py-3 text-left font-semibold rounded-tl-xl">องค์ประกอ���</th>
+         <th class="px-4 py-3 text-left font-semibold rounded-tl-xl">องค์ประกอบ</th>
          <th class="px-4 py-3 text-right font-semibold">ปริมาตร (ml)</th>
-         <th class="px-4 py-3 text-right font-semibold">แคลอรี��� (kcal)</th>
+         <th class="px-4 py-3 text-right font-semibold">แคลอรี่ (kcal)</th>
          <th class="px-4 py-3 text-right font-semibold rounded-tr-xl">mOsmol/L</th>
         </tr>
        </thead>
@@ -468,7 +468,7 @@
          <td class="px-4 py-3 text-right text-gray-400">-</td>
         </tr>
         <tr class="bg-gradient-to-r from-blue-100 to-green-100 font-bold text-lg">
-         <td class="px-4 py-4 text-gray-800 rounded-bl-xl">�� Total TPN</td>
+         <td class="px-4 py-4 text-gray-800 rounded-bl-xl"> Total TPN</td>
          <td id="grandTotalVol" class="px-4 py-4 text-right font-mono text-blue-700">0.0</td>
          <td id="grandTotalCal" class="px-4 py-4 text-right font-mono text-green-700">0.0</td>
          <td class="px-4 py-4 text-right font-mono text-purple-700 rounded-br-xl">-</td>
@@ -518,7 +518,7 @@
        </div>
       </div><!-- Preparation Split -->
       <div><label class="block text-sm font-medium text-gray-700 mb-2">แบ่งเตรียม</label>
-       <div class="space-y-2"><label class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100"> <input type="radio" name="prepSplit" value="none" checked onchange="calculateFatAdmin()"> <span class="text-sm">ไม่แบ่ง</span> </label> <label class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100"> <input type="radio" name="prepSplit" value="split" onchange="calculateFatAdmin()"> <span class="text-sm">��บ่งเตรียม</span> </label>
+       <div class="space-y-2"><label class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100"> <input type="radio" name="prepSplit" value="none" checked onchange="calculateFatAdmin()"> <span class="text-sm">ไม่แบ่ง</span> </label> <label class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100"> <input type="radio" name="prepSplit" value="split" onchange="calculateFatAdmin()"> <span class="text-sm">แบ่งเตรียม</span> </label>
        </div>
       </div><!-- Fat Rate Result -->
       <div><label class="block text-sm font-medium text-gray-700 mb-2">Fat Rate</label>
@@ -535,7 +535,7 @@
      <div id="fatRateWarning" class="hidden p-3 warning-box rounded-xl text-sm"><span class="font-medium">⚠️ Fat Rate สูงเกินไป!</span> ควร ≤ 0.11 g/kg/hr เพื่อป้องกันภาวะแทรกซ้อน
      </div><!-- Preparation Summary -->
      <div id="prepSummary" class="mt-4 p-4 success-box rounded-xl">
-      <h4 class="font-semibold text-green-800 mb-2">📋 สรุปการ��ตรียม Fat</h4>
+      <h4 class="font-semibold text-green-800 mb-2">📋 สรุปการเตรียม Fat</h4>
       <div id="prepDetails" class="text-green-700"></div>
      </div>
     </section><!-- Summary Section -->
@@ -565,13 +565,13 @@
     </header>
     <main class="max-w-6xl mx-auto p-4 md:p-6 space-y-6"><!-- Filter Section -->
      <section class="bg-white rounded-2xl card-shadow p-6">
-      <h2 class="text-lg font-semibold text-gray-800 mb-4">🔍 ก���อง��ายการ</h2>
+      <h2 class="text-lg font-semibold text-gray-800 mb-4">🔍 ค้นหารายการ</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 items-end"><!-- Date Filter -->
        <div><label class="block text-sm font-medium text-gray-700 mb-1">กรองวันที่:</label> <input type="date" id="filterDate" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all">
        </div><!-- HN Search -->
        <div><label class="block text-sm font-medium text-gray-700 mb-1">ค้นหา HN:</label> <input type="text" id="searchHN" placeholder="พิมพ์ HN" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all">
        </div><!-- Patient Name Search -->
-       <div><label class="block text-sm font-medium text-gray-700 mb-1">ค้นหาชื่อน��มสกุล:</label> <input type="text" id="searchName" placeholder="พิมพ์ชื่อ" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all">
+       <div><label class="block text-sm font-medium text-gray-700 mb-1">ค้นหาชื่อ-นามสกุล:</label> <input type="text" id="searchName" placeholder="พิมพ์ชื่อ" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all">
        </div><!-- Search Button --> <button onclick="filterHistory()" class="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all flex items-center gap-2 justify-center"> <span>🔍</span> ค้นหา </button>
       </div>
      </section><!-- Tab Buttons -->
@@ -598,9 +598,9 @@
         <p id="detailPatientInfo" class="text-blue-100 text-sm mt-1">-</p>
        </div><button onclick="closeDetail()" class="text-2xl hover:bg-white/20 p-2 rounded-lg transition-all"> ✕ </button>
       </div><!-- Detail Content -->
-      <div id="detailContent" class="p-6 space-y-6"><!-- ข้อม���ลทั่วไป -->
+      <div id="detailContent" class="p-6 space-y-6"><!-- ข้อมูลทั่วไป -->
        <section class="space-y-4">
-        <h3 class="section-title text-lg font-semibold text-gray-800">📋 ��้อมูลทั่วไป</h3>
+        <h3 class="section-title text-lg font-semibold text-gray-800">📋ข้อมูลทั่วไป</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
          <div class="p-4 bg-gray-50 rounded-xl"><span class="text-xs text-gray-600">วันที่ Order</span>
           <p id="det-orderDate" class="font-semibold text-gray-800 mt-1">-</p>
@@ -608,7 +608,7 @@
          <div class="p-4 bg-gray-50 rounded-xl"><span class="text-xs text-gray-600">HN</span>
           <p id="det-hn" class="font-semibold text-gray-800 mt-1">-</p>
          </div>
-         <div class="p-4 bg-gray-50 rounded-xl"><span class="text-xs text-gray-600">���ื่อ-นามสกุล</span>
+         <div class="p-4 bg-gray-50 rounded-xl"><span class="text-xs text-gray-600">ชื่อ-นามสกุล</span>
           <p id="det-patientName" class="font-semibold text-gray-800 mt-1">-</p>
          </div>
          <div class="p-4 bg-gray-50 rounded-xl"><span class="text-xs text-gray-600">Ward</span>
@@ -708,7 +708,7 @@
    </div><!-- Footer -->
    <footer class="text-center py-6 text-gray-500 text-sm no-print">
     <p>TPN Calculator for Pediatric Patients</p>
-    <p class="mt-1">โรงพย��บาลศรีนครินทร์ | ใช้เพื่อการคำนวณเบื้องต้นเท่านั้น</p>
+    <p class="mt-1">โรงพยาบาลศรีนครินทร์ | ใช้เพื่อการคำนวณเบื้องต้นเท่านั้น</p>
    </footer>
   </div>
   <script>
@@ -831,7 +831,7 @@
               <p class="font-semibold text-gray-800">${order.hn || '-'}</p>
             </div>
             <div>
-              <span class="text-xs text-gray-600">ชื่อ-นา���สกุล</span>
+              <span class="text-xs text-gray-600">ชื่อ-นามสกุล</span>
               <p class="font-semibold text-gray-800">${order.patient_name || '-'}</p>
             </div>
             <div>
@@ -839,7 +839,7 @@
               <p class="font-semibold text-gray-800">${order.bw} kg</p>
             </div>
             <div class="text-right">
-              <span class="text-xs text-gray-600">��ลิกเพื่อดูรายละเอียด</span>
+              <span class="text-xs text-gray-600">คลิกเพื่อดูรายละเอียด</span>
               <p class="text-sm text-blue-600 font-medium">→ ดูเพิ่มเติม</p>
             </div>
           </div>
@@ -878,7 +878,7 @@
       // Helper for product names
       const productNames = {
         'aminoven': '10% Aminoven® Infant',
-        'amiparen': '10% Amiparen��',
+        'amiparen': '10% Amiparen',
         'aminoplasmal': '15% Aminoplasmal®',
         'smof': '20% SMOF Lipid',
         'intralipid': '20% Intralipid'
@@ -978,7 +978,7 @@
       const saveBtn = document.getElementById('saveOrderBtn');
       const originalText = saveBtn.innerHTML;
       saveBtn.disabled = true;
-      saveBtn.innerHTML = '��� กำลังบันทึก...';
+      saveBtn.innerHTML = 'กำลังบันทึก...';
 
       // Calculate protein volume
       const bw = parseFloat(document.getElementById('bw').value) || 0;
@@ -1437,7 +1437,7 @@
         `;
       } else {
         prepText = `
-          <p><strong>Fat Volume รว��ไล่สาย:</strong> ${roundToPlace(totalFatWithFlush, 1)} ml</p>
+          <p><strong>Fat Volume รวมไล่สาย:</strong> ${roundToPlace(totalFatWithFlush, 1)} ml</p>
           <p><strong>Rate:</strong> ${roundToPlace(totalFatWithFlush / dripDuration, 1)} ml/hr ใน ${dripDuration} ชั่วโมง</p>
         `;
       }
@@ -1478,7 +1478,7 @@
           <div class="space-y-2">
             <p><span class="text-blue-200">📅 วันที่:</span> ${formattedDate}</p>
             <p><span class="text-blue-200">🏥 HN:</span> ${hn}</p>
-            <p><span class="text-blue-200">��� ชื่อ:</span> ${patientName}</p>
+            <p><span class="text-blue-200">ชื่อ:</span> ${patientName}</p>
             <p><span class="text-blue-200">🛏️ Ward:</span> ${ward}</p>
             <p><span class="text-blue-200">💉 Route:</span> ${route === 'central' ? 'Central Line' : 'Peripheral Line'}</p>
           </div>
