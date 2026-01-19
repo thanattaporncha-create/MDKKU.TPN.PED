@@ -1101,7 +1101,7 @@
     </section>
     
     <!-- Basic Information Section -->
-    <section class="section">
+   <section class="section">
     <h2>ข้อมูลพื้นฐาน</h2>
     <div class="input-group">
         <div class="input-field">
@@ -1123,18 +1123,34 @@
         <div class="input-field">
             <label for="bag">PN volume (ไม่รวม Fat)</label>
             <div class="input-with-unit">
-                <input type="number" inputmode="numeric" id="bag" step="1" placeholder="คำนวณอัตโนมัติ"/>
+                <input type="number" inputmode="numeric" id="bag" readonly style="background: #f1f5f9;" placeholder="คำนวณอัตโนมัติ"/>
                 <span class="unit">ml</span>
             </div>
         </div>
         <div class="input-field">
             <label for="rate">Rate PN (ml/hr)</label>
             <div class="input-with-unit">
-                <input type="number" inputmode="decimal" id="rate" step="0.1" placeholder="PN Volume / 24"/>
+                <input type="number" inputmode="decimal" id="rate" step="0.1" placeholder="กรอก Rate"/>
                 <span class="unit">ml/hr</span>
             </div>
         </div>
     </div>
+</section>
+
+<div class="input-field">
+    <label for="fat">Fat</label>
+    <div class="input-with-unit">
+        <input type="number" inputmode="decimal" id="fat" step="0.1" placeholder="g/kg/day"/>
+        <span class="unit">g/kg/day</span>
+    </div>
+    
+    <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px; background: #f0f9ff; padding: 8px; border-radius: 8px; border: 1px solid #bfdbfe;">
+        <input type="checkbox" id="deduct-vitalipid" style="width: 20px; height: 20px; cursor: pointer;">
+        <label for="deduct-vitalipid" style="font-size: 0.9em; color: #1e40af; font-weight: 600; cursor: pointer; margin-bottom: 0;">
+            หัก Fat จาก Vitalipid (0.4 g/kg/day)
+        </label>
+    </div>
+</div>
 </section>
     
     <!-- Macronutrients Section -->
