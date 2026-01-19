@@ -1104,34 +1104,42 @@
     <section class="section">
         <h2>ข้อมูลพื้นฐาน</h2>
         <div class="input-group">
-            <div class="input-field">
-                <label for="bw">น้ำหนักตัว (BW)</label>
-                <div class="input-with-unit">
-                    <input type="number" inputmode="decimal" id="bw" step="0.01" 
-                           placeholder="กรอกน้ำหนักตัว"/>
-                    <span class="unit">kg</span>
-                </div>
-            </div>
-            <div class="input-field">
-                <label for="rate">Rate TPN</label>
-                <div class="input-with-unit">
-                    <input type="number" inputmode="decimal" id="rate" step="0.1" 
-                           placeholder="กรอกอัตราการให้"/>
-                    <span class="unit">ml/hr</span>
-                </div>
-            </div>
+    <div class="input-field">
+        <label for="bw">น้ำหนักตัว (BW)</label>
+        <div class="input-with-unit">
+            <input type="number" inputmode="decimal" id="bw" step="0.01" 
+                   placeholder="กรอกน้ำหนักตัว"/>
+            <span class="unit">kg</span>
         </div>
-        <div class="input-group">
-            <div class="input-field">
-                <label for="bag">ปริมาตร Bag TPN (คำนวนอัตโนมัติ)</label>
-                <div class="input-with-unit">
-                    <input type="number" inputmode="numeric" id="bag" step="1" 
-                           placeholder="คำนวนจาก Rate"/>
-                    <span class="unit">ml</span>
-                </div>
-            </div>
-            <div class="input-field"><!-- spacer --></div>
+    </div>
+    <div class="input-field">
+        <label for="total-volume">Total volume (รวม Fat)</label>
+        <div class="input-with-unit">
+            <input type="number" inputmode="decimal" id="total-volume" step="1" 
+                   placeholder="กรอก Total volume"/>
+            <span class="unit">ml</span>
         </div>
+    </div>
+</div>
+
+<div class="input-group">
+    <div class="input-field">
+        <label for="pn-volume">PN volume (จะคำนวณอัตโนมัติ เมื่อกรอกข้อมูล Fat เสร็จ)</label>
+        <div class="input-with-unit">
+            <input type="number" inputmode="decimal" id="pn-volume" step="1" 
+                   placeholder="คำนวณจาก Total volume"/>
+            <span class="unit">ml</span>
+        </div>
+    </div>
+    <div class="input-field">
+        <label for="rate">Rate TPN</label>
+        <div class="input-with-unit">
+            <input type="number" inputmode="decimal" id="rate" step="0.1" 
+                   placeholder="คำนวณจาก PN volume"/>
+            <span class="unit">ml/hr</span>
+        </div>
+    </div>
+</div>
     </section>
     
     <!-- Macronutrients Section -->
@@ -1155,6 +1163,12 @@
                            placeholder="กรอกปริมาณไขมัน"/>
                     <span class="unit">g/kg/day</span>
                 </div>
+                 <!-- ✅ เพิ่มส่วนนี้ -->
+    <div style="margin-top:10px; padding:10px; background:#fef3c7; border-radius:6px; border:2px solid #fcd34d;">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.95em; color:#92400e;">
+            <input type="checkbox" id="deduct-vitalipid" style="transform:scale(1.2); cursor:pointer;">
+            <span style="font-weight:600;">☐ หัก fat Vitalipid 0.4 g/kg/day</span>
+        </label>
             </div>
         </div>
         
@@ -1890,9 +1904,10 @@
     const AUTOSAVE_KEY = 'tpnFormAutosave';
 
     function autosaveCollect() {
-        const ids = ['order-date','patient-hn','patient-name','patient-ward','bw','rate','bag',
-                     'protein','dextrose','fat','milk','total-milk','p','na','k','ca','mg','additional-name',
-    'additional-amount','additional-unit'];
+        const ids = ['order-date','patient-hn','patient-name','patient-ward','bw',
+                 'total-volume','pn-volume','rate', // ✅ เพิ่ม 2 ช่องใหม่, ลบ 'bag'
+                 'protein','dextrose','fat','milk','total-milk','p','na','k','ca','mg',
+                 'additional-name','additional-amount','additional-unit'];
         
         const data = {};
         ids.forEach(id => {
@@ -1900,6 +1915,7 @@
             if (el) data[id] = el.value ?? '';
         });
 
+        const deductVitalipid = document.getElementById('deduct-vitalipid')?.checked || false;
         const route = document.querySelector('input[name="tpn-route"]:checked')?.value || '';
         const proteinProduct = document.querySelector('input[name="protein-product"]:checked')?.value || 'aminoven';
         const fatProduct = document.querySelector('input[name="fat-product"]:checked')?.value || 'smof';
@@ -1929,148 +1945,160 @@ const isPreterm = document.getElementById('preterm-checkbox')?.checked || false;
     peditFreq, cernFreq, vitKChoice, peditDay, cernDay, vitKDay, hasPicc, heparinConc,
     fatPriming, fatDripDuration, fatSplit,
     isPreterm, zincChoice, zincVolume,
-    signatureName  // ← เพิ่มบรรทัดนี้
+    signatureName, // ← เพิ่มบรรทัดนี้
+    deductVitalipid  // ✅ เพิ่ม
 });
         localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data));
     }
 
     function autosaveRestore() {
-        const raw = localStorage.getItem(AUTOSAVE_KEY);
-        if (!raw) return;
-        try {
-            const data = JSON.parse(raw);
-            Object.entries(data).forEach(([k,v]) => {
-                if (['order-date','patient-hn','patient-name','patient-ward','bw','rate','bag',
-                     'protein','dextrose','fat','milk','total-milk','p','na','k','ca','mg','additional-name', // << เพิ่ม 3 ช่อง
-    'additional-amount','additional-unit'].includes(k)) { // << เพิ่ม 3 ช่อง
-                    const el = document.getElementById(k);
-                    if (el) el.value = v;
-                }
-            });
+    const raw = localStorage.getItem(AUTOSAVE_KEY);
+    if (!raw) return;
+    try {
+        const data = JSON.parse(raw);
+        
+        // Restore input fields
+        Object.entries(data).forEach(([k,v]) => {
+            if (['order-date','patient-hn','patient-name','patient-ward','bw',
+                 'total-volume','pn-volume','rate',
+                 'protein','dextrose','fat','milk','total-milk','p','na','k','ca','mg',
+                 'additional-name','additional-amount','additional-unit'].includes(k)) {
+                const el = document.getElementById(k);
+                if (el) el.value = v;
+            }
+        });
 
-            if (data.route) document.querySelector(`input[name="tpn-route"][value="${data.route}"]`)?.click();
+        // ✅ Restore deduct-vitalipid checkbox
+        const deductCheckbox = document.getElementById('deduct-vitalipid');
+        if (deductCheckbox) {
+            deductCheckbox.checked = !!data.deductVitalipid;
+        }
+
+        // Restore route
+        if (data.route) document.querySelector(`input[name="tpn-route"][value="${data.route}"]`)?.click();
+        
+        // Restore protein product
+        if (data.proteinProduct) {
+            const proteinRadio = document.querySelector(`input[name="protein-product"][value="${data.proteinProduct}"]`);
+            if (proteinRadio) {
+                proteinRadio.checked = true;
+                proteinRadio.closest('.product-option').classList.add('selected');
+            }
+        }
+        
+        // Restore fat product
+        if (data.fatProduct) {
+            const fatRadio = document.querySelector(`input[name="fat-product"][value="${data.fatProduct}"]`);
+            if (fatRadio) {
+                fatRadio.checked = true;
+                fatRadio.closest('.product-option').classList.add('selected');
+            }
+        }
+
+        // Restore electrolyte sources
+        if (data.naSrc) document.querySelector(`input[name="na-source"][value="${data.naSrc}"]`)?.click();
+        if (data.kSrc) document.querySelector(`input[name="k-source"][value="${data.kSrc}"]`)?.click();
+        
+        // Restore trace elements and vitamins
+        if (data.peditFreq) document.querySelector(`input[name="peditrace-freq"][value="${data.peditFreq}"]`)?.click();
+        if (data.cernFreq) document.querySelector(`input[name="cernevit-freq"][value="${data.cernFreq}"]`)?.click();
+        if (data.vitKChoice) document.querySelector(`input[name="vitamin-k-choice"][value="${data.vitKChoice}"]`)?.click();
+        
+        // ✅ Restore Fat administration options
+        if (data.fatPriming) document.querySelector(`input[name="fat-priming"][value="${data.fatPriming}"]`)?.click();
+        if (data.fatDripDuration) document.querySelector(`input[name="fat-drip-duration"][value="${data.fatDripDuration}"]`)?.click();
+        if (data.fatSplit) document.querySelector(`input[name="fat-split"][value="${data.fatSplit}"]`)?.click();
+
+        // Restore day inputs
+        const pday = document.getElementById('peditrace-day');
+        if (pday) pday.value = data.peditDay ?? '1';
+        const cday = document.getElementById('cernevit-day');
+        if (cday) cday.value = data.cernDay ?? '1';
+        const vday = document.getElementById('vitamin-k-day');
+        if (vday) vday.value = data.vitKDay ?? '1';
+        
+        // ✅ Restore PICC line and heparin
+        const picc = document.getElementById('picc-line-checkbox');
+        if (picc) {
+            picc.checked = !!data.hasPicc;
+            const heparinRow = document.getElementById('heparin-concentration-row');
+            if (data.hasPicc && heparinRow) {
+                heparinRow.style.display = 'grid';
+            }
+        }
+        if (data.heparinConc) {
+            document.querySelector(`input[name="heparin-concentration"][value="${data.heparinConc}"]`)?.click();
+        }
+
+        // ✅ Restore Preterm and Zinc
+        const pretermCheck = document.getElementById('preterm-checkbox');
+        if (pretermCheck && data.isPreterm) {
+            pretermCheck.checked = true;
+            const zincRec = document.getElementById('zinc-recommendation');
+            if (zincRec) zincRec.style.display = 'block';
             
-            if (data.proteinProduct) {
-                const proteinRadio = document.querySelector(`input[name="protein-product"][value="${data.proteinProduct}"]`);
-                if (proteinRadio) {
-                    proteinRadio.checked = true;
-                    proteinRadio.closest('.product-option').classList.add('selected');
+            // Default to "add" if first time checking
+            if (!data.zincChoice) {
+                document.querySelector('input[name="zinc-choice"][value="add"]').checked = true;
+            }
+        }
+        if (data.zincChoice) {
+            const zincRadio = document.querySelector(`input[name="zinc-choice"][value="${data.zincChoice}"]`);
+            if (zincRadio) zincRadio.checked = true;
+        }
+        if (data.zincVolume) {
+            const zincVolInput = document.getElementById('zinc-volume');
+            if (zincVolInput) zincVolInput.value = data.zincVolume;
+        }
+
+        // ✅ Restore Signature Name
+        if (data.signatureName) {
+            if (data.signatureName === 'ภก.นินท์ พลเรือง') {
+                document.querySelector('input[name="signature-name"][value="ภก.นินท์ พลเรือง"]')?.click();
+            } else {
+                document.querySelector('input[name="signature-name"][value="custom"]')?.click();
+                const customInput = document.getElementById('customSignatureName');
+                if (customInput) customInput.value = data.signatureName;
+            }
+        }
+
+        // ✅ Restore Signature Image
+        if (data.signatureImage && signaturePad) {
+            const img = new Image();
+            img.onload = function() {
+                signaturePad.ctx.clearRect(0, 0, signaturePad.canvas.width, signaturePad.canvas.height);
+                signaturePad.ctx.drawImage(img, 0, 0);
+            };
+            img.src = data.signatureImage;
+        }
+
+        // Update labels and calculate
+        updateProteinLabel();
+        updateFatLabel();
+        calculateTPN();
+        
+        // Calculate recommended Zinc after BW is loaded
+        if (data.isPreterm) {
+            const bw = parseFloat(document.getElementById('bw')?.value) || 0;
+            if (bw > 0) {
+                const recommendedZinc = bw * 0.3;
+                const zincRecommendedEl = document.getElementById('zinc-recommended');
+                if (zincRecommendedEl) {
+                    zincRecommendedEl.textContent = recommendedZinc.toFixed(2) + ' ml';
                 }
             }
-            
-            if (data.fatProduct) {
-                const fatRadio = document.querySelector(`input[name="fat-product"][value="${data.fatProduct}"]`);
-                if (fatRadio) {
-                    fatRadio.checked = true;
-                    fatRadio.closest('.product-option').classList.add('selected');
-                }
-            }
-
-            if (data.naSrc) document.querySelector(`input[name="na-source"][value="${data.naSrc}"]`)?.click();
-            if (data.kSrc) document.querySelector(`input[name="k-source"][value="${data.kSrc}"]`)?.click();
-            if (data.peditFreq) document.querySelector(`input[name="peditrace-freq"][value="${data.peditFreq}"]`)?.click();
-            if (data.cernFreq) document.querySelector(`input[name="cernevit-freq"][value="${data.cernFreq}"]`)?.click();
-            if (data.vitKChoice) document.querySelector(`input[name="vitamin-k-choice"][value="${data.vitKChoice}"]`)?.click();
-            
-            // ✅ กู้คืน Fat administration options
-            if (data.fatPriming) document.querySelector(`input[name="fat-priming"][value="${data.fatPriming}"]`)?.click();
-            if (data.fatDripDuration) document.querySelector(`input[name="fat-drip-duration"][value="${data.fatDripDuration}"]`)?.click();
-            if (data.fatSplit) document.querySelector(`input[name="fat-split"][value="${data.fatSplit}"]`)?.click();
-
-            const pday = document.getElementById('peditrace-day');
-            if (pday) pday.value = data.peditDay ?? '1';
-            const cday = document.getElementById('cernevit-day');
-            if (cday) cday.value = data.cernDay ?? '1';
-            const vday = document.getElementById('vitamin-k-day');
-            if (vday) vday.value = data.vitKDay ?? '1';
-           const picc = document.getElementById('picc-line-checkbox');
-if (picc) {
-    picc.checked = !!data.hasPicc;
-    // แสดง/ซ่อน heparin concentration row ตามสถานะ PICC
-    const heparinRow = document.getElementById('heparin-concentration-row');
-    if (data.hasPicc && heparinRow) {
-        heparinRow.style.display = 'grid';
+        }
+    } catch(e) { 
+        console.error('Error restoring autosave:', e);
     }
 }
 
-if (data.heparinConc) {
-    document.querySelector(`input[name="heparin-concentration"][value="${data.heparinConc}"]`)?.click();
-}
-// ✅ Restore Zinc
-const pretermCheck = document.getElementById('preterm-checkbox');
-if (pretermCheck && data.isPreterm) {
-    pretermCheck.checked = true;
-    const zincRec = document.getElementById('zinc-recommendation');
-    if (zincRec) zincRec.style.display = 'block';
-    
-    // ✅ เพิ่ม: ถ้าไม่มี zincChoice ใน autosave (tick ครั้งแรก)
-    // → ให้ default เป็น "add"
-    if (!data.zincChoice) {
-        document.querySelector('input[name="zinc-choice"][value="add"]').checked = true;
-    }
-}
-
-if (data.zincChoice) {
-    const zincRadio = document.querySelector(`input[name="zinc-choice"][value="${data.zincChoice}"]`);
-    if (zincRadio) zincRadio.checked = true;
-}
-
-if (data.zincVolume) {
-    const zincVolInput = document.getElementById('zinc-volume');
-    if (zincVolInput) zincVolInput.value = data.zincVolume;
-}
-            if (data.signatureName) {
-                if (data.signatureName === 'ภก.นินท์ พลเรือง') {
-                    document.querySelector('input[name="signature-name"][value="ภก.นินท์ พลเรือง"]')?.click();
-                } else {
-                    document.querySelector('input[name="signature-name"][value="custom"]')?.click();
-                    const customInput = document.getElementById('customSignatureName');
-                    if (customInput) customInput.value = data.signatureName;
-                }
-            }
-            // ✅ Restore Signature
-if (data.signatureName) {
-    if (data.signatureName === 'ภก.นินท์ พลเรือง') {
-        document.querySelector('input[name="signature-name"][value="ภก.นินท์ พลเรือง"]')?.click();
-    } else {
-        document.querySelector('input[name="signature-name"][value="custom"]')?.click();
-        const customInput = document.getElementById('customSignatureName');
-        if (customInput) customInput.value = data.signatureName;
-    }
-}
-
-// ✅ Restore Signature Image
-if (data.signatureImage && signaturePad) {
-    const img = new Image();
-    img.onload = function() {
-        signaturePad.ctx.clearRect(0, 0, signaturePad.canvas.width, signaturePad.canvas.height);
-        signaturePad.ctx.drawImage(img, 0, 0);
-    };
-    img.src = data.signatureImage;
-}
-            updateProteinLabel();
-            updateFatLabel();
-   // ✅ คำนวณทุกอย่างก่อน (รวม Zinc from Peditrace)
-            calculateTPN();
-            
-            // ✅ คำนวณ recommended Zinc หลังจากมี BW แล้ว
-            if (data.isPreterm) {
-                const bw = parseFloat(document.getElementById('bw')?.value) || 0;
-                if (bw > 0) {
-                    const recommendedZinc = bw * 0.3;
-                    const zincRecommendedEl = document.getElementById('zinc-recommended');
-                    if (zincRecommendedEl) {
-                        zincRecommendedEl.textContent = recommendedZinc.toFixed(2) + ' ml';
-                    }
-                }
-            }
-        } catch(e) { }
-    }
-
-   function clearAllData() {
+  function clearAllData() {
     if (!confirm('⚠️ คุณต้องการล้างข้อมูลทั้งหมดใช่หรือไม่?')) return;
 
-    const ids = ['patient-hn','patient-name','patient-ward','bw','rate','bag',
+    // ✅ แก้ไข list ของ fields
+    const ids = ['patient-hn','patient-name','patient-ward','bw',
+                 'total-volume','pn-volume','rate',
                  'protein','dextrose','fat','milk','total-milk','p','na','k','ca','mg',
                  'additional-name','additional-amount'];
     ids.forEach(id => {
@@ -2078,15 +2106,21 @@ if (data.signatureImage && signaturePad) {
         if (el) el.value = '';
     });
 
+    // Reset order date to today
     const dateEl = document.getElementById('order-date');
     if (dateEl) {
         const today = new Date();
         dateEl.value = today.toISOString().split('T')[0];
     }
 
+    // ✅ Reset deduct-vitalipid checkbox
+    const deductCheckbox = document.getElementById('deduct-vitalipid');
+    if (deductCheckbox) deductCheckbox.checked = false;
+
+    // Reset route
     document.querySelector('input[name="tpn-route"][value="central"]')?.click();
 
-    // Reset product selections
+    // Reset protein product to Aminoven
     const aminovenRadio = document.querySelector('input[name="protein-product"][value="aminoven"]');
     if (aminovenRadio) {
         aminovenRadio.checked = true;
@@ -2094,6 +2128,7 @@ if (data.signatureImage && signaturePad) {
         aminovenRadio.closest('.product-option').classList.add('selected');
     }
 
+    // Reset fat product to SMOFlipid
     const smofRadio = document.querySelector('input[name="fat-product"][value="smof"]');
     if (smofRadio) {
         smofRadio.checked = true;
@@ -2101,12 +2136,16 @@ if (data.signatureImage && signaturePad) {
         smofRadio.closest('.product-option').classList.add('selected');
     }
 
+    // Reset electrolyte sources
     document.querySelector('input[name="na-source"]')?.checked && (document.querySelector('input[name="na-source"]').checked = false);
     document.querySelector('input[name="k-source"]')?.checked && (document.querySelector('input[name="k-source"]').checked = false);
+    
+    // Reset trace elements and vitamins
     document.querySelector('input[name="peditrace-freq"][value="daily"]')?.click();
     document.querySelector('input[name="cernevit-freq"][value="daily"]')?.click();
     document.querySelector('input[name="vitamin-k-choice"][value="none"]')?.click();
 
+    // Reset day inputs
     const peditDay = document.getElementById('peditrace-day');
     if (peditDay) peditDay.value = '1';
     const cernDay = document.getElementById('cernevit-day');
@@ -2114,29 +2153,30 @@ if (data.signatureImage && signaturePad) {
     const vitKDay = document.getElementById('vitamin-k-day');
     if (vitKDay) vitKDay.value = '1';
     
-   // ✅ Reset Heparin - ยกเลิกการติ๊ก PICC และซ่อน concentration
-const picc = document.getElementById('picc-line-checkbox');
-if (picc) {
-    picc.checked = false;
-    const heparinRow = document.getElementById('heparin-concentration-row');
-    if (heparinRow) heparinRow.style.display = 'none';
+    // ✅ Reset PICC line and Heparin
+    const picc = document.getElementById('picc-line-checkbox');
+    if (picc) {
+        picc.checked = false;
+        const heparinRow = document.getElementById('heparin-concentration-row');
+        if (heparinRow) heparinRow.style.display = 'none';
+        
+        // Uncheck all heparin concentrations
+        const heparin1 = document.querySelector('input[name="heparin-concentration"][value="1"]');
+        const heparin05 = document.querySelector('input[name="heparin-concentration"][value="0.5"]');
+        if (heparin1) heparin1.checked = false;
+        if (heparin05) heparin05.checked = false;
+    }
     
-    // ✅ Uncheck ทั้งหมด - ไม่เลือกอะไรเลย
-    const heparin1 = document.querySelector('input[name="heparin-concentration"][value="1"]');
-    const heparin05 = document.querySelector('input[name="heparin-concentration"][value="0.5"]');
-    if (heparin1) heparin1.checked = false;
-    if (heparin05) heparin05.checked = false;
-}
-    // Reset Zinc
-        const pretermCheck = document.getElementById('preterm-checkbox');
-        if (pretermCheck) {
-            pretermCheck.checked = false;
-            const zincRec = document.getElementById('zinc-recommendation');
-            if (zincRec) zincRec.style.display = 'none';
-        }
-        document.querySelector('input[name="zinc-choice"][value="none"]')?.click();
-        const zincVolInput = document.getElementById('zinc-volume');
-        if (zincVolInput) zincVolInput.value = '';
+    // ✅ Reset Preterm and Zinc
+    const pretermCheck = document.getElementById('preterm-checkbox');
+    if (pretermCheck) {
+        pretermCheck.checked = false;
+        const zincRec = document.getElementById('zinc-recommendation');
+        if (zincRec) zincRec.style.display = 'none';
+    }
+    document.querySelector('input[name="zinc-choice"][value="none"]')?.click();
+    const zincVolInput = document.getElementById('zinc-volume');
+    if (zincVolInput) zincVolInput.value = '';
        
     // ✅ Reset Fat Administration Options
     document.querySelector('input[name="fat-priming"][value="priming"]')?.click();
@@ -2147,19 +2187,26 @@ if (picc) {
     const additionalUnit = document.getElementById('additional-unit');
     if (additionalUnit) additionalUnit.value = 'ml';
 
+    // Clear sticker image if exists
     if (window.clearStickerImage) {
         window.clearStickerImage();
     }
-// Reset signature
+    
+    // Reset signature
     document.querySelector('input[name="signature-name"][value="ภก.นินท์ พลเรือง"]')?.click();
     const customInput = document.getElementById('customSignatureName');
     if (customInput) customInput.value = '';
     clearSignature();
+    
+    // Clear autosave
     localStorage.removeItem(AUTOSAVE_KEY);
+    
+    // Update displays and recalculate
     updateProteinLabel();
     updateFatLabel();
     updateFatDisplay();
     calculateTPN();
+    
     alert('✅ ล้างข้อมูลเรียบร้อยแล้ว');
 }
 
@@ -2203,286 +2250,293 @@ if (picc) {
 
     // ===== Main TPN Calculation Function =====
     function calculateTPN() {
-        const bw = parseFloat(document.getElementById('bw').value) || 0;
-        const rate = parseFloat(document.getElementById('rate').value) || 0;
-        const bag = parseFloat(document.getElementById('bag').value) || 0;
-        const protein = parseFloat(document.getElementById('protein').value) || 0;
-        const dextrose = parseFloat(document.getElementById('dextrose').value) || 0;
-        const fat = parseFloat(document.getElementById('fat').value) || 0;
-        const milk = parseFloat(document.getElementById('milk').value) || 0;
-        const totalMilk = parseFloat(document.getElementById('total-milk').value) || (milk * 8);
-        const p = parseFloat(document.getElementById('p').value) || 0;
-        const na = parseFloat(document.getElementById('na').value) || 0;
-        const k = parseFloat(document.getElementById('k').value) || 0;
-        const ca = parseFloat(document.getElementById('ca').value) || 0;
-        const mg = parseFloat(document.getElementById('mg').value) || 0;
-        const orderDate = document.getElementById('order-date').value;
+    const bw = parseFloat(document.getElementById('bw').value) || 0;
+    const totalVolume = parseFloat(document.getElementById('total-volume').value) || 0;
+    const pnVolume = parseFloat(document.getElementById('pn-volume').value) || 0;
+    const rate = parseFloat(document.getElementById('rate').value) || 0;
+    const protein = parseFloat(document.getElementById('protein').value) || 0;
+    const dextrose = parseFloat(document.getElementById('dextrose').value) || 0;
+    const fatInput = parseFloat(document.getElementById('fat').value) || 0;
+    const deductVitalipid = document.getElementById('deduct-vitalipid')?.checked || false;
+    const milk = parseFloat(document.getElementById('milk').value) || 0;
+    const totalMilk = parseFloat(document.getElementById('total-milk').value) || (milk * 8);
+    const p = parseFloat(document.getElementById('p').value) || 0;
+    const na = parseFloat(document.getElementById('na').value) || 0;
+    const k = parseFloat(document.getElementById('k').value) || 0;
+    const ca = parseFloat(document.getElementById('ca').value) || 0;
+    const mg = parseFloat(document.getElementById('mg').value) || 0;
+    const orderDate = document.getElementById('order-date').value;
 
-        // Get selected protein product
-        const proteinProduct = document.querySelector('input[name="protein-product"]:checked')?.value || 'aminoven';
+    // Get selected protein product
+    const proteinProduct = document.querySelector('input[name="protein-product"]:checked')?.value || 'aminoven';
 
-        // Calculate protein volume based on product
-        let proteinVol_raw;
-        if (proteinProduct === 'aminoplasmal') {
-            proteinVol_raw = (bw * protein) / 0.15;
-        } else {
-            proteinVol_raw = (bw * protein * 100) / 10;
-        }
+    // Calculate effective fat (หักหรือไม่หัก Vitalipid)
+    const effectiveFat = deductVitalipid ? Math.max(0, fatInput - 0.4) : fatInput;
 
-        const proteinCal_raw = bw * protein * 4;
-        const proteinOsm_raw = bag > 0 ? (protein * bw * 1000 * 10) / bag : 0;
-
-        const dextroseVol_raw = ((dextrose * bag) / 100) * 2;
-        const dextroseCal_raw = (dextrose * bag * 3.4) / 100;
-        const dextroseOsm_raw = bag > 0 ? (dextrose * 1000 * 5) / 100 : 0;
-        const gir_raw = (bw > 0) ? (dextrose * rate) / (6 * bw) : 0;
-
-        const fatVol_1 = r1(fat * bw * 5);
-        const fatCal_raw = fat * bw * 10;
-
-        const tfMilk_raw = (bw > 0) ? totalMilk / bw : 0;
-
-        const pVol_1 = r1(p * bw);
-        const naFromGly = pVol_1 * 2;
-        const naReq_raw = na * bw;
-        const rNa_raw = Math.max(0, naReq_raw - naFromGly);
-        const naclVol_1 = rNa_raw > 0 ? r1(rNa_raw / 0.5) : 0;
-        const nacl20Vol_1 = rNa_raw > 0 ? r1(rNa_raw / 3.4) : 0;
-        const naAcVol_1 = rNa_raw > 0 ? r1(rNa_raw / 3.0) : 0;
-
-        const totalK_raw = k * bw;
-        const kclVol_1 = totalK_raw > 0 ? r1(totalK_raw / 2.0) : 0;
-        const kAcVol_1 = totalK_raw > 0 ? r1(totalK_raw / 3.0) : 0;
-
-        const caVol_1 = r1((ca * bw) / 0.25);
-        const mgVol_2 = r2((mg * bw) / 2.0);
-
-        const peditFreq = document.querySelector('input[name="peditrace-freq"]:checked')?.value || 'daily';
-        const peditDay = document.getElementById('peditrace-day')?.value || '1';
-        const includePeditrace = shouldIncludeMicronutrient(peditFreq, peditDay, orderDate);
-
-        const cernFreq = document.querySelector('input[name="cernevit-freq"]:checked')?.value || 'daily';
-        const cernDay = document.getElementById('cernevit-day')?.value || '1';
-        const includeCernevit = shouldIncludeMicronutrient(cernFreq, cernDay, orderDate);
-
-        let pedit_raw = 1 * bw;
-        let peditExceeded = false;
-        if (pedit_raw > 15) {
-            pedit_raw = 15;
-            peditExceeded = true;
-        }
-        const pedit_1 = includePeditrace ? r1(pedit_raw) : 0;
-
-        let cern_raw = 1 * bw;
-        let cernExceeded = false;
-        if (cern_raw > 3) {
-            cern_raw = 3;
-            cernExceeded = true;
-        }
-        const cern_1 = includeCernevit ? r1(cern_raw) : 0;
-
-        const vitK_day_raw_calc = (10 * bw / 1000) * 0.5;
-        let vitK_day_raw = vitK_day_raw_calc;
-        let vitKExceeded = false;
-        if (vitK_day_raw > 0.5) {
-            vitK_day_raw = 0.5;
-            vitKExceeded = true;
-        }
-        const vitK_week_raw = vitK_day_raw * 7;
-
-        const vkChoice = document.querySelector('input[name="vitamin-k-choice"]:checked')?.value || 'daily';
-        const vkDay = document.getElementById('vitamin-k-day')?.value || '1';
-        let includeVitaminK = false;
-        if (vkChoice === 'daily') includeVitaminK = true;
-        else if (vkChoice === 'weekly') includeVitaminK = shouldIncludeMicronutrient('weekly', vkDay, orderDate);
-
-        const picc = document.getElementById('picc-line-checkbox')?.checked || false;
-const heparinConcentration = document.querySelector('input[name="heparin-concentration"]:checked')?.value || '1';
-const divisor = (heparinConcentration === '1') ? 50 : 100;
-const hep_calc_1 = r1(bag > 0 ? bag / divisor : 0);
-const hep_disp_1 = picc ? hep_calc_1 : 0;
-        
-        // Get additional values
-        const additionalAmount = parseFloat(document.getElementById('additional-amount').value) || 0;
-        const additionalUnit = document.getElementById('additional-unit').value;
-        const additionalVolume = (additionalUnit === 'ml') ? additionalAmount : 0;
-
-        let totalUsed = 0;
-        totalUsed += proteinVol_raw;
-        totalUsed += dextroseVol_raw;
-        totalUsed += pVol_1;
-        totalUsed += caVol_1;
-        totalUsed += mgVol_2;
-        totalUsed += pedit_1;
-        totalUsed += cern_1;
-        totalUsed += hep_disp_1;
-        totalUsed += additionalVolume;
-
-        const naSource = document.querySelector('input[name="na-source"]:checked')?.value;
-        if (naSource === 'nacl') totalUsed += naclVol_1;
-        if (naSource === 'nacl20') totalUsed += nacl20Vol_1;
-        if (naSource === 'na-acetate') totalUsed += naAcVol_1;
-
-        const kSource = document.querySelector('input[name="k-source"]:checked')?.value;
-        if (kSource === 'kcl') totalUsed += kclVol_1;
-        if (kSource === 'k-acetate') totalUsed += kAcVol_1;
-
-        if (includeVitaminK) {
-            if (vkChoice === 'daily') totalUsed += vitK_day_raw;
-            else if (vkChoice === 'weekly') totalUsed += vitK_week_raw;
-        }
-// ===== Zinc Calculation =====
-        let zincVolume = 0;
-        const isPreterm = document.getElementById('preterm-checkbox')?.checked || false;
-        const zincChoice = document.querySelector('input[name="zinc-choice"]:checked')?.value;
-        
-        if (isPreterm && zincChoice === 'add') {
-            zincVolume = parseFloat(document.getElementById('zinc-volume').value) || 0;
-        }
-        
-        // เพิ่ม zinc volume ใน totalUsed
-        totalUsed += zincVolume;
-
-        const swVol = Math.floor(bag - totalUsed);
-        const elyteOsm_raw = bag > 0 ? ((na + k) * bw * 2 * 1000) / bag : 0;
-        const totalOsm_raw = proteinOsm_raw + dextroseOsm_raw + elyteOsm_raw;
-
-        // Update DOM (ต้อง update ตารางก่อน เพื่อใช้ค่าที่แสดงในการคำนวณ)
-        document.getElementById('protein-volume').textContent = r1(proteinVol_raw).toFixed(1);
-        document.getElementById('protein-calories').textContent = r1(proteinCal_raw).toFixed(1);
-        document.getElementById('protein-osmol').textContent = r1(proteinOsm_raw).toFixed(1);
-        document.getElementById('dextrose-volume').textContent = r1(dextroseVol_raw).toFixed(1);
-        document.getElementById('dextrose-calories').textContent = r1(dextroseCal_raw).toFixed(1);
-        document.getElementById('dextrose-osmol').textContent = r1(dextroseOsm_raw).toFixed(1);
-        document.getElementById('gir-result').textContent = r1(gir_raw).toFixed(1) + ' mg/kg/min';
-        document.getElementById('fat-volume').textContent = fatVol_1.toFixed(1);
-        document.getElementById('fat-calories').textContent = r1(fatCal_raw).toFixed(1);
-
-        // ✅ คำนวณ Total Calories โดยดึงจากค่าในตารางที่แสดงแล้ว (หลังปัดเศษ)
-        const displayedProteinCal = parseFloat(document.getElementById('protein-calories').textContent) || 0;
-        const displayedDextroseCal = parseFloat(document.getElementById('dextrose-calories').textContent) || 0;
-        const displayedFatCal = parseFloat(document.getElementById('fat-calories').textContent) || 0;
-        
-        const pnCalDay = displayedProteinCal + displayedDextroseCal + displayedFatCal;
-        const pnCalKg = bw > 0 ? pnCalDay / bw : 0;
-        const milkCalDay = totalMilk * 20 / 30;
-        const milkCalKg = bw > 0 ? milkCalDay / bw : 0;
-        const totalCalDay = pnCalDay + milkCalDay;
-        const dispPN = r0(pnCalKg);
-        const dispMilk = r0(milkCalKg);
-        const dispTotalKg = dispPN + dispMilk;
-        document.getElementById('tf-from-milk').textContent = r0(tfMilk_raw) + ' ml/kg/day';
-        document.getElementById('milk-calories-kg').textContent = dispMilk + ' kcal/kg/day';
-        document.getElementById('p-volume').textContent = pVol_1.toFixed(1) + ' ml';
-        document.getElementById('na-from-glycophos').textContent = r1(naFromGly).toFixed(1) + ' mEq';
-        document.getElementById('nacl-volume').textContent = naclVol_1.toFixed(1) + ' ml';
-        document.getElementById('nacl20-volume').textContent = nacl20Vol_1.toFixed(1) + ' ml';
-        document.getElementById('na-acetate-volume').textContent = naAcVol_1.toFixed(1) + ' ml';
-        document.getElementById('kcl-volume').textContent = kclVol_1.toFixed(1) + ' ml';
-        document.getElementById('k-acetate-volume').textContent = kAcVol_1.toFixed(1) + ' ml';
-        document.getElementById('ca-volume').textContent = caVol_1.toFixed(1) + ' ml';
-        document.getElementById('mg-volume').textContent = mgVol_2.toFixed(2) + ' ml';
-
-        const pedEl = document.getElementById('peditrace-volume');
-        if (!includePeditrace) {
-            pedEl.textContent = '0 ml (ไม่ให้วันนี้)';
-            pedEl.style.background = '#fef3c7';
-            pedEl.style.color = '#92400e';
-            pedEl.style.border = '1px solid #fcd34d';
-        } else {
-            pedEl.textContent = pedit_1.toFixed(1) + ' ml';
-            pedEl.style.background = (peditExceeded ? '#dc2626' : '#dcfce7');
-            pedEl.style.color = (peditExceeded ? 'white' : '#166534');
-            pedEl.style.border = (peditExceeded ? '1px solid #dc2626' : '1px solid #86efac');
-        }
-
-        const cerEl = document.getElementById('cernevit-volume');
-        if (!includeCernevit) {
-            cerEl.textContent = '0 ml (ไม่ให้วันนี้)';
-            cerEl.style.background = '#fef3c7';
-            cerEl.style.color = '#92400e';
-            cerEl.style.border = '1px solid #fcd34d';
-        } else {
-            cerEl.textContent = cern_1.toFixed(1) + ' ml';
-            cerEl.style.background = (cernExceeded ? '#dc2626' : '#dcfce7');
-            cerEl.style.color = (cernExceeded ? 'white' : '#166534');
-            cerEl.style.border = (cernExceeded ? '1px solid #dc2626' : '1px solid #86efac');
-        }
-
-        const dailyRadio = document.querySelector('input[name="vitamin-k-choice"][value="daily"]');
-        const weeklyRadio = document.querySelector('input[name="vitamin-k-choice"][value="weekly"]');
-        const dailyOption = document.getElementById('vitamin-k-daily-option');
-        const dailyEl = document.getElementById('vitamin-k-daily');
-        const weeklyEl = document.getElementById('vitamin-k-weekly');
-
-        if (vitK_day_raw < 0.01) {
-            dailyEl.textContent = vitK_day_raw.toFixed(3) + ' ml (เตรียมไม่ได้)';
-            dailyEl.style.background = '#fef3c7';
-            dailyEl.style.color = '#92400e';
-            dailyEl.style.border = '1px solid #fcd34d';
-            if (dailyRadio) {
-                dailyRadio.disabled = true;
-                if (dailyOption) {
-                    dailyOption.style.opacity = '0.5';
-                    dailyOption.style.cursor = 'not-allowed';
-                }
-            }
-            if (dailyRadio && dailyRadio.checked && weeklyRadio) {
-                weeklyRadio.checked = true;
-            }
-        } else {
-            dailyEl.textContent = vitK_day_raw.toFixed(3) + ' ml';
-            dailyEl.style.background = (vitKExceeded ? '#dc2626' : '#dbeafe');
-            dailyEl.style.color = (vitKExceeded ? 'white' : '#1e40af');
-            dailyEl.style.border = (vitKExceeded ? '1px solid #dc2626' : '1px solid #bfdbfe');
-            if (dailyRadio) {
-                dailyRadio.disabled = false;
-                if (dailyOption) {
-                    dailyOption.style.opacity = '1';
-                    dailyOption.style.cursor = 'pointer';
-                }
-            }
-        }
-
-        weeklyEl.textContent = vitK_week_raw.toFixed(3) + ' ml';
-        weeklyEl.style.background = '#dbeafe';
-        weeklyEl.style.color = '#1e40af';
-        weeklyEl.style.border = '1px solid #bfdbfe';
-
-        document.getElementById('heparin-volume').textContent = hep_disp_1.toFixed(1) + ' ml';
-        document.getElementById('sterile-water-volume').textContent = swVol;
-
-        const swSec = document.getElementById('sterile-water-section');
-        swSec.style.background = swVol < 0 ? 
-            'linear-gradient(135deg,#ef4444 0%,#dc2626 100%)' : 
-            'linear-gradient(135deg,#06b6d4 0%,#0891b2 100%)';
-
-        document.getElementById('total-osmol').textContent = '~' + r0(totalOsm_raw);
-
-        const osmolSec = document.getElementById('osmol-section');
-        osmolSec.style.background = r0(totalOsm_raw) > 900 ? 
-            'linear-gradient(135deg,#ef4444 0%,#dc2626 100%)' : 
-            'linear-gradient(135deg,#10b981 0%,#059669 100%)';
-
-        document.getElementById('total-calories-day').textContent = r0(totalCalDay);
-document.getElementById('breakdown-pn').textContent = dispPN;
-document.getElementById('breakdown-milk').textContent = dispMilk;
-document.getElementById('breakdown-total').textContent = dispTotalKg;
-
-// ✅ คำนวณ NPC:N
-const proteinGrams = protein * bw;
-const nitrogenGrams = proteinGrams / 6.25;
-const nonProteinCalories = displayedDextroseCal + displayedFatCal;
-let npcnRatio = 0;
-
-if (nitrogenGrams > 0) {
-    npcnRatio = Math.round(nonProteinCalories / nitrogenGrams);
-}
-
-document.getElementById('npc-n-ratio').textContent = npcnRatio > 0 ? `${npcnRatio}:1` : '0:1';
-
-autosaveCollect();
+    // Calculate protein volume based on product
+    let proteinVol_raw;
+    if (proteinProduct === 'aminoplasmal') {
+        proteinVol_raw = (bw * protein) / 0.15;
+    } else {
+        proteinVol_raw = (bw * protein * 100) / 10;
     }
+
+    const proteinCal_raw = bw * protein * 4;
+    const proteinOsm_raw = pnVolume > 0 ? (protein * bw * 1000 * 10) / pnVolume : 0;
+
+    const dextroseVol_raw = ((dextrose * pnVolume) / 100) * 2;
+    const dextroseCal_raw = (dextrose * pnVolume * 3.4) / 100;
+    const dextroseOsm_raw = pnVolume > 0 ? (dextrose * 1000 * 5) / 100 : 0;
+    const gir_raw = (bw > 0) ? (dextrose * rate) / (6 * bw) : 0;
+
+    const fatVol_1 = r1(effectiveFat * bw * 5);
+    const fatCal_raw = effectiveFat * bw * 10;
+
+    const tfMilk_raw = (bw > 0) ? totalMilk / bw : 0;
+
+    const pVol_1 = r1(p * bw);
+    const naFromGly = pVol_1 * 2;
+    const naReq_raw = na * bw;
+    const rNa_raw = Math.max(0, naReq_raw - naFromGly);
+    const naclVol_1 = rNa_raw > 0 ? r1(rNa_raw / 0.5) : 0;
+    const nacl20Vol_1 = rNa_raw > 0 ? r1(rNa_raw / 3.4) : 0;
+    const naAcVol_1 = rNa_raw > 0 ? r1(rNa_raw / 3.0) : 0;
+
+    const totalK_raw = k * bw;
+    const kclVol_1 = totalK_raw > 0 ? r1(totalK_raw / 2.0) : 0;
+    const kAcVol_1 = totalK_raw > 0 ? r1(totalK_raw / 3.0) : 0;
+
+    const caVol_1 = r1((ca * bw) / 0.25);
+    const mgVol_2 = r2((mg * bw) / 2.0);
+
+    const peditFreq = document.querySelector('input[name="peditrace-freq"]:checked')?.value || 'daily';
+    const peditDay = document.getElementById('peditrace-day')?.value || '1';
+    const includePeditrace = shouldIncludeMicronutrient(peditFreq, peditDay, orderDate);
+
+    const cernFreq = document.querySelector('input[name="cernevit-freq"]:checked')?.value || 'daily';
+    const cernDay = document.getElementById('cernevit-day')?.value || '1';
+    const includeCernevit = shouldIncludeMicronutrient(cernFreq, cernDay, orderDate);
+
+    let pedit_raw = 1 * bw;
+    let peditExceeded = false;
+    if (pedit_raw > 15) {
+        pedit_raw = 15;
+        peditExceeded = true;
+    }
+    const pedit_1 = includePeditrace ? r1(pedit_raw) : 0;
+
+    let cern_raw = 1 * bw;
+    let cernExceeded = false;
+    if (cern_raw > 3) {
+        cern_raw = 3;
+        cernExceeded = true;
+    }
+    const cern_1 = includeCernevit ? r1(cern_raw) : 0;
+
+    const vitK_day_raw_calc = (10 * bw / 1000) * 0.5;
+    let vitK_day_raw = vitK_day_raw_calc;
+    let vitKExceeded = false;
+    if (vitK_day_raw > 0.5) {
+        vitK_day_raw = 0.5;
+        vitKExceeded = true;
+    }
+    const vitK_week_raw = vitK_day_raw * 7;
+
+    const vkChoice = document.querySelector('input[name="vitamin-k-choice"]:checked')?.value || 'daily';
+    const vkDay = document.getElementById('vitamin-k-day')?.value || '1';
+    let includeVitaminK = false;
+    if (vkChoice === 'daily') includeVitaminK = true;
+    else if (vkChoice === 'weekly') includeVitaminK = shouldIncludeMicronutrient('weekly', vkDay, orderDate);
+
+    const picc = document.getElementById('picc-line-checkbox')?.checked || false;
+    const heparinConcentration = document.querySelector('input[name="heparin-concentration"]:checked')?.value || '1';
+    const divisor = (heparinConcentration === '1') ? 50 : 100;
+    const hep_calc_1 = r1(pnVolume > 0 ? pnVolume / divisor : 0);
+    const hep_disp_1 = picc ? hep_calc_1 : 0;
+    
+    // Get additional values
+    const additionalAmount = parseFloat(document.getElementById('additional-amount').value) || 0;
+    const additionalUnit = document.getElementById('additional-unit').value;
+    const additionalVolume = (additionalUnit === 'ml') ? additionalAmount : 0;
+
+    let totalUsed = 0;
+    totalUsed += proteinVol_raw;
+    totalUsed += dextroseVol_raw;
+    totalUsed += pVol_1;
+    totalUsed += caVol_1;
+    totalUsed += mgVol_2;
+    totalUsed += pedit_1;
+    totalUsed += cern_1;
+    totalUsed += hep_disp_1;
+    totalUsed += additionalVolume;
+
+    const naSource = document.querySelector('input[name="na-source"]:checked')?.value;
+    if (naSource === 'nacl') totalUsed += naclVol_1;
+    if (naSource === 'nacl20') totalUsed += nacl20Vol_1;
+    if (naSource === 'na-acetate') totalUsed += naAcVol_1;
+
+    const kSource = document.querySelector('input[name="k-source"]:checked')?.value;
+    if (kSource === 'kcl') totalUsed += kclVol_1;
+    if (kSource === 'k-acetate') totalUsed += kAcVol_1;
+
+    if (includeVitaminK) {
+        if (vkChoice === 'daily') totalUsed += vitK_day_raw;
+        else if (vkChoice === 'weekly') totalUsed += vitK_week_raw;
+    }
+
+    // ===== Zinc Calculation =====
+    let zincVolume = 0;
+    const isPreterm = document.getElementById('preterm-checkbox')?.checked || false;
+    const zincChoice = document.querySelector('input[name="zinc-choice"]:checked')?.value;
+    
+    if (isPreterm && zincChoice === 'add') {
+        zincVolume = parseFloat(document.getElementById('zinc-volume').value) || 0;
+    }
+    
+    // เพิ่ม zinc volume ใน totalUsed
+    totalUsed += zincVolume;
+
+    const swVol = Math.floor(pnVolume - totalUsed);
+    const elyteOsm_raw = pnVolume > 0 ? ((na + k) * bw * 2 * 1000) / pnVolume : 0;
+    const totalOsm_raw = proteinOsm_raw + dextroseOsm_raw + elyteOsm_raw;
+
+    // Update DOM (ต้อง update ตารางก่อน เพื่อใช้ค่าที่แสดงในการคำนวณ)
+    document.getElementById('protein-volume').textContent = r1(proteinVol_raw).toFixed(1);
+    document.getElementById('protein-calories').textContent = r1(proteinCal_raw).toFixed(1);
+    document.getElementById('protein-osmol').textContent = r1(proteinOsm_raw).toFixed(1);
+    document.getElementById('dextrose-volume').textContent = r1(dextroseVol_raw).toFixed(1);
+    document.getElementById('dextrose-calories').textContent = r1(dextroseCal_raw).toFixed(1);
+    document.getElementById('dextrose-osmol').textContent = r1(dextroseOsm_raw).toFixed(1);
+    document.getElementById('gir-result').textContent = r1(gir_raw).toFixed(1) + ' mg/kg/min';
+    document.getElementById('fat-volume').textContent = fatVol_1.toFixed(1);
+    document.getElementById('fat-calories').textContent = r1(fatCal_raw).toFixed(1);
+
+    // ✅ คำนวณ Total Calories โดยดึงจากค่าในตารางที่แสดงแล้ว (หลังปัดเศษ)
+    const displayedProteinCal = parseFloat(document.getElementById('protein-calories').textContent) || 0;
+    const displayedDextroseCal = parseFloat(document.getElementById('dextrose-calories').textContent) || 0;
+    const displayedFatCal = parseFloat(document.getElementById('fat-calories').textContent) || 0;
+    
+    const pnCalDay = displayedProteinCal + displayedDextroseCal + displayedFatCal;
+    const pnCalKg = bw > 0 ? pnCalDay / bw : 0;
+    const milkCalDay = totalMilk * 20 / 30;
+    const milkCalKg = bw > 0 ? milkCalDay / bw : 0;
+    const totalCalDay = pnCalDay + milkCalDay;
+    const dispPN = r0(pnCalKg);
+    const dispMilk = r0(milkCalKg);
+    const dispTotalKg = dispPN + dispMilk;
+
+    document.getElementById('tf-from-milk').textContent = r0(tfMilk_raw) + ' ml/kg/day';
+    document.getElementById('milk-calories-kg').textContent = dispMilk + ' kcal/kg/day';
+    document.getElementById('p-volume').textContent = pVol_1.toFixed(1) + ' ml';
+    document.getElementById('na-from-glycophos').textContent = r1(naFromGly).toFixed(1) + ' mEq';
+    document.getElementById('nacl-volume').textContent = naclVol_1.toFixed(1) + ' ml';
+    document.getElementById('nacl20-volume').textContent = nacl20Vol_1.toFixed(1) + ' ml';
+    document.getElementById('na-acetate-volume').textContent = naAcVol_1.toFixed(1) + ' ml';
+    document.getElementById('kcl-volume').textContent = kclVol_1.toFixed(1) + ' ml';
+    document.getElementById('k-acetate-volume').textContent = kAcVol_1.toFixed(1) + ' ml';
+    document.getElementById('ca-volume').textContent = caVol_1.toFixed(1) + ' ml';
+    document.getElementById('mg-volume').textContent = mgVol_2.toFixed(2) + ' ml';
+
+    const pedEl = document.getElementById('peditrace-volume');
+    if (!includePeditrace) {
+        pedEl.textContent = '0 ml (ไม่ให้วันนี้)';
+        pedEl.style.background = '#fef3c7';
+        pedEl.style.color = '#92400e';
+        pedEl.style.border = '1px solid #fcd34d';
+    } else {
+        pedEl.textContent = pedit_1.toFixed(1) + ' ml';
+        pedEl.style.background = (peditExceeded ? '#dc2626' : '#dcfce7');
+        pedEl.style.color = (peditExceeded ? 'white' : '#166534');
+        pedEl.style.border = (peditExceeded ? '1px solid #dc2626' : '1px solid #86efac');
+    }
+
+    const cerEl = document.getElementById('cernevit-volume');
+    if (!includeCernevit) {
+        cerEl.textContent = '0 ml (ไม่ให้วันนี้)';
+        cerEl.style.background = '#fef3c7';
+        cerEl.style.color = '#92400e';
+        cerEl.style.border = '1px solid #fcd34d';
+    } else {
+        cerEl.textContent = cern_1.toFixed(1) + ' ml';
+        cerEl.style.background = (cernExceeded ? '#dc2626' : '#dcfce7');
+        cerEl.style.color = (cernExceeded ? 'white' : '#166534');
+        cerEl.style.border = (cernExceeded ? '1px solid #dc2626' : '1px solid #86efac');
+    }
+
+    const dailyRadio = document.querySelector('input[name="vitamin-k-choice"][value="daily"]');
+    const weeklyRadio = document.querySelector('input[name="vitamin-k-choice"][value="weekly"]');
+    const dailyOption = document.getElementById('vitamin-k-daily-option');
+    const dailyEl = document.getElementById('vitamin-k-daily');
+    const weeklyEl = document.getElementById('vitamin-k-weekly');
+
+    if (vitK_day_raw < 0.01) {
+        dailyEl.textContent = vitK_day_raw.toFixed(3) + ' ml (เตรียมไม่ได้)';
+        dailyEl.style.background = '#fef3c7';
+        dailyEl.style.color = '#92400e';
+        dailyEl.style.border = '1px solid #fcd34d';
+        if (dailyRadio) {
+            dailyRadio.disabled = true;
+            if (dailyOption) {
+                dailyOption.style.opacity = '0.5';
+                dailyOption.style.cursor = 'not-allowed';
+            }
+        }
+        if (dailyRadio && dailyRadio.checked && weeklyRadio) {
+            weeklyRadio.checked = true;
+        }
+    } else {
+        dailyEl.textContent = vitK_day_raw.toFixed(3) + ' ml';
+        dailyEl.style.background = (vitKExceeded ? '#dc2626' : '#dbeafe');
+        dailyEl.style.color = (vitKExceeded ? 'white' : '#1e40af');
+        dailyEl.style.border = (vitKExceeded ? '1px solid #dc2626' : '1px solid #bfdbfe');
+        if (dailyRadio) {
+            dailyRadio.disabled = false;
+            if (dailyOption) {
+                dailyOption.style.opacity = '1';
+                dailyOption.style.cursor = 'pointer';
+            }
+        }
+    }
+
+    weeklyEl.textContent = vitK_week_raw.toFixed(3) + ' ml';
+    weeklyEl.style.background = '#dbeafe';
+    weeklyEl.style.color = '#1e40af';
+    weeklyEl.style.border = '1px solid #bfdbfe';
+
+    document.getElementById('heparin-volume').textContent = hep_disp_1.toFixed(1) + ' ml';
+    document.getElementById('sterile-water-volume').textContent = swVol;
+
+    const swSec = document.getElementById('sterile-water-section');
+    swSec.style.background = swVol < 0 ? 
+        'linear-gradient(135deg,#ef4444 0%,#dc2626 100%)' : 
+        'linear-gradient(135deg,#06b6d4 0%,#0891b2 100%)';
+
+    document.getElementById('total-osmol').textContent = '~' + r0(totalOsm_raw);
+
+    const osmolSec = document.getElementById('osmol-section');
+    osmolSec.style.background = r0(totalOsm_raw) > 900 ? 
+        'linear-gradient(135deg,#ef4444 0%,#dc2626 100%)' : 
+        'linear-gradient(135deg,#10b981 0%,#059669 100%)';
+
+    document.getElementById('total-calories-day').textContent = r0(totalCalDay);
+    document.getElementById('breakdown-pn').textContent = dispPN;
+    document.getElementById('breakdown-milk').textContent = dispMilk;
+    document.getElementById('breakdown-total').textContent = dispTotalKg;
+
+    // ✅ คำนวณ NPC:N
+    const proteinGrams = protein * bw;
+    const nitrogenGrams = proteinGrams / 6.25;
+    const nonProteinCalories = displayedDextroseCal + displayedFatCal;
+    let npcnRatio = 0;
+
+    if (nitrogenGrams > 0) {
+        npcnRatio = Math.round(nonProteinCalories / nitrogenGrams);
+    }
+
+    document.getElementById('npc-n-ratio').textContent = npcnRatio > 0 ? `${npcnRatio}:1` : '0:1';
+
+    autosaveCollect();
+}
     
     // Fat Administration Display Update
     function updateFatDisplay() {
@@ -2690,252 +2744,253 @@ autosaveCollect();
     }
     // ===== DOM Content Loaded Event =====
     document.addEventListener('DOMContentLoaded', function() {
-        const dateEl = document.getElementById('order-date');
-        if (dateEl && !dateEl.value) {
-            const today = new Date();
-            const dateStr = today.toISOString().split('T')[0];
-            dateEl.value = dateStr;
-        }
 
-        initProductSelection();
-        autosaveRestore();
-// Initialize signature pad
-        initSignaturePad();
-        restoreSignature();
+    /* =================== วันที่ =================== */
+    const dateEl = document.getElementById('order-date');
+    if (dateEl && !dateEl.value) {
+        const today = new Date();
+        const dateStr = today.toISOString().split('T')[0];
+        dateEl.value = dateStr;
+    }
 
-        // Signature name selection
-        document.querySelectorAll('input[name="signature-name"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                const customInput = document.getElementById('customSignatureName');
-                document.querySelectorAll('.signature-name-option').forEach(opt => {
-                    opt.classList.remove('selected');
-                });
-                this.closest('.signature-name-option').classList.add('selected');
-                
-                if (this.value === 'custom') {
-                    customInput.classList.add('active');
-                } else {
-                    customInput.classList.remove('active');
-                }
-                autosaveCollect();
+    initProductSelection();
+    autosaveRestore();
+    initSignaturePad();
+    restoreSignature();
+
+
+    /* =================== Signature =================== */
+    document.querySelectorAll('input[name="signature-name"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const customInput = document.getElementById('customSignatureName');
+            document.querySelectorAll('.signature-name-option').forEach(opt => {
+                opt.classList.remove('selected');
             });
-        });
-
-        document.getElementById('customSignatureName')?.addEventListener('input', () => {
+            this.closest('.signature-name-option').classList.add('selected');
+            
+            if (this.value === 'custom') {
+                customInput.classList.add('active');
+            } else {
+                customInput.classList.remove('active');
+            }
             autosaveCollect();
         });
+    });
 
-        document.getElementById('clearSignatureBtn')?.addEventListener('click', () => {
-            clearSignature();
+    document.getElementById('customSignatureName')?.addEventListener('input', autosaveCollect);
+    document.getElementById('clearSignatureBtn')?.addEventListener('click', clearSignature);
+
+    document.querySelector('input[name="signature-name"]:checked')
+        ?.closest('.signature-name-option')
+        .classList.add('selected');
+
+
+    /* =================== Frequency Selector =================== */
+    const setSelectorDisplay = () => {
+        const pf = document.querySelector('input[name="peditrace-freq"]:checked')?.value || 'daily';
+        document.getElementById('peditrace-day-selector').style.display = (pf === 'weekly') ? 'block' : 'none';
+
+        const cf = document.querySelector('input[name="cernevit-freq"]:checked')?.value || 'daily';
+        document.getElementById('cernevit-day-selector').style.display = (cf === 'weekly') ? 'block' : 'none';
+
+        const vk = document.querySelector('input[name="vitamin-k-choice"]:checked')?.value || 'daily';
+        document.getElementById('vitamin-k-day-selector').style.display = (vk === 'weekly') ? 'block' : 'none';
+    };
+    setSelectorDisplay();
+
+
+    /* =================== Clear =================== */
+    document.getElementById('clearBtn')?.addEventListener('click', clearAllData);
+
+
+    /* =================== Input change =================== */
+    ['bw','pn-volume','protein','dextrose','fat','p','na','k','ca','mg','order-date'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', () => {
+                calculateTPN();
+                if (id === 'bw' || id === 'fat') updateFatDisplay();
+            });
+        }
+    });
+
+
+    /* =================== Milk =================== */
+    const milkEl = document.getElementById('milk');
+    if (milkEl) {
+        milkEl.addEventListener('input', function() {
+            const milk = parseFloat(this.value) || 0;
+            const t = document.getElementById('total-milk');
+            if (t) t.value = (milk * 8).toFixed(0);
+            calculateTPN();
         });
+    }
 
-        // Set initial selected state
-        document.querySelector('input[name="signature-name"]:checked')?.closest('.signature-name-option').classList.add('selected');
-        const setSelectorDisplay = () => {
-            const pf = document.querySelector('input[name="peditrace-freq"]:checked')?.value || 'daily';
-            document.getElementById('peditrace-day-selector').style.display = (pf === 'weekly') ? 'block' : 'none';
-            const cf = document.querySelector('input[name="cernevit-freq"]:checked')?.value || 'daily';
-            document.getElementById('cernevit-day-selector').style.display = (cf === 'weekly') ? 'block' : 'none';
-            const vk = document.querySelector('input[name="vitamin-k-choice"]:checked')?.value || 'daily';
-            document.getElementById('vitamin-k-day-selector').style.display = (vk === 'weekly') ? 'block' : 'none';
-        };
-        setSelectorDisplay();
+    document.getElementById('total-milk')?.addEventListener('input', calculateTPN);
 
-        document.getElementById('clearBtn')?.addEventListener('click', clearAllData);
 
-        // Auto-calculate bag when rate changes
-        const rateEl = document.getElementById('rate');
-        const bagEl = document.getElementById('bag');
-        if (rateEl && bagEl) {
-            rateEl.addEventListener('input', function() {
-                const rate = parseFloat(this.value) || 0;
-                if (rate > 0) {
-                    const calculatedBag = calculateBagVolume(rate);
-                    bagEl.value = calculatedBag;
+    /* =================== Electrolyte Source =================== */
+    document.querySelectorAll('input[name="na-source"]').forEach(r => r.addEventListener('change', calculateTPN));
+    document.querySelectorAll('input[name="k-source"]').forEach(r => r.addEventListener('change', calculateTPN));
+
+
+    /* =================== PICC & Heparin =================== */
+    const picc = document.getElementById('picc-line-checkbox');
+    if (picc) {
+        picc.addEventListener('change', function() {
+            const heparinRow = document.getElementById('heparin-concentration-row');
+            if (this.checked) {
+                heparinRow.style.display = 'grid';
+                const heparin1 = document.querySelector('input[name="heparin-concentration"][value="1"]');
+                if (heparin1 && !document.querySelector('input[name="heparin-concentration"]:checked')) {
+                    heparin1.checked = true;
                 }
-                calculateTPN();
-            });
-        }
-
-        ['bw','bag','protein','dextrose','fat','p','na','k','ca','mg','order-date'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.addEventListener('input', () => {
-                    calculateTPN();
-                    if (id === 'bw' || id === 'fat') {
-                        updateFatDisplay();
-                    }
-                });
+            } else {
+                heparinRow.style.display = 'none';
             }
+            calculateTPN();
         });
+    }
 
-        const milkEl = document.getElementById('milk');
-        if (milkEl) {
-            milkEl.addEventListener('input', function() {
-                const milk = parseFloat(this.value) || 0;
-                const t = document.getElementById('total-milk');
-                if (t) t.value = (milk * 8).toFixed(0);
-                calculateTPN();
-            });
-        }
+    document.querySelectorAll('input[name="heparin-concentration"]').forEach(r => {
+        r.addEventListener('change', calculateTPN);
+    });
 
-        const totMilkEl = document.getElementById('total-milk');
-        if (totMilkEl) {
-            totMilkEl.addEventListener('input', () => {
-                calculateTPN();
-            });
-        }
 
-        document.querySelectorAll('input[name="na-source"]').forEach(r => r.addEventListener('change', () => {
+    /* =================== Fat =================== */
+    document.querySelectorAll('input[name="fat-priming"]').forEach(r => {
+        r.addEventListener('change', () => {
             calculateTPN();
-        }));
-        document.querySelectorAll('input[name="k-source"]').forEach(r => r.addEventListener('change', () => {
-            calculateTPN();
-        }));
+            updateFatDisplay();
+        });
+    });
 
-   const picc = document.getElementById('picc-line-checkbox');
-if (picc) {
-    picc.addEventListener('change', function() {
-        const heparinRow = document.getElementById('heparin-concentration-row');
-        if (this.checked) {
-            heparinRow.style.display = 'grid';
-            // ✅ เมื่อติ๊ก PICC ใหม่ ให้ auto select 1 unit/ml เป็น default
-            const heparin1 = document.querySelector('input[name="heparin-concentration"][value="1"]');
-            if (heparin1 && !document.querySelector('input[name="heparin-concentration"]:checked')) {
-                heparin1.checked = true;
+    document.querySelectorAll('input[name="fat-drip-duration"]').forEach(r => {
+        r.addEventListener('change', updateFatDisplay);
+    });
+
+    document.querySelectorAll('input[name="fat-split"]').forEach(r => {
+        r.addEventListener('change', updateFatDisplay);
+    });
+
+
+    /* =================== Additional =================== */
+    document.getElementById('additional-amount')?.addEventListener('input', calculateTPN);
+    document.getElementById('additional-unit')?.addEventListener('change', calculateTPN);
+
+
+    /* =================== Vitamin freq =================== */
+    document.querySelectorAll('input[name="peditrace-freq"]').forEach(r => {
+        r.addEventListener('change', function() {
+            document.getElementById('peditrace-day-selector').style.display = this.value === 'weekly' ? 'block' : 'none';
+            calculateTPN();
+        });
+    });
+
+    document.querySelectorAll('input[name="cernevit-freq"]').forEach(r => {
+        r.addEventListener('change', function() {
+            document.getElementById('cernevit-day-selector').style.display = this.value === 'weekly' ? 'block' : 'none';
+            calculateTPN();
+        });
+    });
+
+    document.querySelectorAll('input[name="vitamin-k-choice"]').forEach(r => {
+        r.addEventListener('change', function() {
+            document.getElementById('vitamin-k-day-selector').style.display = this.value === 'weekly' ? 'block' : 'none';
+            calculateTPN();
+        });
+    });
+
+    document.getElementById('peditrace-day')?.addEventListener('change', calculateTPN);
+    document.getElementById('cernevit-day')?.addEventListener('change', calculateTPN);
+    document.getElementById('vitamin-k-day')?.addEventListener('change', calculateTPN);
+
+
+    /* =================== Zinc =================== */
+    const pretermCheckbox = document.getElementById('preterm-checkbox');
+    const zincRecommendation = document.getElementById('zinc-recommendation');
+    const zincVolumeInput = document.getElementById('zinc-volume');
+
+    function calculateZincRecommendation() {
+        const bw = parseFloat(document.getElementById('bw').value) || 0;
+        const recommendedZinc = bw * 0.3;
+        document.getElementById('zinc-recommended').textContent = recommendedZinc.toFixed(2) + ' ml';
+        zincVolumeInput.value = recommendedZinc.toFixed(2);
+    }
+
+    if (pretermCheckbox) {
+        pretermCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                zincRecommendation.style.display = 'block';
+                calculateZincRecommendation();
+                document.querySelector('input[name="zinc-choice"][value="add"]').checked = true;
+            } else {
+                zincRecommendation.style.display = 'none';
+                document.querySelector('input[name="zinc-choice"][value="none"]').checked = true;
             }
-        } else {
-            heparinRow.style.display = 'none';
-        }
+            calculateTPN();
+        });
+    }
+
+    document.querySelectorAll('input[name="zinc-choice"]').forEach(r => {
+        r.addEventListener('change', calculateTPN);
+    });
+
+    zincVolumeInput?.addEventListener('input', calculateTPN);
+
+    document.getElementById('bw')?.addEventListener('input', () => {
+        if (pretermCheckbox?.checked) calculateZincRecommendation();
+    });
+
+
+    /* =================== ✅ Total volume → PN volume → Rate =================== */
+    const totalVolumeEl = document.getElementById('total-volume');
+    const pnVolumeEl = document.getElementById('pn-volume');
+    const rateEl = document.getElementById('rate');
+    const fatEl = document.getElementById('fat');
+    const deductVitalipidCheckbox = document.getElementById('deduct-vitalipid');
+
+    function updatePNVolumeAndRate() {
+        const totalVol = parseFloat(totalVolumeEl?.value) || 0;
+        const bw = parseFloat(document.getElementById('bw')?.value) || 0;
+        const fatInput = parseFloat(fatEl?.value) || 0;
+        const deductVitalipid = deductVitalipidCheckbox?.checked || false;
+
+        let effectiveFat = fatInput;
+        if (deductVitalipid) effectiveFat = Math.max(0, fatInput - 0.4);
+
+        const fatVol = effectiveFat * bw * 5;
+        const vitalipidVol = deductVitalipid ? (0.4 * bw * 5) : 0;
+
+        const pnVol = Math.max(0, totalVol - fatVol - vitalipidVol);
+        pnVolumeEl.value = pnVol.toFixed(1);
+
+        const rate = pnVol > 0 ? (pnVol / 24) : 0;
+        rateEl.value = rate.toFixed(1);
+
+        calculateTPN();
+    }
+
+    totalVolumeEl?.addEventListener('input', updatePNVolumeAndRate);
+    fatEl?.addEventListener('input', updatePNVolumeAndRate);
+    deductVitalipidCheckbox?.addEventListener('change', updatePNVolumeAndRate);
+
+    pnVolumeEl?.addEventListener('input', function() {
+        const pnVol = parseFloat(this.value) || 0;
+        const rate = pnVol > 0 ? (pnVol / 24) : 0;
+        rateEl.value = rate.toFixed(1);
         calculateTPN();
     });
-}
-        document.querySelectorAll('input[name="heparin-concentration"]').forEach(r => {
-    r.addEventListener('change', () => {
-        calculateTPN();
-    });
+
+    rateEl?.addEventListener('input', calculateTPN);
+
+
+    /* =================== Init =================== */
+    calculateTPN();
+    updateFatDisplay();
+
 });
-        // Fat administration event listeners
-        document.querySelectorAll('input[name="fat-priming"]').forEach(r => {
-            r.addEventListener('change', () => {
-                calculateTPN();
-                updateFatDisplay();
-            });
-        });
-        
-        document.querySelectorAll('input[name="fat-drip-duration"]').forEach(r => {
-            r.addEventListener('change', () => {
-                updateFatDisplay();
-            });
-        });
-        
-        document.querySelectorAll('input[name="fat-split"]').forEach(r => {
-            r.addEventListener('change', () => {
-                updateFatDisplay();
-            });
-        });
-        
-        // Additional inputs event listeners
-        const additionalAmountEl = document.getElementById('additional-amount');
-        const additionalUnitEl = document.getElementById('additional-unit');
-        if (additionalAmountEl) {
-            additionalAmountEl.addEventListener('input', () => {
-                calculateTPN();
-            });
-        }
-        if (additionalUnitEl) {
-            additionalUnitEl.addEventListener('change', () => {
-                calculateTPN();
-            });
-        }
 
-        document.querySelectorAll('input[name="peditrace-freq"]').forEach(r => {
-            r.addEventListener('change', function() {
-                document.getElementById('peditrace-day-selector').style.display = this.value === 'weekly' ? 'block' : 'none';
-                calculateTPN();
-            });
-        });
-
-        document.querySelectorAll('input[name="cernevit-freq"]').forEach(r => {
-            r.addEventListener('change', function() {
-                document.getElementById('cernevit-day-selector').style.display = this.value === 'weekly' ? 'block' : 'none';
-                calculateTPN();
-            });
-        });
-
-        document.querySelectorAll('input[name="vitamin-k-choice"]').forEach(r => {
-            r.addEventListener('change', function() {
-                document.getElementById('vitamin-k-day-selector').style.display = this.value === 'weekly' ? 'block' : 'none';
-                calculateTPN();
-            });
-        });
-
-        document.getElementById('peditrace-day')?.addEventListener('change', () => {
-            calculateTPN();
-        });
-        document.getElementById('cernevit-day')?.addEventListener('change', () => {
-            calculateTPN();
-        });
-        document.getElementById('vitamin-k-day')?.addEventListener('change', () => {
-            calculateTPN();
-        });
-
-    // ===== Zinc Event Listeners =====
-        const pretermCheckbox = document.getElementById('preterm-checkbox');
-        const zincRecommendation = document.getElementById('zinc-recommendation');
-        const zincVolumeInput = document.getElementById('zinc-volume');
-        
-     if (pretermCheckbox) {
-    pretermCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-            zincRecommendation.style.display = 'block';
-            calculateZincRecommendation();
-            // ✅ เปลี่ยนเป็น Default "เติม Zinc"
-            document.querySelector('input[name="zinc-choice"][value="add"]').checked = true;
-        } else {
-            zincRecommendation.style.display = 'none';
-            // Reset to "ไม่เติม"
-            document.querySelector('input[name="zinc-choice"][value="none"]').checked = true;
-        }
-        calculateTPN();
-    });
-}
-        
-        // เมื่อเลือก zinc choice
-        document.querySelectorAll('input[name="zinc-choice"]').forEach(r => {
-            r.addEventListener('change', () => {
-                calculateTPN();
-            });
-        });
-        
-        // เมื่อแก้ zinc volume
-        if (zincVolumeInput) {
-            zincVolumeInput.addEventListener('input', () => {
-                calculateTPN();
-            });
-        }
-        
-        // ฟังก์ชันคำนวณ Zinc แนะนำ
-        function calculateZincRecommendation() {
-            const bw = parseFloat(document.getElementById('bw').value) || 0;
-            const recommendedZinc = bw * 0.3;
-            document.getElementById('zinc-recommended').textContent = recommendedZinc.toFixed(2) + ' ml';
-            document.getElementById('zinc-volume').value = recommendedZinc.toFixed(2);
-        }
-        
-        // เมื่อ BW เปลี่ยน ให้คำนวณ Zinc ใหม่ (ถ้าเปิด Preterm อยู่)
-        const bwEl = document.getElementById('bw');
-        if (bwEl) {
-            const originalBwListener = bwEl.oninput;
-            bwEl.addEventListener('input', function() {
-                if (pretermCheckbox?.checked) {
-                    calculateZincRecommendation();
-                }
-            });
-        }
-        calculateTPN();
-        updateFatDisplay();
-    });
 
     // ===== Submit Button Handler =====
     document.getElementById('submitBtn')?.addEventListener('click', function() {
@@ -2976,74 +3031,80 @@ if (picc) {
         const dsel = id => document.getElementById(id)?.textContent || document.getElementById(id)?.value || '';
 
         const reportData = {
-            orderDate,
-            orderDayName: dayName,
-            route: document.querySelector('input[name="tpn-route"]:checked')?.value || 'central',
-            proteinProduct: getProteinProductName(),
-            fatProduct: getFatProductName(),
-            hn: hn || '',
-            name: name || '',
-            ward: ward || '',
-            additionalName: document.getElementById('additional-name')?.value.trim() || '',
+    orderDate,
+    orderDayName: dayName,
+    route: document.querySelector('input[name="tpn-route"]:checked')?.value || 'central',
+    proteinProduct: getProteinProductName(),
+    fatProduct: getFatProductName(),
+    hn: hn || '',
+    name: name || '',
+    ward: ward || '',
+    additionalName: document.getElementById('additional-name')?.value.trim() || '',
     additionalAmount: document.getElementById('additional-amount')?.value || '0',
     additionalUnit: document.getElementById('additional-unit')?.value || 'ml',
     stickerImage: window.getStickerImage ? window.getStickerImage() : null,
-            stickerImage: window.getStickerImage ? window.getStickerImage() : null,
-            bw,
-            rate: document.getElementById('rate')?.value || '0',
-            bag: document.getElementById('bag')?.value || '0',
-            protein: document.getElementById('protein')?.value || '0',
-            dextrose: document.getElementById('dextrose')?.value || '0',
-            fat: document.getElementById('fat')?.value || '0',
-            milk: document.getElementById('milk')?.value || '0',
-            totalMilk: document.getElementById('total-milk')?.value || '0',
-            p: document.getElementById('p')?.value || '0',
-            na: document.getElementById('na')?.value || '0',
-            k: document.getElementById('k')?.value || '0',
-            ca: document.getElementById('ca')?.value || '0',
-            mg: document.getElementById('mg')?.value || '0',
-            proteinVol: extractNumberString(dsel('protein-volume')),
-            proteinCal: extractNumberString(dsel('protein-calories')),
-            dextroseVol: extractNumberString(dsel('dextrose-volume')),
-            dextroseCal: extractNumberString(dsel('dextrose-calories')),
-            fatVol: extractNumberString(dsel('fat-volume')),
-            fatCal: extractNumberString(dsel('fat-calories')),
-            gir: dsel('gir-result'),
-            pVol: extractNumberString(dsel('p-volume')),
-            naFromGly: extractNumberString(dsel('na-from-glycophos')),
-            naSource: document.querySelector('input[name="na-source"]:checked')?.value || '',
-            naclVol: extractNumberString(dsel('nacl-volume')),
-            nacl20Vol: extractNumberString(dsel('nacl20-volume')),
-            naAcVol: extractNumberString(dsel('na-acetate-volume')),
-            kSource: document.querySelector('input[name="k-source"]:checked')?.value || '',
-            kclVol: extractNumberString(dsel('kcl-volume')),
-            kAcVol: extractNumberString(dsel('k-acetate-volume')),
-            caVol: extractNumberString(dsel('ca-volume')),
-            mgVol: extractNumberString(dsel('mg-volume')),
-            peditrace: extractNumberString(dsel('peditrace-volume')),
-            peditFreq: document.querySelector('input[name="peditrace-freq"]:checked')?.value || 'daily',
-            peditDay: document.getElementById('peditrace-day')?.value || '1',
-            cernevit: extractNumberString(dsel('cernevit-volume')),
-            cernFreq: document.querySelector('input[name="cernevit-freq"]:checked')?.value || 'daily',
-            cernDay: document.getElementById('cernevit-day')?.value || '1',
-            vitKChoice: document.querySelector('input[name="vitamin-k-choice"]:checked')?.value || 'daily',
-            vitKDay: document.getElementById('vitamin-k-day')?.value || '1',
-            vitKDaily: extractNumberString(dsel('vitamin-k-daily')),
-            vitKWeekly: extractNumberString(dsel('vitamin-k-weekly')),
-            hasPicc: document.getElementById('picc-line-checkbox')?.checked || false,
-            heparinVol: extractNumberString(dsel('heparin-volume')),
-            heparinConc: document.querySelector('input[name="heparin-concentration"]:checked')?.value || '1',
-            isPreterm: document.getElementById('preterm-checkbox')?.checked || false,
-            zincChoice: document.querySelector('input[name="zinc-choice"]:checked')?.value || 'none',
-            zincVolume: document.getElementById('zinc-volume')?.value || '0',
-            zincFromPeditrace: document.getElementById('zinc-from-peditrace')?.textContent || '0',
-            sterileWater: extractNumberString(dsel('sterile-water-volume')),
-            totalOsmol: extractNumberString(dsel('total-osmol')),
-            totalCalDay: extractNumberString(dsel('total-calories-day')),
-            totalCalKg: extractNumberString(dsel('breakdown-total')),
-            pnCalKg: extractNumberString(dsel('breakdown-pn')),
-            milkCalKg: extractNumberString(dsel('breakdown-milk')),
-            tfFromMilk: dsel('tf-from-milk'),
+    bw,
+    totalVolume: document.getElementById('total-volume')?.value || '0',  // ✅ เพิ่ม
+    pnVolume: document.getElementById('pn-volume')?.value || '0',        // ✅ เพิ่ม (แทน bag)
+    rate: document.getElementById('rate')?.value || '0',
+    protein: document.getElementById('protein')?.value || '0',
+    dextrose: document.getElementById('dextrose')?.value || '0',
+    fat: document.getElementById('fat')?.value || '0',
+    deductVitalipid: document.getElementById('deduct-vitalipid')?.checked || false,  // ✅ เพิ่ม
+    milk: document.getElementById('milk')?.value || '0',
+    totalMilk: document.getElementById('total-milk')?.value || '0',
+    p: document.getElementById('p')?.value || '0',
+    na: document.getElementById('na')?.value || '0',
+    k: document.getElementById('k')?.value || '0',
+    ca: document.getElementById('ca')?.value || '0',
+    mg: document.getElementById('mg')?.value || '0',
+    proteinVol: extractNumberString(dsel('protein-volume')),
+    proteinCal: extractNumberString(dsel('protein-calories')),
+    dextroseVol: extractNumberString(dsel('dextrose-volume')),
+    dextroseCal: extractNumberString(dsel('dextrose-calories')),
+    fatVol: extractNumberString(dsel('fat-volume')),
+    fatCal: extractNumberString(dsel('fat-calories')),
+    gir: dsel('gir-result'),
+    pVol: extractNumberString(dsel('p-volume')),
+    naFromGly: extractNumberString(dsel('na-from-glycophos')),
+    naSource: document.querySelector('input[name="na-source"]:checked')?.value || '',
+    naclVol: extractNumberString(dsel('nacl-volume')),
+    nacl20Vol: extractNumberString(dsel('nacl20-volume')),
+    naAcVol: extractNumberString(dsel('na-acetate-volume')),
+    kSource: document.querySelector('input[name="k-source"]:checked')?.value || '',
+    kclVol: extractNumberString(dsel('kcl-volume')),
+    kAcVol: extractNumberString(dsel('k-acetate-volume')),
+    caVol: extractNumberString(dsel('ca-volume')),
+    mgVol: extractNumberString(dsel('mg-volume')),
+    peditrace: extractNumberString(dsel('peditrace-volume')),
+    peditFreq: document.querySelector('input[name="peditrace-freq"]:checked')?.value || 'daily',
+    peditDay: document.getElementById('peditrace-day')?.value || '1',
+    cernevit: extractNumberString(dsel('cernevit-volume')),
+    cernFreq: document.querySelector('input[name="cernevit-freq"]:checked')?.value || 'daily',
+    cernDay: document.getElementById('cernevit-day')?.value || '1',
+    vitKChoice: document.querySelector('input[name="vitamin-k-choice"]:checked')?.value || 'daily',
+    vitKDay: document.getElementById('vitamin-k-day')?.value || '1',
+    vitKDaily: extractNumberString(dsel('vitamin-k-daily')),
+    vitKWeekly: extractNumberString(dsel('vitamin-k-weekly')),
+    hasPicc: document.getElementById('picc-line-checkbox')?.checked || false,
+    heparinVol: extractNumberString(dsel('heparin-volume')),
+    heparinConc: document.querySelector('input[name="heparin-concentration"]:checked')?.value || '1',
+    isPreterm: document.getElementById('preterm-checkbox')?.checked || false,
+    zincChoice: document.querySelector('input[name="zinc-choice"]:checked')?.value || 'none',
+    zincVolume: document.getElementById('zinc-volume')?.value || '0',
+    zincFromPeditrace: document.getElementById('zinc-from-peditrace')?.textContent || '0',
+    sterileWater: extractNumberString(dsel('sterile-water-volume')),
+    totalOsmol: extractNumberString(dsel('total-osmol')),
+    totalCalDay: extractNumberString(dsel('total-calories-day')),
+    totalCalKg: extractNumberString(dsel('breakdown-total')),
+    pnCalKg: extractNumberString(dsel('breakdown-pn')),
+    milkCalKg: extractNumberString(dsel('breakdown-milk')),
+    tfFromMilk: dsel('tf-from-milk'),
+    fatPriming: document.querySelector('input[name="fat-priming"]:checked')?.value || 'priming',
+    fatDripDuration: document.querySelector('input[name="fat-drip-duration"]:checked')?.value || '24',
+    fatSplit: document.querySelector('input[name="fat-split"]:checked')?.value || 'no-split',
+    npcnRatio: (document.getElementById('npc-n-ratio')?.textContent || '0:1').replace(':1', '')
+};
             // Fat administration options
            fatPriming: document.querySelector('input[name="fat-priming"]:checked')?.value || 'priming',
     fatDripDuration: document.querySelector('input[name="fat-drip-duration"]:checked')?.value || '24',
