@@ -965,20 +965,87 @@
       }
     });
 
-    // Save Order
-    async function saveOrder() {
-      const hn = document.getElementById('hn').value;
-      const patientName = document.getElementById('patientName').value;
-      
-      if (!hn || !patientName) {
-        showSaveMessage('⚠️ กรุณากรอก HN และชื่อ-นามสกุล', 'error');
-        return;
-      }
+    // ใส่ URL ของคุณที่นี่
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbweYQupVJnWzY1nuvCfguAe56GU94cRm53mS330wgeShvtvWdSrh_Cf_b_DACiQC_n7/exec'; 
 
-      const saveBtn = document.getElementById('saveOrderBtn');
-      const originalText = saveBtn.innerHTML;
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = 'กำลังบันทึก...';
+async function saveOrder() {
+    const hn = document.getElementById('hn').value;
+    const patientName = document.getElementById('patientName').value;
+    const bw = parseFloat(document.getElementById('bw').value) || 0;
+
+    if (!hn || !patientName || bw === 0) {
+        showSaveMessage('⚠️ กรุณากรอก HN, ชื่อ และน้ำหนักให้ครบถ้วน', 'error');
+        return;
+    }
+
+    const saveBtn = document.getElementById('saveOrderBtn');
+    const originalText = saveBtn.innerHTML;
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = 'กำลังบันทึก...';
+
+    // รวบรวมข้อมูลให้ตรงกับหัวตาราง Google Sheet (คอลัมน์ A-AA)
+    const orderData = {
+        order_date: document.getElementById('orderDate').value,
+        hn: hn,
+        patient_name: patientName,
+        ward: document.getElementById('ward').value,
+        route: document.querySelector('input[name="route"]:checked').value,
+        bw: bw,
+        pn_volume: parseFloat(document.getElementById('pnVolume').value) || 0,
+        rate_tpn: parseFloat(document.getElementById('rateTPN').value) || 0,
+        protein_target: parseFloat(document.getElementById('proteinTarget').value) || 0,
+        net_fat: parseFloat(document.getElementById('netFat').value) || 0,
+        dextrose_percent: parseFloat(document.getElementById('dextrosePercent').value) || 0,
+        gir: parseFloat(document.getElementById('girValue').textContent) || 0,
+        total_calories: parseFloat(document.getElementById('totalCalDisplay').textContent) || 0,
+        cal_per_kg: parseFloat(document.getElementById('calPerKg').textContent) || 0,
+        fat_rate: parseFloat(document.getElementById('fatRateValue').textContent) || 0,
+        total_osmol: parseFloat(document.getElementById('finalOsmol').textContent) || 0,
+        
+        // ข้อมูลปริมาตร (ml) สำหรับ Full Report
+        protein_volume: parseFloat(document.getElementById('proteinVol').textContent) || 0,
+        dextrose_volume: parseFloat(document.getElementById('dextroseVol').textContent) || 0,
+        fat_volume: parseFloat(document.getElementById('fatVol').textContent) || 0,
+        vitalipid_volume: parseFloat(document.getElementById('vitalipid').value) || 0,
+        electrolytes_volume: parseFloat(document.getElementById('electrolytesVol').textContent) || 0,
+        
+        // ข้อมูลเกลือแร่
+        phosphorus: parseFloat(document.getElementById('phosphorus').value) || 0,
+        sodium: parseFloat(document.getElementById('sodium').value) || 0,
+        potassium: parseFloat(document.getElementById('potassium').value) || 0,
+        magnesium: parseFloat(document.getElementById('magnesium').value) || 0,
+        calcium: parseFloat(document.getElementById('calcium').value) || 0
+    };
+
+    try {
+        // ส่งข้อมูลไปยัง Google Apps Script
+        await fetch(scriptUrl, {
+            method: 'POST',
+            mode: 'no-cors', // สำคัญสำหรับ Google Apps Script
+            cache: 'no-cache',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(orderData)
+        });
+
+        // เนื่องจาก mode 'no-cors' จะไม่สามารถอ่าน response ได้ 
+        // แต่ถ้าไม่มี error ในขั้นตอน fetch หมายถึงส่งข้อมูลออกไปแล้ว
+        showSaveMessage('✅ บันทึก Order ลง Google Sheet สำเร็จ!', 'success');
+        
+        setTimeout(() => {
+            resetForm();
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = originalText;
+            goToHistory(); // เปลี่ยนไปหน้าประวัติ
+            loadHistoryFromSheet(); // สั่งให้โหลดข้อมูลใหม่ทันที
+        }, 1500);
+
+    } catch (err) {
+        console.error('Save error:', err);
+        showSaveMessage('❌ เกิดข้อผิดพลาด: ' + err.message, 'error');
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalText;
+    }
+}
 
       // Calculate protein volume
       const bw = parseFloat(document.getElementById('bw').value) || 0;
