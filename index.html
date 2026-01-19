@@ -706,7 +706,52 @@
 .submit-btn:active {
     transform:translateY(0);
 }
+/* ===== Checkbox Styles ===== */
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #4facfe;
+    flex-shrink: 0;
+    margin: 0;
+}
 
+/* Checkbox ใน label ที่มี flex */
+label input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+/* Override สำหรับ checkbox ที่ใช้ transform:scale ใน inline style */
+input[type="checkbox][style*="scale"] {
+    transform: none !important;
+}
+
+/* Checkbox สำหรับ Vitalipid */
+#deduct-vitalipid {
+    width: 18px;
+    height: 18px;
+    accent-color: #f59e0b;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* Checkbox สำหรับ Preterm */
+#preterm-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: #4facfe;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* Checkbox สำหรับ PICC */
+#picc-line-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: #4facfe;
+    cursor: pointer;
+    flex-shrink: 0;
+}
 /* Responsive Design */
 @media (max-width:768px) {
     .clear-btn {
