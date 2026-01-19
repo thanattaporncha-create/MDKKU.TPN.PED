@@ -1101,57 +1101,38 @@
     </section>
     
     <!-- Basic Information Section -->
-   <section class="section">
-    <h2>ข้อมูลพื้นฐาน</h2>
-    <div class="input-group">
-        <div class="input-field">
-            <label for="bw">น้ำหนักตัว (BW)</label>
-            <div class="input-with-unit">
-                <input type="number" inputmode="decimal" id="bw" step="0.01" placeholder="กรอก BW"/>
-                <span class="unit">kg</span>
+    <section class="section">
+        <h2>ข้อมูลพื้นฐาน</h2>
+        <div class="input-group">
+            <div class="input-field">
+                <label for="bw">น้ำหนักตัว (BW)</label>
+                <div class="input-with-unit">
+                    <input type="number" inputmode="decimal" id="bw" step="0.01" 
+                           placeholder="กรอกน้ำหนักตัว"/>
+                    <span class="unit">kg</span>
+                </div>
+            </div>
+            <div class="input-field">
+                <label for="rate">Rate TPN</label>
+                <div class="input-with-unit">
+                    <input type="number" inputmode="decimal" id="rate" step="0.1" 
+                           placeholder="กรอกอัตราการให้"/>
+                    <span class="unit">ml/hr</span>
+                </div>
             </div>
         </div>
-        <div class="input-field">
-            <label for="total-volume-all">Total volume (รวม Fat)</label>
-            <div class="input-with-unit">
-                <input type="number" inputmode="numeric" id="total-volume-all" placeholder="กรอกปริมาตรรวม"/>
-                <span class="unit">ml</span>
+        <div class="input-group">
+            <div class="input-field">
+                <label for="bag">ปริมาตร Bag TPN (คำนวนอัตโนมัติ)</label>
+                <div class="input-with-unit">
+                    <input type="number" inputmode="numeric" id="bag" step="1" 
+                           placeholder="คำนวนจาก Rate"/>
+                    <span class="unit">ml</span>
+                </div>
             </div>
+            <div class="input-field"><!-- spacer --></div>
         </div>
-    </div>
-    <div class="input-group">
-        <div class="input-field">
-            <label for="bag">PN volume (ไม่รวม Fat)</label>
-            <div class="input-with-unit">
-                <input type="number" inputmode="numeric" id="bag" readonly style="background: #f1f5f9;" placeholder="คำนวณอัตโนมัติ"/>
-                <span class="unit">ml</span>
-            </div>
-        </div>
-        <div class="input-field">
-            <label for="rate">Rate PN (ml/hr)</label>
-            <div class="input-with-unit">
-                <input type="number" inputmode="decimal" id="rate" step="0.1" placeholder="กรอก Rate"/>
-                <span class="unit">ml/hr</span>
-            </div>
-        </div>
-    </div>
-</section>
-
-<div class="input-field">
-    <label for="fat">Fat</label>
-    <div class="input-with-unit">
-        <input type="number" inputmode="decimal" id="fat" step="0.1" placeholder="g/kg/day"/>
-        <span class="unit">g/kg/day</span>
-    </div>
-    
-    <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px; background: #f0f9ff; padding: 8px; border-radius: 8px; border: 1px solid #bfdbfe;">
-        <input type="checkbox" id="deduct-vitalipid" style="width: 20px; height: 20px; cursor: pointer;">
-        <label for="deduct-vitalipid" style="font-size: 0.9em; color: #1e40af; font-weight: 600; cursor: pointer; margin-bottom: 0;">
-            หัก Fat จาก Vitalipid (0.4 g/kg/day)
-        </label>
-    </div>
-</div>
-</section>
+    </section>
     
     <!-- Macronutrients Section -->
     <section class="section">
@@ -1167,34 +1148,15 @@
                     <span class="unit">g/kg/day</span>
                 </div>
             </div>
-
             <div class="input-field">
-    <label for="fat">Fat</label>
-    <div class="input-with-unit">
-        <input type="number" inputmode="decimal" id="fat" step="0.1" placeholder="g/kg/day"/>
-        <span class="unit">g/kg/day</span>
-    </div>
-    
-    <label style="display:inline-flex; align-items:center; gap:8px; margin-top:10px; cursor:pointer; font-size:0.9em; color:#1e40af; user-select:none;">
-        <div style="position:relative; width:18px; height:18px;">
-            <input type="checkbox" id="deduct-vitalipid" style="opacity:0; position:absolute; width:100%; height:100%; cursor:pointer;">
-            <div id="radio-visual" style="width:18px; height:18px; border:2px solid #1e40af; border-radius:50%; background:white; transition:all 0.2s;"></div>
-            <div id="radio-dot" style="position:absolute; top:4px; left:4px; width:10px; height:10px; background:#1e40af; border-radius:50%; transform:scale(0); transition:all 0.2s;"></div>
+                <label for="fat">Fat</label>
+                <div class="input-with-unit">
+                    <input type="number" inputmode="decimal" id="fat" step="0.1" 
+                           placeholder="กรอกปริมาณไขมัน"/>
+                    <span class="unit">g/kg/day</span>
+                </div>
+            </div>
         </div>
-        <span style="font-weight: 500;">หัก Fat จาก Vitalipid (0.4 g/kg/day)</span>
-    </label>
-</div>
-
-<style>
-    /* CSS สำหรับเปลี่ยนสถานะจุดกลมเมื่อมีการเช็ค */
-    #deduct-vitalipid:checked + #radio-visual {
-        background: #eff6ff;
-        border-color: #2563eb;
-    }
-    #deduct-vitalipid:checked ~ #radio-dot {
-        transform: scale(1);
-    }
-</style>
         
         <div class="input-group">
             <div class="input-field">
@@ -2275,13 +2237,8 @@ if (picc) {
         const dextroseOsm_raw = bag > 0 ? (dextrose * 1000 * 5) / 100 : 0;
         const gir_raw = (bw > 0) ? (dextrose * rate) / (6 * bw) : 0;
 
-        // --- แก้ไขส่วนการคำนวณ Fat ในฟังก์ชัน calculateTPN ---
-const isDeductFat = document.getElementById('deduct-vitalipid').checked;
-// ถ้าติ๊กหัก Fat ให้เอาค่าที่กรอกมาลบออก 0.4 ก่อน (แต่ห้ามติดลบ)
-const effectiveFat = isDeductFat ? Math.max(0, fat - 0.4) : fat;
-
-const fatVol_1 = r1(effectiveFat * bw * 5); // ใช้ค่าที่หักแล้วมาหาปริมาตรน้ำมัน
-const fatCal_raw = effectiveFat * bw * 10;  // ใช้ค่าที่หักแล้วมาหาแคลอรี่
+        const fatVol_1 = r1(fat * bw * 5);
+        const fatCal_raw = fat * bw * 10;
 
         const tfMilk_raw = (bw > 0) ? totalMilk / bw : 0;
 
@@ -2732,7 +2689,6 @@ autosaveCollect();
         return imageData.data.some(channel => channel !== 0);
     }
     // ===== DOM Content Loaded Event =====
-    // ===== DOM Content Loaded Event (Copy ทั้งชุดนี้ไปแทนที่ของเดิมได้เลย) =====
     document.addEventListener('DOMContentLoaded', function() {
         const dateEl = document.getElementById('order-date');
         if (dateEl && !dateEl.value) {
@@ -2743,7 +2699,7 @@ autosaveCollect();
 
         initProductSelection();
         autosaveRestore();
-        // Initialize signature pad
+// Initialize signature pad
         initSignaturePad();
         restoreSignature();
 
@@ -2775,7 +2731,6 @@ autosaveCollect();
 
         // Set initial selected state
         document.querySelector('input[name="signature-name"]:checked')?.closest('.signature-name-option').classList.add('selected');
-        
         const setSelectorDisplay = () => {
             const pf = document.querySelector('input[name="peditrace-freq"]:checked')?.value || 'daily';
             document.getElementById('peditrace-day-selector').style.display = (pf === 'weekly') ? 'block' : 'none';
@@ -2787,15 +2742,6 @@ autosaveCollect();
         setSelectorDisplay();
 
         document.getElementById('clearBtn')?.addEventListener('click', clearAllData);
-
-        // ✅ เพิ่ม Event Listener สำหรับปุ่มจุดกลมหัก Fat
-        const deductFatCheck = document.getElementById('deduct-vitalipid');
-        if (deductFatCheck) {
-            deductFatCheck.addEventListener('change', () => {
-                calculateTPN(); // สั่งคำนวณปริมาตรใหม่
-                updateFatDisplay(); // อัปเดตการแสดงผล Fat rate
-            });
-        }
 
         // Auto-calculate bag when rate changes
         const rateEl = document.getElementById('rate');
@@ -2847,29 +2793,29 @@ autosaveCollect();
             calculateTPN();
         }));
 
-        const picc = document.getElementById('picc-line-checkbox');
-        if (picc) {
-            picc.addEventListener('change', function() {
-                const heparinRow = document.getElementById('heparin-concentration-row');
-                if (this.checked) {
-                    heparinRow.style.display = 'grid';
-                    const heparin1 = document.querySelector('input[name="heparin-concentration"][value="1"]');
-                    if (heparin1 && !document.querySelector('input[name="heparin-concentration"]:checked')) {
-                        heparin1.checked = true;
-                    }
-                } else {
-                    heparinRow.style.display = 'none';
-                }
-                calculateTPN();
-            });
+   const picc = document.getElementById('picc-line-checkbox');
+if (picc) {
+    picc.addEventListener('change', function() {
+        const heparinRow = document.getElementById('heparin-concentration-row');
+        if (this.checked) {
+            heparinRow.style.display = 'grid';
+            // ✅ เมื่อติ๊ก PICC ใหม่ ให้ auto select 1 unit/ml เป็น default
+            const heparin1 = document.querySelector('input[name="heparin-concentration"][value="1"]');
+            if (heparin1 && !document.querySelector('input[name="heparin-concentration"]:checked')) {
+                heparin1.checked = true;
+            }
+        } else {
+            heparinRow.style.display = 'none';
         }
-
+        calculateTPN();
+    });
+}
         document.querySelectorAll('input[name="heparin-concentration"]').forEach(r => {
-            r.addEventListener('change', () => {
-                calculateTPN();
-            });
-        });
-
+    r.addEventListener('change', () => {
+        calculateTPN();
+    });
+});
+        // Fat administration event listeners
         document.querySelectorAll('input[name="fat-priming"]').forEach(r => {
             r.addEventListener('change', () => {
                 calculateTPN();
@@ -2889,6 +2835,7 @@ autosaveCollect();
             });
         });
         
+        // Additional inputs event listeners
         const additionalAmountEl = document.getElementById('additional-amount');
         const additionalUnitEl = document.getElementById('additional-unit');
         if (additionalAmountEl) {
@@ -2933,36 +2880,42 @@ autosaveCollect();
             calculateTPN();
         });
 
+    // ===== Zinc Event Listeners =====
         const pretermCheckbox = document.getElementById('preterm-checkbox');
         const zincRecommendation = document.getElementById('zinc-recommendation');
         const zincVolumeInput = document.getElementById('zinc-volume');
         
-        if (pretermCheckbox) {
-            pretermCheckbox.addEventListener('change', function() {
-                if (this.checked) {
-                    zincRecommendation.style.display = 'block';
-                    calculateZincRecommendation();
-                    document.querySelector('input[name="zinc-choice"][value="add"]').checked = true;
-                } else {
-                    zincRecommendation.style.display = 'none';
-                    document.querySelector('input[name="zinc-choice"][value="none"]').checked = true;
-                }
-                calculateTPN();
-            });
+     if (pretermCheckbox) {
+    pretermCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            zincRecommendation.style.display = 'block';
+            calculateZincRecommendation();
+            // ✅ เปลี่ยนเป็น Default "เติม Zinc"
+            document.querySelector('input[name="zinc-choice"][value="add"]').checked = true;
+        } else {
+            zincRecommendation.style.display = 'none';
+            // Reset to "ไม่เติม"
+            document.querySelector('input[name="zinc-choice"][value="none"]').checked = true;
         }
+        calculateTPN();
+    });
+}
         
+        // เมื่อเลือก zinc choice
         document.querySelectorAll('input[name="zinc-choice"]').forEach(r => {
             r.addEventListener('change', () => {
                 calculateTPN();
             });
         });
         
+        // เมื่อแก้ zinc volume
         if (zincVolumeInput) {
             zincVolumeInput.addEventListener('input', () => {
                 calculateTPN();
             });
         }
         
+        // ฟังก์ชันคำนวณ Zinc แนะนำ
         function calculateZincRecommendation() {
             const bw = parseFloat(document.getElementById('bw').value) || 0;
             const recommendedZinc = bw * 0.3;
@@ -2970,15 +2923,16 @@ autosaveCollect();
             document.getElementById('zinc-volume').value = recommendedZinc.toFixed(2);
         }
         
+        // เมื่อ BW เปลี่ยน ให้คำนวณ Zinc ใหม่ (ถ้าเปิด Preterm อยู่)
         const bwEl = document.getElementById('bw');
         if (bwEl) {
+            const originalBwListener = bwEl.oninput;
             bwEl.addEventListener('input', function() {
                 if (pretermCheckbox?.checked) {
                     calculateZincRecommendation();
                 }
             });
         }
-
         calculateTPN();
         updateFatDisplay();
     });
