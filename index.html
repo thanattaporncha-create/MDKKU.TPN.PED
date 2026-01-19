@@ -722,7 +722,31 @@
         filterHistory();
       }
     };
+async function loadHistoryFromSheet() {
+    const container = document.getElementById('orderListContainer');
+    container.innerHTML = '<p class="text-gray-500 text-center py-8">⏳ กำลังโหลดข้อมูลจาก Google Sheet...</p>';
 
+    try {
+        const response = await fetch(scriptUrl); // เรียก GET ไปที่ Apps Script
+        const data = await response.json();
+        
+        // เรียงลำดับใหม่ล่าสุดขึ้นก่อน (Timestamp อยู่คอลัมน์แรก)
+        allOrders = data.reverse(); 
+        
+        // กรองข้อมูลเบื้องต้นตาม Tab ที่เลือกอยู่ (ถ้ามี)
+        filterHistory(); 
+        
+    } catch (error) {
+        console.error('Fetch error:', error);
+        container.innerHTML = '<p class="text-red-500 text-center py-8">❌ ไม่สามารถโหลดข้อมูลได้</p>';
+    }
+}
+
+// เรียกใช้ฟังก์ชันนี้ทันทีที่เปิดหน้าเว็บ หรือเมื่อเข้าหน้า History
+document.addEventListener('DOMContentLoaded', () => {
+    initDataSDK();
+    loadHistoryFromSheet(); // โหลดข้อมูลทันที
+});
     async function initDataSDK() {
       if (window.dataSdk) {
         const result = await window.dataSdk.init(dataHandler);
