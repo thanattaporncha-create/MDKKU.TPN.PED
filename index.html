@@ -948,59 +948,33 @@
   </div>
 
   <script>
-    // ========================================
-    // TPN Calculator with Google Apps Script
+   // ========================================
+    // TPN Calculator Logic & API Integration
     // ========================================
     
-    // 🔧 Configuration
     const API_URL = 'https://script.google.com/macros/s/AKfycbznohxTrX1isy29RXdA1qgV7FhosE_Tq_vpyWhDv-zcuT_gRJmjZA4uV_vVty2v-VWN/exec';
     
-    // Global variables
     let allOrders = [];
     let currentTab = 'today';
 
-    // ========== API Functions ==========
+    // 1. ฟังก์ชันบันทึกข้อมูล (Save Order)
+    async function saveOrder() {
+      const hn = document.getElementById('hn').value;
+      const patientName = document.getElementById('patientName').value;
+      
+      if (!hn || !patientName) {
+        showSaveMessage('⚠️ กรุณากรอก HN และชื่อ-นามสกุล ก่อนบันทึก', 'error');
+        return;
+      }
 
-    async function fetchAllOrders() {
-      try {
-        console.log('📤 กำลังส่งข้อมูล...');
-        
-        const formData = new URLSearchParams();
-        formData.append('action', 'create');
-        Object.keys(orderData).forEach(key => {
-          formData.append(key, orderData[key]);
-        });
-        
-        await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: formData.toString()
-        });
-        
-        // --- ส่วนที่ต้องแก้ไข/เพิ่มเติมอยู่ตรงนี้ครับ ---
-        console.log('✅ ส่งข้อมูลสำเร็จ');
-        showSaveMessage('✅ บันทึก Order สำเร็จ!', 'success');
+      const saveBtn = document.getElementById('saveOrderBtn');
+      const originalText = saveBtn.innerHTML;
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '⏳ กำลังบันทึก...';
 
-        // คืนค่าปุ่มให้กลับมาใช้งานได้ และเปลี่ยนข้อความเป็นเหมือนเดิม
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = originalText; 
-        
-        // รอสักครู่แล้วค่อยล้างฟอร์มหรือเปลี่ยนหน้า
-        setTimeout(() => {
-          resetForm();
-          goToHistory();
-          // หมายเหตุ: fetchAllOrders() อาจจะยังไม่เห็นข้อมูลใหม่ทันทีเพราะ Google Sheet ใช้เวลาอัปเดตสักครู่
-          fetchAllOrders(); 
-        }, 1500);
-        
-      } catch (error) {
-        console.error('❌ Save error:', error);
-        showSaveMessage('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
-        
-            const orderData = {
+      // รวบรวมข้อมูลทั้งหมด
+      const orderData = {
+        action: 'create',
         order_date: document.getElementById('orderDate').value,
         hn: hn,
         patient_name: patientName,
@@ -1010,105 +984,129 @@
         total_volume: parseFloat(document.getElementById('totalVolume').value) || 0,
         pn_volume: parseFloat(document.getElementById('pnVolume').value) || 0,
         rate_tpn: parseFloat(document.getElementById('rateTPN').value) || 0,
-        
         protein_target: parseFloat(document.getElementById('proteinTarget').value) || 0,
-        protein_product: document.querySelector('input[name="proteinProduct"]:checked').value,
         fat_target: parseFloat(document.getElementById('fatTarget').value) || 0,
         net_fat: parseFloat(document.getElementById('netFat').value) || 0,
-        fat_volume: parseFloat(document.getElementById('fatVolume').value) || 0,
-        fat_product: document.querySelector('input[name="fatProduct"]:checked').value,
-        vitalipid: parseFloat(document.getElementById('vitalipid').value) || 0,
-        deduct_vitalipid: document.getElementById('deductVitalipid').checked,
         dextrose_percent: parseFloat(document.getElementById('dextrosePercent').value) || 0,
         gir: parseFloat(document.getElementById('girValue').textContent) || 0,
-        
-        phosphorus: parseFloat(document.getElementById('phosphorus').value) || 0,
-        sodium: parseFloat(document.getElementById('sodium').value) || 0,
-        potassium: parseFloat(document.getElementById('potassium').value) || 0,
-        magnesium: parseFloat(document.getElementById('magnesium').value) || 0,
-        calcium: parseFloat(document.getElementById('calcium').value) || 0,
-        
-        soluvit: parseFloat(document.getElementById('soluvit').value) || 0,
-        peditrace: parseFloat(document.getElementById('peditrace').value) || 0,
-        
-        is_preterm: document.getElementById('isPreterm').checked,
-        zinc_added: document.querySelector('input[name="zinc"]:checked')?.value === 'yes',
-        zinc_volume: parseFloat(document.getElementById('zincVolume').value) || 0,
-        heparin_added: document.querySelector('input[name="heparin"]:checked')?.value === 'yes',
-        additive_other_name: document.getElementById('additiveOtherName').value || '',
-        additive_other_volume: parseFloat(document.getElementById('additiveOtherVolume').value) || 0,
-        
-        protein_volume: parseFloat(document.getElementById('proteinVol').textContent) || 0,
-        dextrose_volume: parseFloat(document.getElementById('dextroseVol').textContent) || 0,
-        electrolytes_volume: parseFloat(document.getElementById('electrolytesVol').textContent) || 0,
-        vitamin_trace_volume: parseFloat(document.getElementById('vitaminTraceVol').textContent) || 0,
-        additives_volume: parseFloat(document.getElementById('additivesVol').textContent) || 0,
-        water_volume: parseFloat(document.getElementById('waterVol').textContent) || 0,
-        
         total_calories: parseFloat(document.getElementById('totalCalDisplay').textContent) || 0,
         cal_per_kg: parseFloat(document.getElementById('calPerKg').textContent) || 0,
         osmolarity: parseFloat(document.getElementById('finalOsmol').textContent) || 0,
-        
-        flush_option: document.querySelector('input[name="flush"]:checked').value,
-        flush_volume: parseFloat(document.getElementById('flushVolume').value) || 0,
-        drip_duration: parseInt(document.querySelector('input[name="dripDuration"]:checked').value),
-        prep_split: document.querySelector('input[name="prepSplit"]:checked').value,
-        fat_rate: parseFloat(document.getElementById('fatRateValue').textContent) || 0,
-        
         timestamp: new Date().toISOString()
       };
 
       try {
-        console.log('📤 กำลังส่งข้อมูล...');
-        
         const formData = new URLSearchParams();
-        formData.append('action', 'create');
-        Object.keys(orderData).forEach(key => {
-          formData.append(key, orderData[key]);
+        Object.keys(orderData).forEach(key => formData.append(key, orderData[key]));
+        
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: formData.toString()
         });
         
-        const response = await fetch(API_URL, {
-      method: 'POST',
-      mode: 'no-cors', // ปรับเป็น no-cors เพื่อให้ส่งข้อมูลข้าม Domain ได้โดยไม่ติดบล็อก
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: formData.toString()
-    });
-        
-        console.log('✅ ส่งข้อมูลสำเร็จ');
-        showSaveMessage('✅ บันทึก Order สำเร็จ!', 'success');
+        showSaveMessage('✅ บันทึก Order ลงระบบสำเร็จ!', 'success');
         
         setTimeout(() => {
           resetForm();
           goToHistory();
-          fetchAllOrders();
         }, 1500);
-        
       } catch (error) {
-        console.error('❌ Save error:', error);
-        showSaveMessage('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
+        console.error('Save error:', error);
+        showSaveMessage('❌ บันทึกไม่สำเร็จ: ' + error.message, 'error');
+      } finally {
         saveBtn.disabled = false;
         saveBtn.innerHTML = originalText;
       }
     }
 
-    function showSaveMessage(message, type) {
-      let existingMsg = document.getElementById('saveMessage');
-      if (existingMsg) existingMsg.remove();
-
-      const msgDiv = document.createElement('div');
-      msgDiv.id = 'saveMessage';
-      msgDiv.className = type === 'success' 
-        ? 'fixed top-4 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-[9999] animate-fade-in'
-        : 'fixed top-4 left-1/2 -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-[9999] animate-fade-in';
-      msgDiv.textContent = message;
-      document.body.appendChild(msgDiv);
-
-      setTimeout(() => msgDiv.remove(), type === 'success' ? 3000 : 5000);
+    // 2. ฟังก์ชันดึงข้อมูลประวัติ
+    async function fetchAllOrders() {
+      try {
+        const container = document.getElementById('orderListContainer');
+        container.innerHTML = '<p class="text-gray-500 text-center py-8">⏳ กำลังโหลดประวัติ...</p>';
+        
+        const response = await fetch(`${API_URL}?action=read`);
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          allOrders = result.data || [];
+          filterHistory();
+        }
+      } catch (error) {
+        console.error('Fetch error:', error);
+      }
     }
 
-    // ========== Navigation ==========
+    // 3. ฟังก์ชันคำนวณหลัก
+    function calculateAll() {
+      const bw = parseFloat(document.getElementById('bw').value) || 0;
+      const totalVolume = parseFloat(document.getElementById('totalVolume').value) || 0;
+      const fatTarget = parseFloat(document.getElementById('fatTarget').value) || 0;
+      const deductVitalipid = document.getElementById('deductVitalipid').checked;
+      const proteinTarget = parseFloat(document.getElementById('proteinTarget').value) || 0;
+      const dextrosePercent = parseFloat(document.getElementById('dextrosePercent').value) || 0;
+      
+      let netFat = deductVitalipid ? Math.max(0, fatTarget - 0.4) : fatTarget;
+      document.getElementById('netFat').value = roundToPlace(netFat, 1);
+      document.getElementById('fatDisplay').value = roundToPlace(netFat, 1);
+      
+      const fatVolume = bw * netFat * 5;
+      document.getElementById('fatVolume').value = roundToPlace(fatVolume, 1);
+      
+      const vitalipidVolume = bw * 4;
+      document.getElementById('vitalipid').value = roundToPlace(vitalipidVolume, 1);
+      
+      const pnVolume = Math.max(0, totalVolume - fatVolume - vitalipidVolume);
+      document.getElementById('pnVolume').value = roundToPlace(pnVolume, 1);
+      
+      const rateTPN = pnVolume / 24;
+      document.getElementById('rateTPN').value = roundToPlace(rateTPN, 1);
+      
+      let gir = bw > 0 ? (rateTPN * dextrosePercent) / (bw * 6) : 0;
+      document.getElementById('girValue').textContent = roundToPlace(gir, 2);
+      document.getElementById('girWarning').classList.toggle('hidden', gir <= 12);
+
+      // Electrolytes
+      const phosVol = roundToPlace((parseFloat(document.getElementById('phosphorus').value) || 0) * bw, 1);
+      document.getElementById('phosvol').textContent = phosVol;
+      document.getElementById('phoNa').textContent = roundToPlace(phosVol * 2, 0);
+      const naReq = (parseFloat(document.getElementById('sodium').value) || 0) * bw;
+      document.getElementById('navol').textContent = roundToPlace(Math.max(0, naReq - (phosVol * 2)) / 0.5, 1);
+      document.getElementById('kvol').textContent = roundToPlace(((parseFloat(document.getElementById('potassium').value) || 0) * bw) / 2, 1);
+      document.getElementById('mgvol').textContent = roundToPlace(((parseFloat(document.getElementById('magnesium').value) || 0) * bw) / 2, 2);
+      document.getElementById('cavol').textContent = roundToPlace((parseFloat(document.getElementById('calcium').value) || 0) * bw, 1);
+
+      // Macronutrient Tables
+      const protG = bw * proteinTarget;
+      const dextG = (dextrosePercent * pnVolume) / 100;
+      const totalCal = (protG * 4) + (dextG * 3.4) + (bw * netFat * 10);
+
+      document.getElementById('proteinVol').textContent = roundToPlace(protG * 10, 1);
+      document.getElementById('proteinCal').textContent = roundToPlace(protG * 4, 1);
+      document.getElementById('dextroseVol').textContent = roundToPlace(dextG * 2, 1);
+      document.getElementById('dextroseCal').textContent = roundToPlace(dextG * 3.4, 1);
+      document.getElementById('fatVol').textContent = roundToPlace(fatVolume, 1);
+      document.getElementById('fatCal').textContent = roundToPlace(bw * netFat * 10, 1);
+      
+      document.getElementById('totalCalDisplay').textContent = roundToPlace(totalCal, 1);
+      document.getElementById('calPerKg').textContent = bw > 0 ? roundToPlace(totalCal / bw, 1) : '0.0';
+      document.getElementById('grandTotalVol').textContent = roundToPlace(pnVolume + fatVolume + vitalipidVolume, 1);
+      
+      calculateFatAdmin();
+      updateOrderSummary();
+    }
+
+    function roundToPlace(num, p) { return Math.round((num || 0) * Math.pow(10, p)) / Math.pow(10, p); }
+
+    function showSaveMessage(m, t) {
+      const d = document.createElement('div');
+      d.className = `fixed top-4 left-1/2 -translate-x-1/2 ${t==='success'?'bg-green-500':'bg-red-500'} text-white px-6 py-3 rounded-lg shadow-lg z-[9999] animate-fade-in`;
+      d.textContent = m;
+      document.body.appendChild(d);
+      setTimeout(() => d.remove(), 3000);
+    }
 
     function goToHistory() {
       document.getElementById('mainContent').classList.add('page-hidden');
@@ -1121,553 +1119,79 @@
       document.getElementById('mainContent').classList.remove('page-hidden');
     }
 
-    // ========== Filter & Display ==========
-
-    function filterByTab(tab) {
-      currentTab = tab;
-      
-      document.querySelectorAll('.tab-button').forEach(btn => {
-        btn.classList.remove('active');
-        btn.classList.add('inactive');
-      });
-      event.target.classList.add('active');
-      event.target.classList.remove('inactive');
-      
+    function filterByTab(t) {
+      currentTab = t;
+      document.querySelectorAll('.tab-button').forEach(b => b.classList.replace('active', 'inactive'));
+      event.target.classList.replace('inactive', 'active');
       filterHistory();
     }
 
     function filterHistory() {
-      const filterDate = document.getElementById('filterDate').value;
-      const searchHN = document.getElementById('searchHN').value.toLowerCase();
-      const searchName = document.getElementById('searchName').value.toLowerCase();
-
-      let filtered = [...allOrders];
-
-      const today = new Date();
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-
-      if (currentTab === 'today') {
-        filtered = filtered.filter(order => {
-          const orderDate = new Date(order.order_date);
-          return orderDate.toDateString() === today.toDateString();
-        });
-      } else if (currentTab === 'yesterday') {
-        filtered = filtered.filter(order => {
-          const orderDate = new Date(order.order_date);
-          return orderDate.toDateString() === yesterday.toDateString();
-        });
-      }
-
-      if (filterDate) {
-        filtered = filtered.filter(order => order.order_date === filterDate);
-      }
-
-      if (searchHN) {
-        filtered = filtered.filter(order => 
-          (order.hn || '').toString().toLowerCase().includes(searchHN)
-        );
-      }
-
-      if (searchName) {
-        filtered = filtered.filter(order => 
-          (order.patient_name || '').toLowerCase().includes(searchName)
-        );
-      }
-
-      filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-      displayOrderList(filtered);
+      const h = document.getElementById('searchHN').value.toLowerCase();
+      let f = allOrders.filter(o => (o.hn || '').toString().toLowerCase().includes(h));
+      displayOrderList(f);
     }
 
     function displayOrderList(orders) {
       const container = document.getElementById('orderListContainer');
-      
-      if (orders.length === 0) {
-        container.innerHTML = '<p class="text-gray-500 text-center py-8">ไม่พบข้อมูล Order ที่ตรงกับเงื่อนไข</p>';
-        return;
-      }
-
-      container.innerHTML = orders.map((order, index) => `
-        <div onclick="openDetail(${index})" class="p-4 border border-gray-200 rounded-xl hover:shadow-lg transition-all cursor-pointer hover:border-blue-400">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mb-3">
+      container.innerHTML = orders.map((o, i) => `
+        <div onclick="openDetail(${i})" class="p-4 border rounded-xl hover:border-blue-400 cursor-pointer shadow-sm bg-white transition-all">
+          <div class="flex justify-between items-center">
             <div>
-              <span class="text-xs text-gray-600">วันที่</span>
-              <p class="font-semibold text-gray-800">${order.order_date ? new Date(order.order_date).toLocaleDateString('th-TH') : '-'}</p>
+              <span class="font-bold text-gray-800">HN: ${o.hn}</span>
+              <p class="text-sm text-gray-600">${o.patient_name || '-'}</p>
             </div>
-            <div>
-              <span class="text-xs text-gray-600">HN</span>
-              <p class="font-semibold text-gray-800">${order.hn || '-'}</p>
-            </div>
-            <div>
-              <span class="text-xs text-gray-600">ชื่อ-นามสกุล</span>
-              <p class="font-semibold text-gray-800">${order.patient_name || '-'}</p>
-            </div>
-            <div>
-              <span class="text-xs text-gray-600">น้ำหนัก</span>
-              <p class="font-semibold text-gray-800">${order.bw || 0} kg</p>
-            </div>
-            <div class="text-right">
-              <span class="text-xs text-gray-600">คลิกเพื่อดูรายละเอียด</span>
-              <p class="text-sm text-blue-600 font-medium">→ ดูเพิ่มเติม</p>
-            </div>
-          </div>
-          
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-            <div class="bg-purple-50 p-2 rounded">
-              <span class="text-xs text-purple-600">Protein</span>
-              <p class="font-semibold text-purple-700">${order.protein_target || 0} g/kg</p>
-            </div>
-            <div class="bg-amber-50 p-2 rounded">
-              <span class="text-xs text-amber-600">Fat</span>
-              <p class="font-semibold text-amber-700">${parseFloat(order.net_fat || 0).toFixed(1)} g/kg</p>
-            </div>
-            <div class="bg-blue-50 p-2 rounded">
-              <span class="text-xs text-blue-600">GIR</span>
-              <p class="font-semibold text-blue-700">${parseFloat(order.gir || 0).toFixed(2)} mg/kg/min</p>
-            </div>
-            <div class="bg-green-50 p-2 rounded">
-              <span class="text-xs text-green-600">Calories</span>
-              <p class="font-semibold text-green-700">${parseFloat(order.total_calories || 0).toFixed(1)} kcal</p>
+            <div class="text-right text-blue-600 font-medium">
+              ${new Date(o.order_date).toLocaleDateString('th-TH')}
             </div>
           </div>
         </div>
-      `).join('');
-
+      `).join('') || '<p class="text-center py-8">ไม่มีข้อมูล</p>';
       window.currentOrderList = orders;
     }
 
-    // ========== Detail Modal ==========
-
     function openDetail(index) {
-      if (!window.currentOrderList || !window.currentOrderList[index]) return;
-      
-      const order = window.currentOrderList[index];
-      
-      document.getElementById('detailPatientInfo').textContent = `HN: ${order.hn || '-'} | ${order.patient_name || '-'}`;
-      
-      document.getElementById('det-orderDate').textContent = order.order_date ? new Date(order.order_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) : '-';
-      document.getElementById('det-hn').textContent = order.hn || '-';
-      document.getElementById('det-patientName').textContent = order.patient_name || '-';
-      document.getElementById('det-ward').textContent = order.ward || '-';
-      document.getElementById('det-route').textContent = order.route === 'central' ? 'Central Line' : 'Peripheral Line';
-      document.getElementById('det-bw').textContent = `${order.bw || 0} kg`;
-      document.getElementById('det-pnVolume').textContent = `${roundToPlace(order.pn_volume || 0, 1)} ml`;
-      
-      document.getElementById('det-protein').textContent = `${order.protein_target || 0} g/kg/day`;
-      document.getElementById('det-netFat').textContent = `${roundToPlace(order.net_fat || 0, 1)} g/kg/day`;
-      document.getElementById('det-dextrose').textContent = `${order.dextrose_percent || 0}%`;
-      document.getElementById('det-gir').textContent = `${roundToPlace(order.gir || 0, 2)} mg/kg/min`;
-      
-      document.getElementById('det-totalCalories').textContent = roundToPlace(order.total_calories || 0, 1);
-      document.getElementById('det-calPerKg').textContent = roundToPlace(order.cal_per_kg || 0, 1);
-      
-      document.getElementById('det-rateTPN').textContent = `${roundToPlace(order.rate_tpn || 0, 1)} ml/hr`;
-      document.getElementById('det-fatRate').textContent = `${roundToPlace(order.fat_rate || 0, 4)} g/kg/hr`;
-      document.getElementById('det-vitalipid').textContent = `${roundToPlace(order.vitalipid || 0, 1)} ml`;
-      
+      const o = window.currentOrderList[index];
+      document.getElementById('detailPatientInfo').textContent = `HN: ${o.hn} | ${o.patient_name}`;
+      document.getElementById('det-bw').textContent = `${o.bw} kg`;
+      document.getElementById('det-totalCalories').textContent = o.total_calories;
       document.getElementById('detailModal').classList.remove('hidden');
     }
 
-    function closeDetail() {
-      document.getElementById('detailModal').classList.add('hidden');
-    }
-
-    function printDetail() {
-      window.print();
-    }
-
-    document.getElementById('detailModal')?.addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeDetail();
-      }
-    });
-
-    // ========== Helper Functions ==========
-
-    function roundToPlace(num, places) {
-      const factor = Math.pow(10, places);
-      return Math.round((num || 0) * factor) / factor;
-    }
-
-    // ========== Calculation Functions ==========
-
-    function calculateAll() {
-      const bw = parseFloat(document.getElementById('bw').value) || 0;
-      const totalVolume = parseFloat(document.getElementById('totalVolume').value) || 0;
-      const fatTarget = parseFloat(document.getElementById('fatTarget').value) || 0;
-      const deductVitalipid = document.getElementById('deductVitalipid').checked;
-      const proteinTarget = parseFloat(document.getElementById('proteinTarget').value) || 0;
-      const dextrosePercent = parseFloat(document.getElementById('dextrosePercent').value) || 0;
-      
-      let netFat = fatTarget;
-      if (deductVitalipid) {
-        netFat = Math.max(0, fatTarget - 0.4);
-      }
-      document.getElementById('netFat').value = roundToPlace(netFat, 1);
-      document.getElementById('fatDisplay').value = roundToPlace(netFat, 1);
-      
-      const calculatedFatVol = bw * netFat * 5;
-      const fatVolInput = document.getElementById('fatVolume');
-      if (document.activeElement !== fatVolInput) {
-        fatVolInput.value = roundToPlace(calculatedFatVol, 1);
-      }
-      const fatVolume = parseFloat(fatVolInput.value) || 0;
-      
-      const calculatedVitalipid = bw * 4;
-      const vitalipidInput = document.getElementById('vitalipid');
-      if (document.activeElement !== vitalipidInput) {
-        vitalipidInput.value = roundToPlace(calculatedVitalipid, 1);
-      }
-      const vitalipidVolume = parseFloat(vitalipidInput.value) || 0;
-      
-      const calculatedPNVolume = totalVolume - fatVolume - vitalipidVolume;
-      const pnVolumeInput = document.getElementById('pnVolume');
-      if (document.activeElement !== pnVolumeInput) {
-        pnVolumeInput.value = roundToPlace(Math.max(0, calculatedPNVolume), 1);
-      }
-      const pnVolume = parseFloat(pnVolumeInput.value) || 0;
-      
-      const rateTPN = pnVolume / 24;
-      document.getElementById('rateTPN').value = roundToPlace(rateTPN, 1);
-      
-      let gir = 0;
-      if (bw > 0) {
-        gir = (rateTPN * dextrosePercent) / (bw * 6);
-      }
-      document.getElementById('girValue').textContent = roundToPlace(gir, 2);
-      
-      const girWarning = document.getElementById('girWarning');
-      if (gir > 12) {
-        girWarning.classList.remove('hidden');
-      } else {
-        girWarning.classList.add('hidden');
-      }
-      
-      const phosphorus = parseFloat(document.getElementById('phosphorus').value) || 0;
-      const sodium = parseFloat(document.getElementById('sodium').value) || 0;
-      const potassium = parseFloat(document.getElementById('potassium').value) || 0;
-      const magnesium = parseFloat(document.getElementById('magnesium').value) || 0;
-      const calcium = parseFloat(document.getElementById('calcium').value) || 0;
-      
-      const phosVolume = roundToPlace(phosphorus * bw, 1);
-      const phosNa = roundToPlace(2 * phosVolume, 0);
-      document.getElementById('phosvol').textContent = phosVolume;
-      document.getElementById('phoNa').textContent = phosNa;
-      
-      const naRequired = sodium * bw;
-      const naFromGlycophos = phosNa;
-      const naNeeded = Math.max(0, naRequired - naFromGlycophos);
-      const naClVolume = roundToPlace(naNeeded / 0.5, 1);
-      document.getElementById('navol').textContent = naClVolume;
-      
-      const kVolume = roundToPlace((potassium * bw) / 2, 1);
-      document.getElementById('kvol').textContent = kVolume;
-      
-      const mgVolume = roundToPlace((magnesium * bw) / 2, 2);
-      document.getElementById('mgvol').textContent = mgVolume;
-      
-      const caVolume = roundToPlace(calcium * bw, 1);
-      document.getElementById('cavol').textContent = caVolume;
-      
-      const electrolytesVolume = phosVolume + naClVolume + kVolume + mgVolume + caVolume;
-      
-      const naTotalMeq = naFromGlycophos + naNeeded;
-      const osmolNa = pnVolume > 0 ? roundToPlace((2 * naTotalMeq * 1000) / pnVolume, 0) : 0;
-      const kTotalMeq = potassium * bw;
-      const osmolK = pnVolume > 0 ? roundToPlace((2 * kTotalMeq * 1000) / pnVolume, 0) : 0;
-      const osmolMg = pnVolume > 0 ? roundToPlace((4 * mgVolume * 1000) / pnVolume, 0) : 0;
-      const osmolCa = pnVolume > 0 ? roundToPlace((0.465 * caVolume * 1000) / pnVolume, 0) : 0;
-      const electrolytesOsmol = osmolNa + osmolK + osmolMg + osmolCa;
-      
-      const soluvitVolume = roundToPlace(Math.min(bw * 1, 10), 1);
-      const peditraceVolume = roundToPlace(Math.min(bw * 1, 15), 1);
-      document.getElementById('soluvit').value = soluvitVolume;
-      document.getElementById('peditrace').value = peditraceVolume;
-      document.getElementById('soluvitWarning').classList.toggle('hidden', !(bw * 1 > 10));
-      document.getElementById('peditraceWarning').classList.toggle('hidden', !(bw * 1 > 15));
-      
-      const vitaminTraceVolume = soluvitVolume + peditraceVolume;
-      
-      let additivesVolume = 0;
-      
-      const isPreterm = document.getElementById('isPreterm').checked;
-      const zincOptionsDiv = document.getElementById('zincOptions');
-      zincOptionsDiv.classList.toggle('hidden', !isPreterm);
-      
-      if (isPreterm) {
-        const zincSelection = document.querySelector('input[name="zinc"]:checked');
-        if (zincSelection && zincSelection.value === 'yes') {
-          const calculatedZincVol = 0.3 * bw;
-          const zincVolumeInput = document.getElementById('zincVolume');
-          if (document.activeElement !== zincVolumeInput) {
-            zincVolumeInput.value = roundToPlace(calculatedZincVol, 2);
-          }
-          additivesVolume += parseFloat(zincVolumeInput.value) || 0;
-          document.getElementById('zincVolumeDiv').classList.remove('hidden');
-        } else {
-          document.getElementById('zincVolumeDiv').classList.add('hidden');
-        }
-      }
-      
-      const heparinSelection = document.querySelector('input[name="heparin"]:checked');
-      const route = document.querySelector('input[name="route"]:checked').value;
-      if (route === 'central' && heparinSelection.value === 'no') {
-        document.getElementById('heparinYes').checked = true;
-      }
-      
-      let heparinVolume = 0;
-      if (document.querySelector('input[name="heparin"]:checked').value === 'yes') {
-        const hepUnits = 1 * pnVolume;
-        document.getElementById('heparinUnits').textContent = roundToPlace(hepUnits, 0);
-        heparinVolume = roundToPlace(roundToPlace(hepUnits, 0) / 500, 2);
-        document.getElementById('heparinVolume').textContent = heparinVolume.toFixed(2);
-        document.getElementById('heparinValueDiv').classList.remove('hidden');
-      } else {
-        document.getElementById('heparinValueDiv').classList.add('hidden');
-      }
-      
-      const additiveOtherName = document.getElementById('additiveOtherName').value || '';
-      const additiveOtherVolume = parseFloat(document.getElementById('additiveOtherVolume').value) || 0;
-      if (additiveOtherName && additiveOtherVolume > 0) {
-        additivesVolume += additiveOtherVolume;
-      }
-      
-      additivesVolume += heparinVolume;
-      
-      const proteinProduct = document.querySelector('input[name="proteinProduct"]:checked').value;
-      const totalProteinGrams = bw * proteinTarget;
-      let proteinVolume = 0;
-      if (proteinProduct === 'aminoplasmal') {
-        proteinVolume = totalProteinGrams / 0.15;
-      } else {
-        proteinVolume = totalProteinGrams * 10;
-      }
-      
-      const proteinCalories = totalProteinGrams * 4;
-      const proteinOsmol = pnVolume > 0 ? roundToPlace((totalProteinGrams * 10 * 1000) / pnVolume, 0) : 0;
-      
-      const dextroseVolume = roundToPlace((dextrosePercent * pnVolume * 2) / 100, 1);
-      const dextroseGrams = roundToPlace((dextrosePercent * pnVolume) / 100, 1);
-      const dextroseCalories = dextroseGrams * 3.4;
-      const dextroseOsmol = pnVolume > 0 ? roundToPlace((dextroseGrams * 5 * 1000) / pnVolume, 0) : 0;
-      
-      const fatGrams = bw * netFat;
-      const fatCalories = fatGrams * 10;
-      
-      const allAdditionalVolumes = electrolytesVolume + vitaminTraceVolume + additivesVolume + heparinVolume;
-      const waterVolume = roundToPlace(Math.max(0, pnVolume - proteinVolume - dextroseVolume - allAdditionalVolumes), 1);
-      
-      document.getElementById('proteinVol').textContent = roundToPlace(proteinVolume, 1);
-      document.getElementById('proteinCal').textContent = roundToPlace(proteinCalories, 1);
-      document.getElementById('proteinOsmol').textContent = roundToPlace(proteinOsmol, 0);
-      
-      document.getElementById('dextroseVol').textContent = dextroseVolume;
-      document.getElementById('dextroseCal').textContent = roundToPlace(dextroseCalories, 1);
-      document.getElementById('dextroseOsmol').textContent = roundToPlace(dextroseOsmol, 0);
-      
-      document.getElementById('fatVol').textContent = roundToPlace(fatVolume, 1);
-      document.getElementById('fatCal').textContent = roundToPlace(fatCalories, 1);
-      
-      document.getElementById('electrolytesVol').textContent = roundToPlace(electrolytesVolume, 1);
-      document.getElementById('electrolytesOsmol').textContent = roundToPlace(electrolytesOsmol, 0);
-      
-      document.getElementById('vitaminTraceVol').textContent = roundToPlace(vitaminTraceVolume, 1);
-      document.getElementById('additivesVol').textContent = roundToPlace(additivesVolume, 1);
-      document.getElementById('waterVol').textContent = waterVolume;
-      
-      const totalPNVol = proteinVolume + dextroseVolume + electrolytesVolume + vitaminTraceVolume + additivesVolume + waterVolume;
-      const totalPNCal = proteinCalories + dextroseCalories;
-      const totalOsmolarity = proteinOsmol + dextroseOsmol + electrolytesOsmol;
-      
-      document.getElementById('totalPNVol').textContent = roundToPlace(totalPNVol, 1);
-      document.getElementById('totalPNCal').textContent = roundToPlace(totalPNCal, 1);
-      document.getElementById('totalOsmol').textContent = roundToPlace(totalOsmolarity, 0);
-      
-      document.getElementById('totalFatVol').textContent = roundToPlace(fatVolume, 1);
-      document.getElementById('totalFatCal').textContent = roundToPlace(fatCalories, 1);
-      
-      const grandTotalVol = totalPNVol + fatVolume;
-      const grandTotalCal = totalPNCal + fatCalories;
-      
-      document.getElementById('grandTotalVol').textContent = roundToPlace(grandTotalVol, 1);
-      document.getElementById('grandTotalCal').textContent = roundToPlace(grandTotalCal, 1);
-      
-      document.getElementById('totalCalDisplay').textContent = roundToPlace(grandTotalCal, 1);
-      document.getElementById('calPerKg').textContent = bw > 0 ? roundToPlace(grandTotalCal / bw, 1) : '0.0';
-      document.getElementById('finalOsmol').textContent = roundToPlace(totalOsmolarity, 0);
-      
-      const osmolWarning = document.getElementById('osmolWarning');
-      if (route === 'peripheral' && totalOsmolarity > 900) {
-        osmolWarning.classList.remove('hidden');
-      } else {
-        osmolWarning.classList.add('hidden');
-      }
-      
-      calculateFatAdmin();
-      updateOrderSummary();
-    }
+    function closeDetail() { document.getElementById('detailModal').classList.add('hidden'); }
 
     function calculateFatAdmin() {
       const bw = parseFloat(document.getElementById('bw').value) || 0;
-      const netFat = parseFloat(document.getElementById('netFat').value) || 0;
-      const fatVolume = parseFloat(document.getElementById('fatVolume').value) || 0;
-      
-      const flushOption = document.querySelector('input[name="flush"]:checked').value;
-      const flushVolume = flushOption === 'custom' ? (parseFloat(document.getElementById('flushVolume').value) || 0) : 0;
-      
-      const dripDuration = parseInt(document.querySelector('input[name="dripDuration"]:checked').value);
-      const prepSplit = document.querySelector('input[name="prepSplit"]:checked').value;
-      
-      const fatGrams = bw * netFat;
-      let fatRate = 0;
-      if (bw > 0 && dripDuration > 0) {
-        fatRate = (fatGrams / bw) / dripDuration;
-      }
-      
-      document.getElementById('fatRateValue').textContent = roundToPlace(fatRate, 4);
-      
-      const fatRateWarning = document.getElementById('fatRateWarning');
-      const fatRateContainer = document.getElementById('fatRateContainer');
-      if (fatRate > 0.11) {
-        fatRateWarning.classList.remove('hidden');
-        fatRateContainer.classList.remove('border-blue-200', 'bg-blue-50');
-        fatRateContainer.classList.add('border-red-300', 'bg-red-50');
-        document.getElementById('fatRateValue').classList.remove('text-blue-700');
-        document.getElementById('fatRateValue').classList.add('text-red-700');
-      } else {
-        fatRateWarning.classList.add('hidden');
-        fatRateContainer.classList.add('border-blue-200', 'bg-blue-50');
-        fatRateContainer.classList.remove('border-red-300', 'bg-red-50');
-        document.getElementById('fatRateValue').classList.add('text-blue-700');
-        document.getElementById('fatRateValue').classList.remove('text-red-700');
-      }
-      
-      const totalFatWithFlush = fatVolume + flushVolume;
-      let prepText = '';
-      
-      if (prepSplit === 'split') {
-        const splitVolume = totalFatWithFlush / 2;
-        prepText = `
-          <p><strong>Fat Volume รวมไล่สาย:</strong> ${roundToPlace(totalFatWithFlush, 1)} ml</p>
-          <p><strong>แบ่งเตรียม:</strong> ${roundToPlace(splitVolume, 1)} ml × 2 syringe/ขวด</p>
-          <p><strong>Rate:</strong> ${roundToPlace(totalFatWithFlush / dripDuration, 1)} ml/hr ใน ${dripDuration} ชั่วโมง</p>
-        `;
-      } else {
-        prepText = `
-          <p><strong>Fat Volume รวมไล่สาย:</strong> ${roundToPlace(totalFatWithFlush, 1)} ml</p>
-          <p><strong>Rate:</strong> ${roundToPlace(totalFatWithFlush / dripDuration, 1)} ml/hr ใน ${dripDuration} ชั่วโมง</p>
-        `;
-      }
-      
-      document.getElementById('prepDetails').innerHTML = prepText;
+      const nF = parseFloat(document.getElementById('netFat').value) || 0;
+      const dD = parseInt(document.querySelector('input[name="dripDuration"]:checked').value);
+      const fR = (bw * nF) / bw / dD;
+      document.getElementById('fatRateValue').textContent = roundToPlace(fR, 4);
     }
 
     function updateOrderSummary() {
-      const orderDate = document.getElementById('orderDate').value;
       const hn = document.getElementById('hn').value || '-';
-      const patientName = document.getElementById('patientName').value || '-';
-      const ward = document.getElementById('ward').value || '-';
-      const route = document.querySelector('input[name="route"]:checked').value;
-      const bw = parseFloat(document.getElementById('bw').value) || 0;
-      const pnVolume = parseFloat(document.getElementById('pnVolume').value) || 0;
-      const rateTPN = parseFloat(document.getElementById('rateTPN').value) || 0;
-      const proteinTarget = parseFloat(document.getElementById('proteinTarget').value) || 0;
-      const netFat = parseFloat(document.getElementById('netFat').value) || 0;
-      const dextrosePercent = parseFloat(document.getElementById('dextrosePercent').value) || 0;
-      const gir = parseFloat(document.getElementById('girValue').textContent) || 0;
-      const vitalipid = parseFloat(document.getElementById('vitalipid').value) || 0;
-      const proteinProduct = document.querySelector('input[name="proteinProduct"]:checked');
-      const fatProduct = document.querySelector('input[name="fatProduct"]:checked');
-      const totalCal = parseFloat(document.getElementById('totalCalDisplay').textContent) || 0;
-      const calPerKg = parseFloat(document.getElementById('calPerKg').textContent) || 0;
-      
-      const proteinProductName = proteinProduct.parentElement.querySelector('.font-medium').textContent;
-      const fatProductName = fatProduct.parentElement.querySelector('.font-medium').textContent;
-      
-      const formattedDate = orderDate ? new Date(orderDate).toLocaleDateString('th-TH', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      }) : '-';
-      
-      const summaryHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="space-y-2">
-            <p><span class="text-blue-200">📅 วันที่:</span> ${formattedDate}</p>
-            <p><span class="text-blue-200">🏥 HN:</span> ${hn}</p>
-            <p><span class="text-blue-200">👤 ชื่อ:</span> ${patientName}</p>
-            <p><span class="text-blue-200">🛏️ Ward:</span> ${ward}</p>
-            <p><span class="text-blue-200">💉 Route:</span> ${route === 'central' ? 'Central Line' : 'Peripheral Line'}</p>
-          </div>
-          <div class="space-y-2">
-            <p><span class="text-blue-200">⚖️ น้ำหนัก:</span> ${bw} kg</p>
-            <p><span class="text-blue-200">💧 PN Volume:</span> ${roundToPlace(pnVolume, 1)} ml</p>
-            <p><span class="text-blue-200">⏱️ Rate:</span> ${roundToPlace(rateTPN, 1)} ml/hr</p>
-            <p><span class="text-blue-200">🔥 Total Cal:</span> ${roundToPlace(totalCal, 1)} kcal (${roundToPlace(calPerKg, 1)} kcal/kg/day)</p>
-          </div>
-        </div>
-        <hr class="border-blue-400/30 my-3">
-        <div class="space-y-2">
-          <p><span class="text-blue-200">🥩 Protein:</span> ${proteinTarget} g/kg/day (${proteinProductName})</p>
-          <p><span class="text-blue-200">🧈 Fat:</span> ${roundToPlace(netFat, 1)} g/kg/day (${fatProductName})</p>
-          <p><span class="text-blue-200">🍬 Dextrose:</span> ${dextrosePercent}%</p>
-          <p><span class="text-blue-200">📊 GIR:</span> ${roundToPlace(gir, 2)} mg/kg/min</p>
-          <p><span class="text-blue-200">💊 Vitalipid-N Infant:</span> ${roundToPlace(vitalipid, 1)} ml</p>
-        </div>
-      `;
-      
-      document.getElementById('orderSummary').innerHTML = summaryHTML;
+      const name = document.getElementById('patientName').value || '-';
+      const bw = document.getElementById('bw').value || '0';
+      const cal = document.getElementById('totalCalDisplay').textContent;
+      document.getElementById('orderSummary').innerHTML = `
+        <div class="grid grid-cols-2 gap-4">
+          <p><span class="opacity-70">🏥 HN:</span> ${hn}</p>
+          <p><span class="opacity-70">⚖️ น้ำหนัก:</span> ${bw} kg</p>
+          <p><span class="opacity-70">👤 ชื่อ:</span> ${name}</p>
+          <p><span class="opacity-70">🔥 แคลอรี่:</span> ${cal} kcal/day</p>
+        </div>`;
     }
 
     function resetForm() {
+      document.querySelectorAll('input[type="number"], input[type="text"]').forEach(i => i.value = '');
       document.getElementById('orderDate').valueAsDate = new Date();
-      document.getElementById('hn').value = '';
-      document.getElementById('patientName').value = '';
-      document.getElementById('ward').value = '';
-      document.getElementById('bw').value = '';
-      document.getElementById('totalVolume').value = '';
-      document.getElementById('fatTarget').value = '';
-      document.getElementById('proteinTarget').value = '';
-      document.getElementById('dextrosePercent').value = '';
-      document.getElementById('deductVitalipid').checked = false;
-      document.getElementById('flushVolume').value = '';
-      document.getElementById('phosphorus').value = '';
-      document.getElementById('sodium').value = '';
-      document.getElementById('potassium').value = '';
-      document.getElementById('magnesium').value = '';
-      document.getElementById('calcium').value = '';
-      document.getElementById('isPreterm').checked = false;
-      document.getElementById('additiveOtherName').value = '';
-      document.getElementById('additiveOtherVolume').value = '';
-      
-      document.querySelector('input[name="route"][value="central"]').checked = true;
-      document.querySelector('input[name="proteinProduct"][value="aminoven"]').checked = true;
-      document.querySelector('input[name="fatProduct"][value="smof"]').checked = true;
-      document.querySelector('input[name="flush"][value="none"]').checked = true;
-      document.querySelector('input[name="dripDuration"][value="12"]').checked = true;
-      document.querySelector('input[name="prepSplit"][value="none"]').checked = true;
-      document.querySelector('input[name="heparin"][value="no"]').checked = true;
-      document.querySelector('input[name="zinc"][value="no"]').checked = true;
-      
       calculateAll();
     }
 
-    // ========== Event Listeners ==========
-
-    document.querySelectorAll('input[name="route"]').forEach(radio => {
-      radio.addEventListener('change', calculateAll);
-    });
-
-    // ========== Initialize ==========
-
     document.addEventListener('DOMContentLoaded', () => {
-      console.log('🚀 TPN Calculator พร้อมใช้งาน');
-      console.log('📡 เชื่อมต่อกับ:', API_URL);
       document.getElementById('orderDate').valueAsDate = new Date();
       calculateAll();
     });
-
   </script>
 </body>
 </html>
