@@ -1,13 +1,11 @@
 <!doctype html>
 <html lang="th" class="h-full">
- <head>
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TPN Calculator - Pediatric | โรงพยาบาลศรีนครินทร์</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/_sdk/data_sdk.js"></script>
-  <script src="/_sdk/element_sdk.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body {
       box-sizing: border-box;
@@ -134,765 +132,861 @@
       display: none !important;
     }
   </style>
-  <style>@view-transition { navigation: auto; }</style>
- </head>
- <body class="h-full bg-gray-50">
-  <div id="app" class="h-full overflow-auto"><!-- Header -->
-   <header class="gradient-header text-white py-4 px-6 sticky top-0 z-50 shadow-lg no-print">
-    <div class="max-w-6xl mx-auto flex items-center justify-between">
-     <div class="flex items-center gap-3">
-      <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-       <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14h-2v-4H6v-2h4V7h2v4h4v2h-4v4z" />
-       </svg>
-      </div>
-      <div>
-       <h1 id="appTitle" class="text-xl font-bold tracking-tight">TPN Calculator - Pediatric</h1>
-       <p id="hospitalName" class="text-blue-100 text-sm">โรงพยาบาลศรีนครินทร์</p>
-      </div>
-     </div>
-     <div class="flex items-center gap-2"><button id="historyBtn" onclick="goToHistory()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium backdrop-blur-sm"> 📋 ประวัติการสั่ง TPN </button> <button onclick="resetForm()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium backdrop-blur-sm"> 🔄 รีเซ็ต </button> <button onclick="window.print()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium backdrop-blur-sm"> 🖨️ พิมพ์ </button>
-     </div>
-    </div>
-   </header><!-- Main Content -->
-   <main id="mainContent" class="max-w-6xl mx-auto p-4 md:p-6 space-y-6"><!-- Order Date & Patient Info -->
-    <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
-     <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">📋 ข้อมู��ทั่วไป</h2>
-     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"><!-- Order Date -->
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">วันที่ Order TPN</label> <input type="date" id="orderDate" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all bg-white">
-      </div><!-- HN -->
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">HN (สแกนบาร์โค้ดได้)</label> <input type="text" id="hn" placeholder="สแกนหรือพิมพ์ HN" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" autofocus>
-      </div><!-- Patient Name -->
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">ชื่อ-��า���สกุล</label> <input type="text" id="patientName" placeholder="ชื่อ ���ามสกุล" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all">
-      </div><!-- Ward -->
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">Ward</label> <input type="text" id="ward" placeholder="หอผู้ป่วย" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all">
-      </div>
-     </div>
-    </section><!-- Route Selection -->
-    <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
-     <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">🩺 Route การให้ TPN</h2>
-     <div class="flex flex-wrap gap-3"><input type="radio" name="route" id="central" value="central" class="hidden radio-custom" checked> <label for="central" class="px-6 py-3 border-2 border-gray-300 rounded-xl cursor-pointer transition-all hover:border-blue-400 font-medium flex items-center gap-2"> <span class="text-xl">🔵</span> Central Line </label> <input type="radio" name="route" id="peripheral" value="peripheral" class="hidden radio-custom"> <label for="peripheral" class="px-6 py-3 border-2 border-gray-300 rounded-xl cursor-pointer transition-all hover:border-blue-400 font-medium flex items-center gap-2"> <span class="text-xl">🟢</span> Peripheral Line </label>
-     </div>
-    </section><!-- Basic Info -->
-    <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
-     <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">⚖️ ข้อมูลพื้นฐาน</h2>
-     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">น้ำหนัก (BW)</label>
-       <div class="relative"><input type="number" id="bw" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-12" inputmode="decimal" oninput="calculateAll()"> <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">kg</span>
-       </div>
-      </div>
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">Total TPN Volume (รวม Fat)</label>
-       <div class="relative"><input type="number" id="totalVolume" step="1" min="0" placeholder="0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-12" inputmode="decimal" oninput="calculateAll()"> <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">ml</span>
-       </div>
-      </div>
-     </div>
-    </section><!-- Fat Configuration -->
-    <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
-     <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">🧈 การให้ Fat</h2>
-     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">Fat ที่ต้องการให้</label>
-       <div class="relative"><input type="number" id="fatTarget" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-24" inputmode="decimal" oninput="calculateAll()"> <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">g/kg/day</span>
-       </div>
-      </div>
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">Net Fat ส��ทธิ</label>
-       <div class="relative"><input type="number" id="netFat" step="0.1" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-blue-50 pr-24 font-semibold text-blue-700" readonly inputmode="decimal"> <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">g/kg/day</span>
-       </div>
-      </div>
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">Fat Volume</label>
-       <div class="relative"><input type="number" id="fatVolume" step="0.1" min="0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-12" inputmode="decimal" oninput="calculateAll()"> <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">ml</span>
-       </div>
-      </div>
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">Vitalipid-N Infant</label>
-       <div class="relative"><input type="number" id="vitalipid" step="0.1" min="0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-12" inputmode="decimal" oninput="calculateAll()"> <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">ml</span>
-       </div>
-      </div>
-     </div>
-     <div class="flex items-center gap-3 p-3 bg-amber-50 rounded-xl border border-amber-200"><input type="checkbox" id="deductVitalipid" class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" onchange="calculateAll()"> <label for="deductVitalipid" class="text-sm text-gray-700 cursor-pointer select-none"> <span class="font-medium">หัก Fat จาก Vitalipid</span> <span class="text-amber-600">(0.4 g/kg/day)</span> </label>
-     </div>
-    </section><!-- PN Volume & Rate -->
-    <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
-     <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">💧 PN Volume &amp; Rate</h2>
-     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">PN Volume (Total - Fat - Vitalipid)</label>
-       <div class="relative"><input type="number" id="pnVolume" step="0.1" min="0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-12 bg-green-50 font-semibold text-green-700" inputmode="decimal" oninput="calculateAll()"> <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">ml</span>
-       </div>
-      </div>
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">Rate TPN (PN Volume ÷ 24)</label>
-       <div class="relative"><input type="number" id="rateTPN" step="0.01" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-blue-50 pr-16 font-semibold text-blue-700" readonly inputmode="decimal"> <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">ml/hr</span>
-       </div>
-      </div>
-     </div>
-    </section><!-- Macronutrient -->
-    <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
-     <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">🥗 Macronutrient</h2>
-     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">Protein</label>
-       <div class="relative"><input type="number" id="proteinTarget" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-24" inputmode="decimal" oninput="calculateAll()"> <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">g/kg/day</span>
-       </div>
-      </div>
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">Fat (Net Fat)</label>
-       <div class="relative"><input type="number" id="fatDisplay" step="0.1" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-100 pr-24 font-semibold text-gray-600" readonly inputmode="decimal"> <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">g/kg/day</span>
-       </div>
-      </div>
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">%Dextrose</label>
-       <div class="relative"><input type="number" id="dextrosePercent" step="0.1" min="0" max="50" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-12" inputmode="decimal" oninput="calculateAll()"> <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">%</span>
-       </div>
-      </div>
-     </div><!-- GIR Display -->
-     <div id="girContainer" class="p-4 rounded-xl result-highlight">
-      <div class="flex items-center justify-between">
-       <div class="flex items-center gap-2"><span class="text-2xl">📊</span>
-        <div><span class="text-sm text-gray-600">GIR (Glucose Infusion Rate)</span>
-         <p class="text-xs text-gray-500 mt-0.5">= (Rate TPN × %Dextrose) ÷ (BW × 6)</p>
-        </div>
-       </div>
-       <div class="text-right"><span id="girValue" class="text-2xl font-bold text-blue-700">0.00</span> <span class="text-gray-600 ml-1">mg/kg/min</span>
-       </div>
-      </div>
-      <div id="girWarning" class="hidden mt-2 text-sm text-amber-700 bg-amber-100 px-3 py-2 rounded-lg">
-       ⚠️ GIR สูงเกินไป (ปกติ 4-6 mg/kg/min สำหรับทารก, 2-4 mg/kg/min สำหรับเด็กโต)
-      </div>
-     </div>
-    </section><!-- Product Selection -->
-    <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
-     <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">🧬 เลือกผลิตภัณฑ์</h2>
-     <div class="grid grid-cols-1 md:grid-cols-2 gap-6"><!-- Protein Product -->
-      <div class="p-4 bg-purple-50 rounded-xl border border-purple-200">
-       <h3 class="font-semibold text-purple-800 mb-3 flex items-center gap-2"><span>🥩</span> Protein Product</h3>
-       <div class="space-y-2"><label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-purple-100 transition-all border border-transparent hover:border-purple-300"> <input type="radio" name="proteinProduct" value="aminoven" class="mt-1" checked onchange="calculateAll()">
-         <div><span class="font-medium text-gray-800">10% Aminoven® Infant</span>
-          <p class="text-xs text-gray-500">สำหรับอายุ 0-1 เดือน</p>
-         </div></label> <label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-purple-100 transition-all border border-transparent hover:border-purple-300"> <input type="radio" name="proteinProduct" value="amiparen" onchange="calculateAll()">
-         <div><span class="font-medium text-gray-800">10% Amiparen®</span>
-          <p class="text-xs text-gray-500">สำหรับอายุ &gt; 1 เดือน</p>
-         </div></label> <label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-purple-100 transition-all border border-transparent hover:border-purple-300"> <input type="radio" name="proteinProduct" value="aminoplasmal" onchange="calculateAll()">
-         <div><span class="font-medium text-gray-800">15% Aminoplasmal®</span>
-          <p class="text-xs text-gray-500">ความ���ข้มข้��สูง (ปริมาณน้อยกว่า)</p>
-         </div></label>
-       </div>
-      </div><!-- Fat Product -->
-      <div class="p-4 bg-amber-50 rounded-xl border border-amber-200">
-       <h3 class="font-semibold text-amber-800 mb-3 flex items-center gap-2"><span>🧈</span> Fat Product</h3>
-       <div class="space-y-2"><label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-amber-100 transition-all border border-transparent hover:border-amber-300"> <input type="radio" name="fatProduct" value="smof" class="mt-1" checked onchange="calculateAll()">
-         <div><span class="font-medium text-gray-800">20% SMOF Lipid</span>
-          <p class="text-xs text-gray-500">Mixed lipid emulsion</p>
-         </div></label> <label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-amber-100 transition-all border border-transparent hover:border-amber-300"> <input type="radio" name="fatProduct" value="intralipid" onchange="calculateAll()">
-         <div><span class="font-medium text-gray-800">20% Intralipid</span>
-          <p class="text-xs text-gray-500">Soybean oil emulsion</p>
-         </div></label>
-       </div>
-      </div>
-     </div>
-    </section><!-- Electrolytes Section -->
-    <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
-     <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">⚗️ Electrolytes</h2>
-     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4"><!-- Phosphorus -->
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">P (Glycophos®)</label>
-       <p class="text-xs text-gray-600 mb-2">0.5-1 mEq/kg/day</p>
-       <div class="relative mb-2"><input type="number" id="phosphorus" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" inputmode="decimal" oninput="calculateAll()">
-       </div>
-       <div class="text-xs bg-blue-50 p-2 rounded-lg border border-blue-200">
-        <p class="text-gray-700"><strong>Vol:</strong> <span id="phosvol">0.0</span> ml</p>
-        <p class="text-gray-700"><strong>Na from P:</strong> <span id="phoNa">0</span> mEq</p>
-       </div>
-      </div><!-- Sodium -->
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">Na (3% NaCl)</label>
-       <p class="text-xs text-gray-600 mb-2">2-4 mEq/kg/day</p>
-       <div class="relative mb-2"><input type="number" id="sodium" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" inputmode="decimal" oninput="calculateAll()">
-       </div>
-       <div class="text-xs bg-blue-50 p-2 rounded-lg border border-blue-200">
-        <p class="text-gray-700"><strong>Vol:</strong> <span id="navol">0.0</span> ml</p>
-       </div>
-      </div><!-- Potassium -->
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">K (KCl)</label>
-       <p class="text-xs text-gray-600 mb-2">2-4 mEq/kg/day</p>
-       <div class="relative mb-2"><input type="number" id="potassium" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" inputmode="decimal" oninput="calculateAll()">
-       </div>
-       <div class="text-xs bg-blue-50 p-2 rounded-lg border border-blue-200">
-        <p class="text-gray-700"><strong>Vol:</strong> <span id="kvol">0.0</span> ml</p>
-       </div>
-      </div><!-- Magnesium -->
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">Mg (50% MgSO₄)</label>
-       <p class="text-xs text-gray-600 mb-2">0.2-0.3 mmol/kg/day</p>
-       <div class="relative mb-2"><input type="number" id="magnesium" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" inputmode="decimal" oninput="calculateAll()">
-       </div>
-       <div class="text-xs bg-blue-50 p-2 rounded-lg border border-blue-200">
-        <p class="text-gray-700"><strong>Vol:</strong> <span id="mgvol">0.0</span> ml</p>
-       </div>
-      </div><!-- Calcium -->
-      <div><label class="block text-sm font-medium text-gray-700 mb-1">Ca (10% Ca Gluconate)</label>
-       <p class="text-xs text-gray-600 mb-2">4-6 ml/kg/day</p>
-       <div class="relative mb-2"><input type="number" id="calcium" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" inputmode="decimal" oninput="calculateAll()">
-       </div>
-       <div class="text-xs bg-blue-50 p-2 rounded-lg border border-blue-200">
-        <p class="text-gray-700"><strong>Vol:</strong> <span id="cavol">0.0</span> ml</p>
-       </div>
-      </div>
-     </div>
-    </section><!-- Vitamins & Trace Elements Section -->
-    <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
-     <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">💊 Vitamin &amp; Trace Elements</h2>
-     <div class="grid grid-cols-1 md:grid-cols-2 gap-6"><!-- Vitamin -->
-      <div class="p-4 bg-green-50 rounded-xl border border-green-200">
-       <h3 class="font-semibold text-green-800 mb-3">💉 Vitamin</h3>
-       <div class="space-y-3">
-        <div><label class="text-sm font-medium text-gray-700 block mb-1">Soluvit® N</label>
-         <div class="flex items-center gap-2"><input type="number" id="soluvit" step="0.1" class="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" readonly inputmode="decimal"> <span class="text-gray-600 whitespace-nowrap font-medium">ml</span>
-         </div>
-         <p class="text-xs text-gray-600 mt-1">= 1 × BW (Max 10 ml)</p>
-         <p id="soluvitWarning" class="hidden text-xs text-red-600 mt-1 font-semibold">⚠️ เกิน 10 ml!</p>
-        </div>
-       </div>
-      </div><!-- Trace Elements -->
-      <div class="p-4 bg-cyan-50 rounded-xl border border-cyan-200">
-       <h3 class="font-semibold text-cyan-800 mb-3">🔬 Trace Elements</h3>
-       <div class="space-y-3">
-        <div><label class="text-sm font-medium text-gray-700 block mb-1">Peditrace®</label>
-         <div class="flex items-center gap-2"><input type="number" id="peditrace" step="0.1" class="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" readonly inputmode="decimal"> <span class="text-gray-600 whitespace-nowrap font-medium">ml</span>
-         </div>
-         <p class="text-xs text-gray-600 mt-1">= 1 × BW (Max 15 ml)</p>
-         <p id="peditraceWarning" class="hidden text-xs text-red-600 mt-1 font-semibold">⚠️ เกิน 15 ml!</p>
-        </div>
-       </div>
-      </div>
-     </div>
-    </section><!-- Additive Section -->
-    <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
-     <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">🧪 Additive</h2>
-     <div class="space-y-6"><!-- Preterm & Zinc -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-       <div class="p-4 bg-orange-50 rounded-xl border border-orange-200">
-        <h3 class="font-semibold text-orange-800 mb-3 flex items-center gap-2"><input type="checkbox" id="isPreterm" class="w-5 h-5 rounded cursor-pointer" onchange="calculateAll()"> <label for="isPreterm" class="cursor-pointer">Preterm infant</label></h3>
-        <div id="zincOptions" class="space-y-3 hidden"><label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-orange-100 border border-transparent hover:border-orange-300"> <input type="radio" name="zinc" value="yes" class="mt-1" onchange="calculateAll()">
-          <div class="flex-1"><span class="font-medium text-gray-800 block">Add Zinc Sulfate</span>
-           <p class="text-xs text-gray-600">500 mcg/ml = 0.3 ml × BW</p>
-          </div></label>
-         <div id="zincVolumeDiv" class="hidden ml-8 p-3 bg-white rounded-lg"><label class="block text-sm font-medium text-gray-700 mb-2">Zinc Volume</label>
-          <div class="relative"><input type="number" id="zincVolume" step="0.01" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" inputmode="decimal" oninput="calculateAll()"> <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">ml</span>
-          </div>
-         </div><label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-orange-100 border border-transparent hover:border-orange-300"> <input type="radio" name="zinc" value="no" class="mt-1" onchange="calculateAll()"> <span class="font-medium text-gray-800">ไม่เติม Zinc</span> </label>
-        </div>
-       </div><!-- Heparin -->
-       <div class="p-4 bg-pink-50 rounded-xl border border-pink-200">
-        <h3 class="font-semibold text-pink-800 mb-3">💉 Heparin</h3>
-        <div class="space-y-3"><label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-pink-100 border border-transparent hover:border-pink-300"> <input type="radio" name="heparin" value="yes" id="heparinYes" class="mt-1" onchange="calculateAll()">
-          <div class="flex-1"><span class="font-medium text-gray-800 block">เติม Heparin</span>
-           <p class="text-xs text-gray-600">1 unit/ml = 1 × PN volume</p>
-          </div></label>
-         <div id="heparinValueDiv" class="hidden ml-8 p-3 bg-white rounded-lg">
-          <div class="flex items-center gap-2 mb-2"><span class="text-sm font-medium text-gray-700">Heparin Units:</span> <span id="heparinUnits" class="text-lg font-bold text-pink-700">0</span> <span class="text-gray-600">units</span>
-          </div>
-          <div class="flex items-center gap-2"><span class="text-sm font-medium text-gray-700">Heparin Volume:</span> <span id="heparinVolume" class="text-lg font-bold text-pink-700">0.00</span> <span class="text-gray-600">ml (÷ 500)</span>
-          </div>
-         </div><label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-pink-100 border border-transparent hover:border-pink-300"> <input type="radio" name="heparin" value="no" class="mt-1" checked onchange="calculateAll()"> <span class="font-medium text-gray-800">ไม่�����ติม Heparin</span> </label>
-        </div>
-       </div>
-      </div><!-- Add Other -->
-      <div class="p-4 bg-purple-50 rounded-xl border border-purple-200">
-       <h3 class="font-semibold text-purple-800 mb-3">➕ Add อื่นๆ</h3>
-       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div><label class="block text-sm font-medium text-gray-700 mb-1">ชื่อสาร</label> <input type="text" id="additiveOtherName" placeholder="เช่น Taurine, L-Carnitine" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" oninput="calculateAll()">
-        </div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-1">ปริมาตร</label>
-         <div class="relative"><input type="number" id="additiveOtherVolume" step="0.1" min="0" placeholder="0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-12" inputmode="decimal" oninput="calculateAll()"> <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">ml</span>
-         </div>
-        </div>
-       </div>
-      </div>
-     </div>
-    </section><!-- Composition Table -->
-    <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
-     <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">📊 องค์ประกอบ TPN</h2>
-     <div class="overflow-x-auto rounded-xl border border-gray-200">
-      <table class="w-full text-sm">
-       <thead>
-        <tr class="table-header text-white">
-         <th class="px-4 py-3 text-left font-semibold rounded-tl-xl">องค์ประกอ���</th>
-         <th class="px-4 py-3 text-right font-semibold">ปริมาตร (ml)</th>
-         <th class="px-4 py-3 text-right font-semibold">แคลอรี่ (kcal)</th>
-         <th class="px-4 py-3 text-right font-semibold rounded-tr-xl">mOsmol/L</th>
-        </tr>
-       </thead>
-       <tbody id="compositionTable">
-        <tr class="border-b border-gray-100 hover:bg-gray-50">
-         <td class="px-4 py-3 font-medium text-purple-700">🥩 Protein</td>
-         <td id="proteinVol" class="px-4 py-3 text-right font-mono">0.0</td>
-         <td id="proteinCal" class="px-4 py-3 text-right font-mono">0.0</td>
-         <td id="proteinOsmol" class="px-4 py-3 text-right font-mono">0</td>
-        </tr>
-        <tr class="border-b border-gray-100 hover:bg-gray-50 bg-blue-50/50">
-         <td class="px-4 py-3 font-medium text-blue-700">🍬 50% Dextrose</td>
-         <td id="dextroseVol" class="px-4 py-3 text-right font-mono">0.0</td>
-         <td id="dextroseCal" class="px-4 py-3 text-right font-mono">0.0</td>
-         <td id="dextroseOsmol" class="px-4 py-3 text-right font-mono">0</td>
-        </tr>
-        <tr class="border-b border-gray-100 hover:bg-gray-50">
-         <td class="px-4 py-3 font-medium text-amber-700">🧈 Fat 20%</td>
-         <td id="fatVol" class="px-4 py-3 text-right font-mono">0.0</td>
-         <td id="fatCal" class="px-4 py-3 text-right font-mono">0.0</td>
-         <td class="px-4 py-3 text-right text-gray-400">-</td>
-        </tr>
-        <tr class="border-b border-gray-100 hover:bg-gray-50">
-         <td class="px-4 py-3 font-medium text-red-700">🧂 Electrolytes</td>
-         <td id="electrolytesVol" class="px-4 py-3 text-right font-mono">0.0</td>
-         <td class="px-4 py-3 text-right text-gray-400">-</td>
-         <td id="electrolytesOsmol" class="px-4 py-3 text-right font-mono">0</td>
-        </tr>
-        <tr class="border-b border-gray-100 hover:bg-gray-50">
-         <td class="px-4 py-3 font-medium text-green-700">💊 Vitamins &amp; Trace</td>
-         <td id="vitaminTraceVol" class="px-4 py-3 text-right font-mono">0.0</td>
-         <td class="px-4 py-3 text-right text-gray-400">-</td>
-         <td class="px-4 py-3 text-right text-gray-400">-</td>
-        </tr>
-        <tr class="border-b border-gray-100 hover:bg-gray-50">
-         <td class="px-4 py-3 font-medium text-indigo-700">🧪 Additives</td>
-         <td id="additivesVol" class="px-4 py-3 text-right font-mono">0.0</td>
-         <td class="px-4 py-3 text-right text-gray-400">-</td>
-         <td class="px-4 py-3 text-right text-gray-400">-</td>
-        </tr>
-        <tr class="border-b border-gray-100 hover:bg-gray-50 bg-green-50/50">
-         <td class="px-4 py-3 font-medium text-green-700">💧 Sterile Water</td>
-         <td id="waterVol" class="px-4 py-3 text-right font-mono">0.0</td>
-         <td class="px-4 py-3 text-right text-gray-400">-</td>
-         <td class="px-4 py-3 text-right text-gray-400">-</td>
-        </tr>
-        <tr class="bg-gray-100 font-bold">
-         <td class="px-4 py-3 text-gray-800">รวม (PN bag)</td>
-         <td id="totalPNVol" class="px-4 py-3 text-right font-mono text-blue-700">0.0</td>
-         <td id="totalPNCal" class="px-4 py-3 text-right font-mono text-green-700">0.0</td>
-         <td id="totalOsmol" class="px-4 py-3 text-right font-mono text-purple-700">0</td>
-        </tr>
-        <tr class="bg-amber-50">
-         <td class="px-4 py-3 font-medium text-amber-700">+ Fat Volume</td>
-         <td id="totalFatVol" class="px-4 py-3 text-right font-mono">0.0</td>
-         <td id="totalFatCal" class="px-4 py-3 text-right font-mono">0.0</td>
-         <td class="px-4 py-3 text-right text-gray-400">-</td>
-        </tr>
-        <tr class="bg-gradient-to-r from-blue-100 to-green-100 font-bold text-lg">
-         <td class="px-4 py-4 text-gray-800 rounded-bl-xl">�� Total TPN</td>
-         <td id="grandTotalVol" class="px-4 py-4 text-right font-mono text-blue-700">0.0</td>
-         <td id="grandTotalCal" class="px-4 py-4 text-right font-mono text-green-700">0.0</td>
-         <td class="px-4 py-4 text-right font-mono text-purple-700 rounded-br-xl">-</td>
-        </tr>
-       </tbody>
-      </table>
-     </div><!-- Calorie & Osmol Summary -->
-     <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="p-4 bg-green-50 rounded-xl border border-green-200">
-       <div class="text-sm text-green-600 mb-1">
-        Total Calories
-       </div>
-       <div class="flex items-baseline gap-2"><span id="totalCalDisplay" class="text-2xl font-bold text-green-700">0.0</span> <span class="text-green-600">kcal/day</span>
-       </div>
-      </div>
-      <div class="p-4 bg-blue-50 rounded-xl border border-blue-200">
-       <div class="text-sm text-blue-600 mb-1">
-        Calories per kg
-       </div>
-       <div class="flex items-baseline gap-2"><span id="calPerKg" class="text-2xl font-bold text-blue-700">0.0</span> <span class="text-blue-600">kcal/kg/day</span>
-       </div>
-      </div>
-      <div class="p-4 bg-purple-50 rounded-xl border border-purple-200">
-       <div class="text-sm text-purple-600 mb-1">
-        Final Osmolarity
-       </div>
-       <div class="flex items-baseline gap-2"><span id="finalOsmol" class="text-2xl font-bold text-purple-700">0</span> <span class="text-purple-600">mOsmol/L</span>
-       </div>
-      </div>
-     </div><!-- Osmolarity Warning -->
-     <div id="osmolWarning" class="hidden mt-4 p-4 warning-box rounded-xl">
-      <div class="flex items-center gap-2 text-amber-800"><span class="text-xl">⚠️</span> <span class="font-medium">Osmolarity สูงเกินไปสำหรับ Peripheral Line (&gt; 900 mOsmol/L) พิจารณาใช้ Central Line</span>
-      </div>
-     </div>
-    </section><!-- Fat Administration -->
-    <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
-     <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">💉 วิธีการให้ Fat</h2>
-     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4"><!-- Flush Line -->
-      <div><label class="block text-sm font-medium text-gray-700 mb-2">การไล่สาย</label>
-       <div class="space-y-2"><label class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100"> <input type="radio" name="flush" value="none" checked onchange="calculateFatAdmin()"> <span class="text-sm">ไม่ไล่สาย</span> </label>
-        <div class="flex items-center gap-2"><input type="radio" name="flush" value="custom" onchange="calculateFatAdmin()"> <span class="text-sm">+</span> <input type="number" id="flushVolume" min="0" step="1" placeholder="0" class="w-20 px-2 py-1 border border-gray-300 rounded-lg text-sm" inputmode="decimal" oninput="calculateFatAdmin()"> <span class="text-sm text-gray-600">ml ไล่สาย</span>
-        </div>
-       </div>
-      </div><!-- IV Drip Duration -->
-      <div><label class="block text-sm font-medium text-gray-700 mb-2">IV drip in</label>
-       <div class="space-y-2"><label class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100"> <input type="radio" name="dripDuration" value="12" checked onchange="calculateFatAdmin()"> <span class="text-sm">12 ชั่วโมง</span> </label> <label class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100"> <input type="radio" name="dripDuration" value="24" onchange="calculateFatAdmin()"> <span class="text-sm">24 ชั่วโมง</span> </label>
-       </div>
-      </div><!-- Preparation Split -->
-      <div><label class="block text-sm font-medium text-gray-700 mb-2">แบ่งเตรียม</label>
-       <div class="space-y-2"><label class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100"> <input type="radio" name="prepSplit" value="none" checked onchange="calculateFatAdmin()"> <span class="text-sm">ไม่แบ่ง</span> </label> <label class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100"> <input type="radio" name="prepSplit" value="split" onchange="calculateFatAdmin()"> <span class="text-sm">��บ่งเตรียม</span> </label>
-       </div>
-      </div><!-- Fat Rate Result -->
-      <div><label class="block text-sm font-medium text-gray-700 mb-2">Fat Rate</label>
-       <div id="fatRateContainer" class="p-3 bg-blue-50 rounded-xl border border-blue-200">
-        <div class="text-2xl font-bold text-blue-700" id="fatRateValue">
-         0.0
-        </div>
-        <div class="text-xs text-blue-600">
-         g/kg/hr
-        </div>
-       </div>
-      </div>
-     </div><!-- Fat Rate Warning -->
-     <div id="fatRateWarning" class="hidden p-3 warning-box rounded-xl text-sm"><span class="font-medium">⚠️ Fat Rate สูงเกินไป!</span> ควร ≤ 0.11 g/kg/hr เพื่อป้องกันภาวะแทรกซ้อน
-     </div><!-- Preparation Summary -->
-     <div id="prepSummary" class="mt-4 p-4 success-box rounded-xl">
-      <h4 class="font-semibold text-green-800 mb-2">📋 สรุปการเตรียม Fat</h4>
-      <div id="prepDetails" class="text-green-700"></div>
-     </div>
-    </section><!-- Summary Section -->
-    <section class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl card-shadow p-6 text-white animate-fade-in">
-     <h2 class="text-lg font-semibold mb-4 flex items-center gap-2"><span class="text-2xl">📋</span> สรุป TPN Order</h2>
-     <div id="orderSummary" class="space-y-3 text-blue-100">
-      <p>กรุณากรอกข้อมูลเพื่อดูสรุป Order</p>
-     </div>
-    </section><!-- Save Order Button -->
-    <div class="flex gap-2 justify-end mb-6"><button onclick="goToHistory()" class="px-6 py-3 bg-gray-200 text-gray-800 font-semibold rounded-xl hover:bg-gray-300 transition-all"> ← ย้อนกลับ </button> <button id="saveOrderBtn" onclick="saveOrder()" class="px-6 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-all flex items-center gap-2"> <span>💾</span> บันทึก Order </button>
-    </div>
-   </main><!-- History Page -->
-   <div id="historyPage" class="page-hidden h-full overflow-auto">
+</head>
+<body class="h-full bg-gray-50">
+  <div id="app" class="h-full overflow-auto">
+    <!-- Header -->
     <header class="gradient-header text-white py-4 px-6 sticky top-0 z-50 shadow-lg no-print">
-     <div class="max-w-6xl mx-auto flex items-center justify-between">
-      <div class="flex items-center gap-3">
-       <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-        <svg class="w-8 h-8" fill="currentColor" viewbox="0 0 24 24"><path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z" />
-        </svg>
-       </div>
-       <div>
-        <h1 class="text-xl font-bold tracking-tight">ประวัติการสั่ง TPN</h1>
-        <p class="text-blue-100 text-sm">Order History</p>
-       </div>
-      </div><button onclick="goToCalculator()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium backdrop-blur-sm"> ← กลับไปคำนวณ </button>
-     </div>
+      <div class="max-w-6xl mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14h-2v-4H6v-2h4V7h2v4h4v2h-4v4z"/>
+            </svg>
+          </div>
+          <div>
+            <h1 id="appTitle" class="text-xl font-bold tracking-tight">TPN Calculator - Pediatric</h1>
+            <p id="hospitalName" class="text-blue-100 text-sm">โรงพยาบาลศรีนครินทร์</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="historyBtn" onclick="goToHistory()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium backdrop-blur-sm">
+            📋 ประวัติการสั่ง TPN
+          </button>
+          <button onclick="resetForm()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium backdrop-blur-sm">
+            🔄 รีเซ็ต
+          </button>
+          <button onclick="window.print()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium backdrop-blur-sm">
+            🖨️ พิมพ์
+          </button>
+        </div>
+      </div>
     </header>
-    <main class="max-w-6xl mx-auto p-4 md:p-6 space-y-6"><!-- Filter Section -->
-     <section class="bg-white rounded-2xl card-shadow p-6">
-      <h2 class="text-lg font-semibold text-gray-800 mb-4">🔍 กรองรายการ</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 items-end"><!-- Date Filter -->
-       <div><label class="block text-sm font-medium text-gray-700 mb-1">กรองวันที่:</label> <input type="date" id="filterDate" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all">
-       </div><!-- HN Search -->
-       <div><label class="block text-sm font-medium text-gray-700 mb-1">ค้นหา HN:</label> <input type="text" id="searchHN" placeholder="พิมพ์ HN" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all">
-       </div><!-- Patient Name Search -->
-       <div><label class="block text-sm font-medium text-gray-700 mb-1">ค้นหาชื่อนามสกุล:</label> <input type="text" id="searchName" placeholder="พิมพ์ชื่อ" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all">
-       </div><!-- Search Button --> <button onclick="filterHistory()" class="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all flex items-center gap-2 justify-center"> <span>🔍</span> ค้นหา </button>
-      </div>
-     </section><!-- Tab Buttons -->
-     <section class="bg-white rounded-2xl card-shadow p-4">
-      <div class="flex flex-wrap gap-2"><button onclick="filterByTab('today')" class="tab-button active px-6 py-2 border-2 rounded-lg font-medium transition-all"> 📅 วันนี้ </button> <button onclick="filterByTab('yesterday')" class="tab-button inactive px-6 py-2 border-2 rounded-lg font-medium transition-all"> 📅 เมื่อวาน </button> <button onclick="filterByTab('all')" class="tab-button inactive px-6 py-2 border-2 rounded-lg font-medium transition-all"> 📅 ทั้งหมด </button>
-      </div>
-     </section><!-- Order List -->
-     <section id="historyList" class="bg-white rounded-2xl card-shadow p-6">
-      <div id="orderListContainer" class="space-y-4">
-       <p class="text-gray-500 text-center py-8">ยังไม่มีข้อมูล Order</p>
-      </div>
-     </section>
-    </main><!-- Footer -->
-    <footer class="text-center py-6 text-gray-500 text-sm">
-     <p>TPN Calculator for Pediatric Patients</p>
-    </footer>
-   </div><!-- Order Detail Modal -->
-   <div id="detailModal" class="fixed inset-0 bg-black/50 z-[9999] hidden overflow-auto">
-    <div class="min-h-screen py-6 px-4 flex items-center justify-center">
-     <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-auto shadow-2xl"><!-- Detail Header -->
-      <div class="gradient-header text-white p-6 sticky top-0 z-50 flex items-center justify-between">
-       <div>
-        <h2 class="text-2xl font-bold">📋 รายละเอียด TPN Order</h2>
-        <p id="detailPatientInfo" class="text-blue-100 text-sm mt-1">-</p>
-       </div><button onclick="closeDetail()" class="text-2xl hover:bg-white/20 p-2 rounded-lg transition-all"> ✕ </button>
-      </div><!-- Detail Content -->
-      <div id="detailContent" class="p-6 space-y-6"><!-- ข้อมูลทั่วไป -->
-       <section class="space-y-4">
-        <h3 class="section-title text-lg font-semibold text-gray-800">📋 ข้อมูลทั่วไป</h3>
+
+    <!-- Main Content -->
+    <main id="mainContent" class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
+      <!-- Order Date & Patient Info -->
+      <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
+        <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">📋 ข้อมูลทั่วไป</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-         <div class="p-4 bg-gray-50 rounded-xl"><span class="text-xs text-gray-600">วันที่ Order</span>
-          <p id="det-orderDate" class="font-semibold text-gray-800 mt-1">-</p>
-         </div>
-         <div class="p-4 bg-gray-50 rounded-xl"><span class="text-xs text-gray-600">HN</span>
-          <p id="det-hn" class="font-semibold text-gray-800 mt-1">-</p>
-         </div>
-         <div class="p-4 bg-gray-50 rounded-xl"><span class="text-xs text-gray-600">ชื่อ-นามสกุล</span>
-          <p id="det-patientName" class="font-semibold text-gray-800 mt-1">-</p>
-         </div>
-         <div class="p-4 bg-gray-50 rounded-xl"><span class="text-xs text-gray-600">Ward</span>
-          <p id="det-ward" class="font-semibold text-gray-800 mt-1">-</p>
-         </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">วันที่ Order TPN</label>
+            <input type="date" id="orderDate" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all bg-white">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">HN (สแกนบาร์โค้ดได้)</label>
+            <input type="text" id="hn" placeholder="สแกนหรือพิมพ์ HN" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" autofocus>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อ-นามสกุล</label>
+            <input type="text" id="patientName" placeholder="ชื่อ นามสกุล" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Ward</label>
+            <input type="text" id="ward" placeholder="หอผู้ป่วย" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all">
+          </div>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-         <div class="p-4 bg-blue-50 rounded-xl border border-blue-200"><span class="text-xs text-blue-600">Route</span>
-          <p id="det-route" class="font-semibold text-blue-700 mt-1">-</p>
-         </div>
-         <div class="p-4 bg-green-50 rounded-xl border border-green-200"><span class="text-xs text-green-600">น้ำหนัก (BW)</span>
-          <p id="det-bw" class="font-semibold text-green-700 mt-1">-</p>
-         </div>
-         <div class="p-4 bg-purple-50 rounded-xl border border-purple-200"><span class="text-xs text-purple-600">PN Volume</span>
-          <p id="det-pnVolume" class="font-semibold text-purple-700 mt-1">-</p>
-         </div>
+      </section>
+
+      <!-- Route Selection -->
+      <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
+        <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">🩺 Route การให้ TPN</h2>
+        <div class="flex flex-wrap gap-3">
+          <input type="radio" name="route" id="central" value="central" class="hidden radio-custom" checked>
+          <label for="central" class="px-6 py-3 border-2 border-gray-300 rounded-xl cursor-pointer transition-all hover:border-blue-400 font-medium flex items-center gap-2">
+            <span class="text-xl">🔵</span> Central Line
+          </label>
+          <input type="radio" name="route" id="peripheral" value="peripheral" class="hidden radio-custom">
+          <label for="peripheral" class="px-6 py-3 border-2 border-gray-300 rounded-xl cursor-pointer transition-all hover:border-blue-400 font-medium flex items-center gap-2">
+            <span class="text-xl">🟢</span> Peripheral Line
+          </label>
         </div>
-       </section><!-- Macronutrient -->
-       <section class="space-y-4">
-        <h3 class="section-title text-lg font-semibold text-gray-800">🥗 Macronutrient</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-         <div class="p-4 bg-purple-50 rounded-xl border border-purple-200"><span class="text-xs text-purple-600">Protein</span>
-          <p id="det-protein" class="font-semibold text-purple-700 mt-1">-</p>
-         </div>
-         <div class="p-4 bg-amber-50 rounded-xl border border-amber-200"><span class="text-xs text-amber-600">Net Fat</span>
-          <p id="det-netFat" class="font-semibold text-amber-700 mt-1">-</p>
-         </div>
-         <div class="p-4 bg-blue-50 rounded-xl border border-blue-200"><span class="text-xs text-blue-600">Dextrose %</span>
-          <p id="det-dextrose" class="font-semibold text-blue-700 mt-1">-</p>
-         </div>
-         <div class="p-4 bg-red-50 rounded-xl border border-red-200"><span class="text-xs text-red-600">GIR</span>
-          <p id="det-gir" class="font-semibold text-red-700 mt-1">-</p>
-         </div>
-        </div>
-       </section><!-- Calories -->
-       <section class="space-y-4">
-        <h3 class="section-title text-lg font-semibold text-gray-800">🔥 Calories</h3>
+      </section>
+
+      <!-- Basic Info -->
+      <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
+        <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">⚖️ ข้อมูลพื้นฐาน</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-         <div class="p-4 bg-green-50 rounded-xl border border-green-200"><span class="text-xs text-green-600">Total Calories</span>
-          <p id="det-totalCalories" class="text-2xl font-bold text-green-700 mt-1">-</p><span class="text-xs text-green-600">kcal/day</span>
-         </div>
-         <div class="p-4 bg-green-50 rounded-xl border border-green-200"><span class="text-xs text-green-600">Calories per kg</span>
-          <p id="det-calPerKg" class="text-2xl font-bold text-green-700 mt-1">-</p><span class="text-xs text-green-600">kcal/kg/day</span>
-         </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">น้ำหนัก (BW)</label>
+            <div class="relative">
+              <input type="number" id="bw" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-12" inputmode="decimal" oninput="calculateAll()">
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">kg</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Total TPN Volume (รวม Fat)</label>
+            <div class="relative">
+              <input type="number" id="totalVolume" step="1" min="0" placeholder="0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-12" inputmode="decimal" oninput="calculateAll()">
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">ml</span>
+            </div>
+          </div>
         </div>
-       </section><!-- Rate & Volume -->
-       <section class="space-y-4">
-        <h3 class="section-title text-lg font-semibold text-gray-800">💧 Rate &amp; Volume</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-         <div class="p-4 bg-cyan-50 rounded-xl border border-cyan-200"><span class="text-xs text-cyan-600">Rate TPN</span>
-          <p id="det-rateTPN" class="font-semibold text-cyan-700 mt-1">-</p>
-         </div>
-         <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-200"><span class="text-xs text-indigo-600">Fat Rate</span>
-          <p id="det-fatRate" class="font-semibold text-indigo-700 mt-1">-</p>
-         </div>
-         <div class="p-4 bg-pink-50 rounded-xl border border-pink-200"><span class="text-xs text-pink-600">Vitalipid Volume</span>
-          <p id="det-vitalipid" class="font-semibold text-pink-700 mt-1">-</p>
-         </div>
+      </section>
+
+      <!-- Fat Configuration -->
+      <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
+        <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">🧈 การให้ Fat</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fat ที่ต้องการให้</label>
+            <div class="relative">
+              <input type="number" id="fatTarget" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-24" inputmode="decimal" oninput="calculateAll()">
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">g/kg/day</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Net Fat สุทธิ</label>
+            <div class="relative">
+              <input type="number" id="netFat" step="0.1" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-blue-50 pr-24 font-semibold text-blue-700" readonly inputmode="decimal">
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">g/kg/day</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fat Volume</label>
+            <div class="relative">
+              <input type="number" id="fatVolume" step="0.1" min="0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-12" inputmode="decimal" oninput="calculateAll()">
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">ml</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Vitalipid-N Infant</label>
+            <div class="relative">
+              <input type="number" id="vitalipid" step="0.1" min="0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-12" inputmode="decimal" oninput="calculateAll()">
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">ml</span>
+            </div>
+          </div>
         </div>
-       </section><!-- ปุ่มการพิมพ์และปิด -->
-       <div class="flex gap-2 justify-end pt-4 border-t border-gray-200"><button onclick="printDetail()" class="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all"> 🖨️ พิมพ์ </button> <button onclick="closeDetail()" class="px-6 py-2.5 bg-gray-300 text-gray-800 font-semibold rounded-xl hover:bg-gray-400 transition-all"> ปิด </button>
-       </div>
+        <div class="flex items-center gap-3 p-3 bg-amber-50 rounded-xl border border-amber-200">
+          <input type="checkbox" id="deductVitalipid" class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer" onchange="calculateAll()">
+          <label for="deductVitalipid" class="text-sm text-gray-700 cursor-pointer select-none">
+            <span class="font-medium">หัก Fat จาก Vitalipid</span>
+            <span class="text-amber-600">(0.4 g/kg/day)</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- PN Volume & Rate -->
+      <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
+        <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">💧 PN Volume & Rate</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">PN Volume (Total - Fat - Vitalipid)</label>
+            <div class="relative">
+              <input type="number" id="pnVolume" step="0.1" min="0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-12 bg-green-50 font-semibold text-green-700" inputmode="decimal" oninput="calculateAll()">
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">ml</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Rate TPN (PN Volume ÷ 24)</label>
+            <div class="relative">
+              <input type="number" id="rateTPN" step="0.01" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-blue-50 pr-16 font-semibold text-blue-700" readonly inputmode="decimal">
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">ml/hr</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Macronutrient -->
+      <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
+        <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">🥗 Macronutrient</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Protein</label>
+            <div class="relative">
+              <input type="number" id="proteinTarget" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-24" inputmode="decimal" oninput="calculateAll()">
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">g/kg/day</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fat (Net Fat)</label>
+            <div class="relative">
+              <input type="number" id="fatDisplay" step="0.1" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-100 pr-24 font-semibold text-gray-600" readonly inputmode="decimal">
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">g/kg/day</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">%Dextrose</label>
+            <div class="relative">
+              <input type="number" id="dextrosePercent" step="0.1" min="0" max="50" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-12" inputmode="decimal" oninput="calculateAll()">
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">%</span>
+            </div>
+          </div>
+        </div>
+        <div id="girContainer" class="p-4 rounded-xl result-highlight">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">📊</span>
+              <div>
+                <span class="text-sm text-gray-600">GIR (Glucose Infusion Rate)</span>
+                <p class="text-xs text-gray-500 mt-0.5">= (Rate TPN × %Dextrose) ÷ (BW × 6)</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <span id="girValue" class="text-2xl font-bold text-blue-700">0.00</span>
+              <span class="text-gray-600 ml-1">mg/kg/min</span>
+            </div>
+          </div>
+          <div id="girWarning" class="hidden mt-2 text-sm text-amber-700 bg-amber-100 px-3 py-2 rounded-lg">
+            ⚠️ GIR สูงเกินไป (ปกติ 4-6 mg/kg/min สำหรับทารก, 2-4 mg/kg/min สำหรับเด็กโต)
+          </div>
+        </div>
+      </section>
+
+      <!-- Product Selection -->
+      <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
+        <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">🧬 เลือกผลิตภัณฑ์</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="p-4 bg-purple-50 rounded-xl border border-purple-200">
+            <h3 class="font-semibold text-purple-800 mb-3 flex items-center gap-2"><span>🥩</span> Protein Product</h3>
+            <div class="space-y-2">
+              <label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-purple-100 transition-all border border-transparent hover:border-purple-300">
+                <input type="radio" name="proteinProduct" value="aminoven" class="mt-1" checked onchange="calculateAll()">
+                <div>
+                  <span class="font-medium text-gray-800">10% Aminoven® Infant</span>
+                  <p class="text-xs text-gray-500">สำหรับอายุ 0-1 เดือน</p>
+                </div>
+              </label>
+              <label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-purple-100 transition-all border border-transparent hover:border-purple-300">
+                <input type="radio" name="proteinProduct" value="amiparen" onchange="calculateAll()">
+                <div>
+                  <span class="font-medium text-gray-800">10% Amiparen®</span>
+                  <p class="text-xs text-gray-500">สำหรับอายุ > 1 เดือน</p>
+                </div>
+              </label>
+              <label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-purple-100 transition-all border border-transparent hover:border-purple-300">
+                <input type="radio" name="proteinProduct" value="aminoplasmal" onchange="calculateAll()">
+                <div>
+                  <span class="font-medium text-gray-800">15% Aminoplasmal®</span>
+                  <p class="text-xs text-gray-500">ความเข้มข้นสูง (ปริมาณน้อยกว่า)</p>
+                </div>
+              </label>
+            </div>
+          </div>
+          <div class="p-4 bg-amber-50 rounded-xl border border-amber-200">
+            <h3 class="font-semibold text-amber-800 mb-3 flex items-center gap-2"><span>🧈</span> Fat Product</h3>
+            <div class="space-y-2">
+              <label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-amber-100 transition-all border border-transparent hover:border-amber-300">
+                <input type="radio" name="fatProduct" value="smof" class="mt-1" checked onchange="calculateAll()">
+                <div>
+                  <span class="font-medium text-gray-800">20% SMOF Lipid</span>
+                  <p class="text-xs text-gray-500">Mixed lipid emulsion</p>
+                </div>
+              </label>
+              <label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-amber-100 transition-all border border-transparent hover:border-amber-300">
+                <input type="radio" name="fatProduct" value="intralipid" onchange="calculateAll()">
+                <div>
+                  <span class="font-medium text-gray-800">20% Intralipid</span>
+                  <p class="text-xs text-gray-500">Soybean oil emulsion</p>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Electrolytes Section -->
+      <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
+        <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">⚗️ Electrolytes</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">P (Glycophos®)</label>
+            <p class="text-xs text-gray-600 mb-2">0.5-1 mEq/kg/day</p>
+            <div class="relative mb-2">
+              <input type="number" id="phosphorus" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" inputmode="decimal" oninput="calculateAll()">
+            </div>
+            <div class="text-xs bg-blue-50 p-2 rounded-lg border border-blue-200">
+              <p class="text-gray-700"><strong>Vol:</strong> <span id="phosvol">0.0</span> ml</p>
+              <p class="text-gray-700"><strong>Na from P:</strong> <span id="phoNa">0</span> mEq</p>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Na (3% NaCl)</label>
+            <p class="text-xs text-gray-600 mb-2">2-4 mEq/kg/day</p>
+            <div class="relative mb-2">
+              <input type="number" id="sodium" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" inputmode="decimal" oninput="calculateAll()">
+            </div>
+            <div class="text-xs bg-blue-50 p-2 rounded-lg border border-blue-200">
+              <p class="text-gray-700"><strong>Vol:</strong> <span id="navol">0.0</span> ml</p>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">K (KCl)</label>
+            <p class="text-xs text-gray-600 mb-2">2-4 mEq/kg/day</p>
+            <div class="relative mb-2">
+              <input type="number" id="potassium" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" inputmode="decimal" oninput="calculateAll()">
+            </div>
+            <div class="text-xs bg-blue-50 p-2 rounded-lg border border-blue-200">
+              <p class="text-gray-700"><strong>Vol:</strong> <span id="kvol">0.0</span> ml</p>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Mg (50% MgSO₄)</label>
+            <p class="text-xs text-gray-600 mb-2">0.2-0.3 mmol/kg/day</p>
+            <div class="relative mb-2">
+              <input type="number" id="magnesium" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" inputmode="decimal" oninput="calculateAll()">
+            </div>
+            <div class="text-xs bg-blue-50 p-2 rounded-lg border border-blue-200">
+              <p class="text-gray-700"><strong>Vol:</strong> <span id="mgvol">0.0</span> ml</p>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Ca (10% Ca Gluconate)</label>
+            <p class="text-xs text-gray-600 mb-2">4-6 ml/kg/day</p>
+            <div class="relative mb-2">
+              <input type="number" id="calcium" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" inputmode="decimal" oninput="calculateAll()">
+            </div>
+            <div class="text-xs bg-blue-50 p-2 rounded-lg border border-blue-200">
+              <p class="text-gray-700"><strong>Vol:</strong> <span id="cavol">0.0</span> ml</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vitamins & Trace Elements Section -->
+      <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
+        <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">💊 Vitamin & Trace Elements</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="p-4 bg-green-50 rounded-xl border border-green-200">
+            <h3 class="font-semibold text-green-800 mb-3">💉 Vitamin</h3>
+            <div class="space-y-3">
+              <div>
+                <label class="text-sm font-medium text-gray-700 block mb-1">Soluvit® N</label>
+                <div class="flex items-center gap-2">
+                  <input type="number" id="soluvit" step="0.1" class="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" readonly inputmode="decimal">
+                  <span class="text-gray-600 whitespace-nowrap font-medium">ml</span>
+                </div>
+                <p class="text-xs text-gray-600 mt-1">= 1 × BW (Max 10 ml)</p>
+                <p id="soluvitWarning" class="hidden text-xs text-red-600 mt-1 font-semibold">⚠️ เกิน 10 ml!</p>
+              </div>
+            </div>
+          </div>
+          <div class="p-4 bg-cyan-50 rounded-xl border border-cyan-200">
+            <h3 class="font-semibold text-cyan-800 mb-3">🔬 Trace Elements</h3>
+            <div class="space-y-3">
+              <div>
+                <label class="text-sm font-medium text-gray-700 block mb-1">Peditrace®</label>
+                <div class="flex items-center gap-2">
+                  <input type="number" id="peditrace" step="0.1" class="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" readonly inputmode="decimal">
+                  <span class="text-gray-600 whitespace-nowrap font-medium">ml</span>
+                </div>
+                <p class="text-xs text-gray-600 mt-1">= 1 × BW (Max 15 ml)</p>
+                <p id="peditraceWarning" class="hidden text-xs text-red-600 mt-1 font-semibold">⚠️ เกิน 15 ml!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Additive Section -->
+      <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
+        <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">🧪 Additive</h2>
+        <div class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="p-4 bg-orange-50 rounded-xl border border-orange-200">
+              <h3 class="font-semibold text-orange-800 mb-3 flex items-center gap-2">
+                <input type="checkbox" id="isPreterm" class="w-5 h-5 rounded cursor-pointer" onchange="calculateAll()">
+                <label for="isPreterm" class="cursor-pointer">Preterm infant</label>
+              </h3>
+              <div id="zincOptions" class="space-y-3 hidden">
+                <label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-orange-100 border border-transparent hover:border-orange-300">
+                  <input type="radio" name="zinc" value="yes" class="mt-1" onchange="calculateAll()">
+                  <div class="flex-1">
+                    <span class="font-medium text-gray-800 block">Add Zinc Sulfate</span>
+                    <p class="text-xs text-gray-600">500 mcg/ml = 0.3 ml × BW</p>
+                  </div>
+                </label>
+                <div id="zincVolumeDiv" class="hidden ml-8 p-3 bg-white rounded-lg">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Zinc Volume</label>
+                  <div class="relative">
+                    <input type="number" id="zincVolume" step="0.01" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" inputmode="decimal" oninput="calculateAll()">
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">ml</span>
+                  </div>
+                </div>
+                <label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-orange-100 border border-transparent hover:border-orange-300">
+                  <input type="radio" name="zinc" value="no" class="mt-1" onchange="calculateAll()">
+                  <span class="font-medium text-gray-800">ไม่เติม Zinc</span>
+                </label>
+              </div>
+            </div>
+            <div class="p-4 bg-pink-50 rounded-xl border border-pink-200">
+              <h3 class="font-semibold text-pink-800 mb-3">💉 Heparin</h3>
+              <div class="space-y-3">
+                <label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-pink-100 border border-transparent hover:border-pink-300">
+                  <input type="radio" name="heparin" value="yes" id="heparinYes" class="mt-1" onchange="calculateAll()">
+                  <div class="flex-1">
+                    <span class="font-medium text-gray-800 block">เติม Heparin</span>
+                    <p class="text-xs text-gray-600">1 unit/ml = 1 × PN volume</p>
+                  </div>
+                </label>
+                <div id="heparinValueDiv" class="hidden ml-8 p-3 bg-white rounded-lg">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="text-sm font-medium text-gray-700">Heparin Units:</span>
+                    <span id="heparinUnits" class="text-lg font-bold text-pink-700">0</span>
+                    <span class="text-gray-600">units</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium text-gray-700">Heparin Volume:</span>
+                    <span id="heparinVolume" class="text-lg font-bold text-pink-700">0.00</span>
+                    <span class="text-gray-600">ml (÷ 500)</span>
+                  </div>
+                </div>
+                <label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-pink-100 border border-transparent hover:border-pink-300">
+                  <input type="radio" name="heparin" value="no" class="mt-1" checked onchange="calculateAll()">
+                  <span class="font-medium text-gray-800">ไม่เติม Heparin</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="p-4 bg-purple-50 rounded-xl border border-purple-200">
+            <h3 class="font-semibold text-purple-800 mb-3">➕ Add อื่นๆ</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อสาร</label>
+                <input type="text" id="additiveOtherName" placeholder="เช่น Taurine, L-Carnitine" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" oninput="calculateAll()">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">ปริมาตร</label>
+                <div class="relative">
+                  <input type="number" id="additiveOtherVolume" step="0.1" min="0" placeholder="0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-12" inputmode="decimal" oninput="calculateAll()">
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">ml</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Composition Table -->
+      <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
+        <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">📊 องค์ประกอบ TPN</h2>
+        <div class="overflow-x-auto rounded-xl border border-gray-200">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="table-header text-white">
+                <th class="px-4 py-3 text-left font-semibold rounded-tl-xl">องค์ประกอบ</th>
+                <th class="px-4 py-3 text-right font-semibold">ปริมาตร (ml)</th>
+                <th class="px-4 py-3 text-right font-semibold">แคลอรี่ (kcal)</th>
+                <th class="px-4 py-3 text-right font-semibold rounded-tr-xl">mOsmol/L</th>
+              </tr>
+            </thead>
+            <tbody id="compositionTable">
+              <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <td class="px-4 py-3 font-medium text-purple-700">🥩 Protein</td>
+                <td id="proteinVol" class="px-4 py-3 text-right font-mono">0.0</td>
+                <td id="proteinCal" class="px-4 py-3 text-right font-mono">0.0</td>
+                <td id="proteinOsmol" class="px-4 py-3 text-right font-mono">0</td>
+              </tr>
+              <tr class="border-b border-gray-100 hover:bg-gray-50 bg-blue-50/50">
+                <td class="px-4 py-3 font-medium text-blue-700">🍬 50% Dextrose</td>
+                <td id="dextroseVol" class="px-4 py-3 text-right font-mono">0.0</td>
+                <td id="dextroseCal" class="px-4 py-3 text-right font-mono">0.0</td>
+                <td id="dextroseOsmol" class="px-4 py-3 text-right font-mono">0</td>
+              </tr>
+              <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <td class="px-4 py-3 font-medium text-amber-700">🧈 Fat 20%</td>
+                <td id="fatVol" class="px-4 py-3 text-right font-mono">0.0</td>
+                <td id="fatCal" class="px-4 py-3 text-right font-mono">0.0</td>
+                <td class="px-4 py-3 text-right text-gray-400">-</td>
+              </tr>
+              <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <td class="px-4 py-3 font-medium text-red-700">🧂 Electrolytes</td>
+                <td id="electrolytesVol" class="px-4 py-3 text-right font-mono">0.0</td>
+                <td class="px-4 py-3 text-right text-gray-400">-</td>
+                <td id="electrolytesOsmol" class="px-4 py-3 text-right font-mono">0</td>
+              </tr>
+              <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <td class="px-4 py-3 font-medium text-green-700">💊 Vitamins & Trace</td>
+                <td id="vitaminTraceVol" class="px-4 py-3 text-right font-mono">0.0</td>
+                <td class="px-4 py-3 text-right text-gray-400">-</td>
+                <td class="px-4 py-3 text-right text-gray-400">-</td>
+              </tr>
+              <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <td class="px-4 py-3 font-medium text-indigo-700">🧪 Additives</td>
+                <td id="additivesVol" class="px-4 py-3 text-right font-mono">0.0</td>
+                <td class="px-4 py-3 text-right text-gray-400">-</td>
+                <td class="px-4 py-3 text-right text-gray-400">-</td>
+              </tr>
+              <tr class="border-b border-gray-100 hover:bg-gray-50 bg-green-50/50">
+                <td class="px-4 py-3 font-medium text-green-700">💧 Sterile Water</td>
+                <td id="waterVol" class="px-4 py-3 text-right font-mono">0.0</td>
+                <td class="px-4 py-3 text-right text-gray-400">-</td>
+                <td class="px-4 py-3 text-right text-gray-400">-</td>
+              </tr>
+              <tr class="bg-gray-100 font-bold">
+                <td class="px-4 py-3 text-gray-800">รวม (PN bag)</td>
+                <td id="totalPNVol" class="px-4 py-3 text-right font-mono text-blue-700">0.0</td>
+                <td id="totalPNCal" class="px-4 py-3 text-right font-mono text-green-700">0.0</td>
+                <td id="totalOsmol" class="px-4 py-3 text-right font-mono text-purple-700">0</td>
+              </tr>
+              <tr class="bg-amber-50">
+                <td class="px-4 py-3 font-medium text-amber-700">+ Fat Volume</td>
+                <td id="totalFatVol" class="px-4 py-3 text-right font-mono">0.0</td>
+                <td id="totalFatCal" class="px-4 py-3 text-right font-mono">0.0</td>
+                <td class="px-4 py-3 text-right text-gray-400">-</td>
+              </tr>
+              <tr class="bg-gradient-to-r from-blue-100 to-green-100 font-bold text-lg">
+                <td class="px-4 py-4 text-gray-800 rounded-bl-xl">🎯 Total TPN</td>
+                <td id="grandTotalVol" class="px-4 py-4 text-right font-mono text-blue-700">0.0</td>
+                <td id="grandTotalCal" class="px-4 py-4 text-right font-mono text-green-700">0.0</td>
+                <td class="px-4 py-4 text-right font-mono text-purple-700 rounded-br-xl">-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-4 bg-green-50 rounded-xl border border-green-200">
+            <div class="text-sm text-green-600 mb-1">Total Calories</div>
+            <div class="flex items-baseline gap-2">
+              <span id="totalCalDisplay" class="text-2xl font-bold text-green-700">0.0</span>
+              <span class="text-green-600">kcal/day</span>
+            </div>
+          </div>
+          <div class="p-4 bg-blue-50 rounded-xl border border-blue-200">
+            <div class="text-sm text-blue-600 mb-1">Calories per kg</div>
+            <div class="flex items-baseline gap-2">
+              <span id="calPerKg" class="text-2xl font-bold text-blue-700">0.0</span>
+              <span class="text-blue-600">kcal/kg/day</span>
+            </div>
+          </div>
+          <div class="p-4 bg-purple-50 rounded-xl border border-purple-200">
+            <div class="text-sm text-purple-600 mb-1">Final Osmolarity</div>
+            <div class="flex items-baseline gap-2">
+              <span id="finalOsmol" class="text-2xl font-bold text-purple-700">0</span>
+              <span class="text-purple-600">mOsmol/L</span>
+            </div>
+          </div>
+        </div>
+        <div id="osmolWarning" class="hidden mt-4 p-4 warning-box rounded-xl">
+          <div class="flex items-center gap-2 text-amber-800">
+            <span class="text-xl">⚠️</span>
+            <span class="font-medium">Osmolarity สูงเกินไปสำหรับ Peripheral Line (> 900 mOsmol/L) พิจารณาใช้ Central Line</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Fat Administration -->
+      <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
+        <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">💉 วิธีการให้ Fat</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">การไล่สาย</label>
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                <input type="radio" name="flush" value="none" checked onchange="calculateFatAdmin()">
+                <span class="text-sm">ไม่ไล่สาย</span>
+              </label>
+              <div class="flex items-center gap-2">
+                <input type="radio" name="flush" value="custom" onchange="calculateFatAdmin()">
+                <span class="text-sm">+</span>
+                <input type="number" id="flushVolume" min="0" step="1" placeholder="0" class="w-20 px-2 py-1 border border-gray-300 rounded-lg text-sm" inputmode="decimal" oninput="calculateFatAdmin()">
+                <span class="text-sm text-gray-600">ml ไล่สาย</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">IV drip in</label>
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                <input type="radio" name="dripDuration" value="12" checked onchange="calculateFatAdmin()">
+                <span class="text-sm">12 ชั่วโมง</span>
+              </label>
+              <label class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                <input type="radio" name="dripDuration" value="24" onchange="calculateFatAdmin()">
+                <span class="text-sm">24 ชั่วโมง</span>
+              </label>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">แบ่งเตรียม</label>
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                <input type="radio" name="prepSplit" value="none" checked onchange="calculateFatAdmin()">
+                <span class="text-sm">ไม่แบ่ง</span>
+              </label>
+              <label class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
+                <input type="radio" name="prepSplit" value="split" onchange="calculateFatAdmin()">
+                <span class="text-sm">แบ่งเตรียม</span>
+              </label>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Fat Rate</label>
+            <div id="fatRateContainer" class="p-3 bg-blue-50 rounded-xl border border-blue-200">
+              <div class="text-2xl font-bold text-blue-700" id="fatRateValue">0.0</div>
+              <div class="text-xs text-blue-600">g/kg/hr</div>
+            </div>
+          </div>
+        </div>
+        <div id="fatRateWarning" class="hidden p-3 warning-box rounded-xl text-sm">
+          <span class="font-medium">⚠️ Fat Rate สูงเกินไป!</span> ควร ≤ 0.11 g/kg/hr เพื่อป้องกันภาวะแทรกซ้อน
+        </div>
+        <div id="prepSummary" class="mt-4 p-4 success-box rounded-xl">
+          <h4 class="font-semibold text-green-800 mb-2">📋 สรุปการเตรียม Fat</h4>
+          <div id="prepDetails" class="text-green-700"></div>
+        </div>
+      </section>
+
+      <!-- Summary Section -->
+      <section class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl card-shadow p-6 text-white animate-fade-in">
+        <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+          <span class="text-2xl">📋</span> สรุป TPN Order
+        </h2>
+        <div id="orderSummary" class="space-y-3 text-blue-100">
+          <p>กรุณากรอกข้อมูลเพื่อดูสรุป Order</p>
+        </div>
+      </section>
+
+      <!-- Save Order Button -->
+      <div class="flex gap-2 justify-end mb-6">
+        <button onclick="goToHistory()" class="px-6 py-3 bg-gray-200 text-gray-800 font-semibold rounded-xl hover:bg-gray-300 transition-all">
+          ← ย้อนกลับ
+        </button>
+        <button id="saveOrderBtn" onclick="saveOrder()" class="px-6 py-3 bg-green-600 text-white font-semibold rounded-xl hover:bg-green-700 transition-all flex items-center gap-2">
+          <span>💾</span> บันทึก Order
+        </button>
       </div>
-     </div>
+    </main>
+
+    <!-- History Page -->
+    <div id="historyPage" class="page-hidden h-full overflow-auto">
+      <header class="gradient-header text-white py-4 px-6 sticky top-0 z-50 shadow-lg no-print">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+              <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-xl font-bold tracking-tight">ประวัติการสั่ง TPN</h1>
+              <p class="text-blue-100 text-sm">Order History</p>
+            </div>
+          </div>
+          <button onclick="goToCalculator()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium backdrop-blur-sm">
+            ← กลับไปคำนวณ
+          </button>
+        </div>
+      </header>
+
+      <main class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
+        <!-- Filter Section -->
+        <section class="bg-white rounded-2xl card-shadow p-6">
+          <h2 class="text-lg font-semibold text-gray-800 mb-4">🔍 กรองรายการ</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 items-end">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">กรองวันที่:</label>
+              <input type="date" id="filterDate" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">ค้นหา HN:</label>
+              <input type="text" id="searchHN" placeholder="พิมพ์ HN" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">ค้นหาชื่อนามสกุล:</label>
+              <input type="text" id="searchName" placeholder="พิมพ์ชื่อ" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all">
+            </div>
+            <button onclick="filterHistory()" class="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all flex items-center gap-2 justify-center">
+              <span>🔍</span> ค้นหา
+            </button>
+          </div>
+        </section>
+
+        <!-- Tab Buttons -->
+        <section class="bg-white rounded-2xl card-shadow p-4">
+          <div class="flex flex-wrap gap-2">
+            <button onclick="filterByTab('today')" class="tab-button active px-6 py-2 border-2 rounded-lg font-medium transition-all">
+              📅 วันนี้
+            </button>
+            <button onclick="filterByTab('yesterday')" class="tab-button inactive px-6 py-2 border-2 rounded-lg font-medium transition-all">
+              📅 เมื่อวาน
+            </button>
+            <button onclick="filterByTab('all')" class="tab-button inactive px-6 py-2 border-2 rounded-lg font-medium transition-all">
+              📅 ทั้งหมด
+            </button>
+          </div>
+        </section>
+
+        <!-- Order List -->
+        <section id="historyList" class="bg-white rounded-2xl card-shadow p-6">
+          <div id="orderListContainer" class="space-y-4">
+            <p class="text-gray-500 text-center py-8">กำลังโหลดข้อมูล...</p>
+          </div>
+        </section>
+      </main>
+
+      <!-- Footer -->
+      <footer class="text-center py-6 text-gray-500 text-sm">
+        <p>TPN Calculator for Pediatric Patients</p>
+      </footer>
     </div>
-   </div><!-- Footer -->
-   <footer class="text-center py-6 text-gray-500 text-sm no-print">
-    <p>TPN Calculator for Pediatric Patients</p>
-    <p class="mt-1">โรงพยาบาลศรีนครินทร์ | ใช้เพื่อการคำนวณเบื้องต้นเท่านั้น</p>
-   </footer>
+
+    <!-- Order Detail Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black/50 z-[9999] hidden overflow-auto">
+      <div class="min-h-screen py-6 px-4 flex items-center justify-center">
+        <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-auto shadow-2xl">
+          <div class="gradient-header text-white p-6 sticky top-0 z-50 flex items-center justify-between">
+            <div>
+              <h2 class="text-2xl font-bold">📋 รายละเอียด TPN Order</h2>
+              <p id="detailPatientInfo" class="text-blue-100 text-sm mt-1">-</p>
+            </div>
+            <button onclick="closeDetail()" class="text-2xl hover:bg-white/20 p-2 rounded-lg transition-all">
+              ✕
+            </button>
+          </div>
+          <div id="detailContent" class="p-6 space-y-6">
+            <section class="space-y-4">
+              <h3 class="section-title text-lg font-semibold text-gray-800">📋 ข้อมูลทั่วไป</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-4 bg-gray-50 rounded-xl">
+                  <span class="text-xs text-gray-600">วันที่ Order</span>
+                  <p id="det-orderDate" class="font-semibold text-gray-800 mt-1">-</p>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-xl">
+                  <span class="text-xs text-gray-600">HN</span>
+                  <p id="det-hn" class="font-semibold text-gray-800 mt-1">-</p>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-xl">
+                  <span class="text-xs text-gray-600">ชื่อ-นามสกุล</span>
+                  <p id="det-patientName" class="font-semibold text-gray-800 mt-1">-</p>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-xl">
+                  <span class="text-xs text-gray-600">Ward</span>
+                  <p id="det-ward" class="font-semibold text-gray-800 mt-1">-</p>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="p-4 bg-blue-50 rounded-xl border border-blue-200">
+                  <span class="text-xs text-blue-600">Route</span>
+                  <p id="det-route" class="font-semibold text-blue-700 mt-1">-</p>
+                </div>
+                <div class="p-4 bg-green-50 rounded-xl border border-green-200">
+                  <span class="text-xs text-green-600">น้ำหนัก (BW)</span>
+                  <p id="det-bw" class="font-semibold text-green-700 mt-1">-</p>
+                </div>
+                <div class="p-4 bg-purple-50 rounded-xl border border-purple-200">
+                  <span class="text-xs text-purple-600">PN Volume</span>
+                  <p id="det-pnVolume" class="font-semibold text-purple-700 mt-1">-</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="space-y-4">
+              <h3 class="section-title text-lg font-semibold text-gray-800">🥗 Macronutrient</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-4 bg-purple-50 rounded-xl border border-purple-200">
+                  <span class="text-xs text-purple-600">Protein</span>
+                  <p id="det-protein" class="font-semibold text-purple-700 mt-1">-</p>
+                </div>
+                <div class="p-4 bg-amber-50 rounded-xl border border-amber-200">
+                  <span class="text-xs text-amber-600">Net Fat</span>
+                  <p id="det-netFat" class="font-semibold text-amber-700 mt-1">-</p>
+                </div>
+                <div class="p-4 bg-blue-50 rounded-xl border border-blue-200">
+                  <span class="text-xs text-blue-600">Dextrose %</span>
+                  <p id="det-dextrose" class="font-semibold text-blue-700 mt-1">-</p>
+                </div>
+                <div class="p-4 bg-red-50 rounded-xl border border-red-200">
+                  <span class="text-xs text-red-600">GIR</span>
+                  <p id="det-gir" class="font-semibold text-red-700 mt-1">-</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="space-y-4">
+              <h3 class="section-title text-lg font-semibold text-gray-800">🔥 Calories</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 bg-green-50 rounded-xl border border-green-200">
+                  <span class="text-xs text-green-600">Total Calories</span>
+                  <p id="det-totalCalories" class="text-2xl font-bold text-green-700 mt-1">-</p>
+                  <span class="text-xs text-green-600">kcal/day</span>
+                </div>
+                <div class="p-4 bg-green-50 rounded-xl border border-green-200">
+                  <span class="text-xs text-green-600">Calories per kg</span>
+                  <p id="det-calPerKg" class="text-2xl font-bold text-green-700 mt-1">-</p>
+                  <span class="text-xs text-green-600">kcal/kg/day</span>
+                </div>
+              </div>
+            </section>
+
+            <section class="space-y-4">
+              <h3 class="section-title text-lg font-semibold text-gray-800">💧 Rate & Volume</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="p-4 bg-cyan-50 rounded-xl border border-cyan-200">
+                  <span class="text-xs text-cyan-600">Rate TPN</span>
+                  <p id="det-rateTPN" class="font-semibold text-cyan-700 mt-1">-</p>
+                </div>
+                <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-200">
+                  <span class="text-xs text-indigo-600">Fat Rate</span>
+                  <p id="det-fatRate" class="font-semibold text-indigo-700 mt-1">-</p>
+                </div>
+                <div class="p-4 bg-pink-50 rounded-xl border border-pink-200">
+                  <span class="text-xs text-pink-600">Vitalipid Volume</span>
+                  <p id="det-vitalipid" class="font-semibold text-pink-700 mt-1">-</p>
+                </div>
+              </div>
+            </section>
+
+            <div class="flex gap-2 justify-end pt-4 border-t border-gray-200">
+              <button onclick="printDetail()" class="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all">
+                🖨️ พิมพ์
+              </button>
+              <button onclick="closeDetail()" class="px-6 py-2.5 bg-gray-300 text-gray-800 font-semibold rounded-xl hover:bg-gray-400 transition-all">
+                ปิด
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-6 text-gray-500 text-sm no-print">
+      <p>TPN Calculator for Pediatric Patients</p>
+      <p class="mt-1">โรงพยาบาลศรีนครินทร์ | ใช้เพื่อการคำนวณเบื้องต้นเท่านั้น</p>
+    </footer>
   </div>
+
   <script>
-    // Initialize Data SDK
+    // ========================================
+    // TPN Calculator with Google Apps Script
+    // ========================================
+    
+    // 🔧 Configuration
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwo28vVrwVp82BwqqsXmXv69xXtPqtTPC-xygi6BhN7lrsZSlJARwAkkBvw4c2U501W/exec';
+    
+    // Global variables
     let allOrders = [];
     let currentTab = 'today';
 
-    const dataHandler = {
-      onDataChanged(data) {
-        allOrders = data;
-        filterHistory();
-      }
-    };
+    // ========== API Functions ==========
 
-    async function initDataSDK() {
-      if (window.dataSdk) {
-        const result = await window.dataSdk.init(dataHandler);
-        if (!result.isOk) {
-          console.error('Failed to initialize Data SDK');
+    async function fetchAllOrders() {
+      try {
+        console.log('📥 กำลังดึงข้อมูล...');
+        const response = await fetch(`${API_URL}?action=read`);
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+          allOrders = result.data || [];
+          console.log('✅ ดึงข้อมูลสำเร็จ:', allOrders.length, 'รายการ');
+          filterHistory();
+          return allOrders;
+        } else {
+          console.error('❌ Error:', result.message);
+          document.getElementById('orderListContainer').innerHTML = 
+            '<p class="text-red-500 text-center py-8">เกิดข้อผิดพลาดในการดึงข้อมูล</p>';
+          return [];
         }
+      } catch (error) {
+        console.error('❌ Fetch error:', error);
+        document.getElementById('orderListContainer').innerHTML = 
+          '<p class="text-red-500 text-center py-8">ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์</p>';
+        return [];
       }
     }
 
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', () => {
-      initDataSDK();
-    });
-
-    // Navigation
-    function goToHistory() {
-      document.getElementById('mainContent').classList.add('page-hidden');
-      document.getElementById('historyPage').classList.remove('page-hidden');
-      filterHistory();
-    }
-
-    function goToCalculator() {
-      document.getElementById('historyPage').classList.add('page-hidden');
-      document.getElementById('mainContent').classList.remove('page-hidden');
-    }
-
-    // Tab filtering
-    function filterByTab(tab) {
-      currentTab = tab;
-      
-      // Update button styles
-      document.querySelectorAll('.tab-button').forEach(btn => {
-        btn.classList.remove('active');
-        btn.classList.add('inactive');
-      });
-      event.target.classList.add('active');
-      event.target.classList.remove('inactive');
-      
-      filterHistory();
-    }
-
-    // Filter history
-    function filterHistory() {
-      const filterDate = document.getElementById('filterDate').value;
-      const searchHN = document.getElementById('searchHN').value.toLowerCase();
-      const searchName = document.getElementById('searchName').value.toLowerCase();
-
-      let filtered = [...allOrders];
-
-      // Tab filter
-      const today = new Date();
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-
-      if (currentTab === 'today') {
-        filtered = filtered.filter(order => {
-          const orderDate = new Date(order.order_date);
-          return orderDate.toDateString() === today.toDateString();
-        });
-      } else if (currentTab === 'yesterday') {
-        filtered = filtered.filter(order => {
-          const orderDate = new Date(order.order_date);
-          return orderDate.toDateString() === yesterday.toDateString();
-        });
-      }
-
-      // Date filter
-      if (filterDate) {
-        filtered = filtered.filter(order => order.order_date === filterDate);
-      }
-
-      // HN search
-      if (searchHN) {
-        filtered = filtered.filter(order => order.hn.toLowerCase().includes(searchHN));
-      }
-
-      // Name search
-      if (searchName) {
-        filtered = filtered.filter(order => order.patient_name.toLowerCase().includes(searchName));
-      }
-
-      // Sort by date (newest first)
-      filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-      // Display
-      displayOrderList(filtered);
-    }
-
-    function displayOrderList(orders) {
-      const container = document.getElementById('orderListContainer');
-      
-      if (orders.length === 0) {
-        container.innerHTML = '<p class="text-gray-500 text-center py-8">ไม่พบข้อมูล Order ที่ตรงกับเงื่อนไข</p>';
-        return;
-      }
-
-      container.innerHTML = orders.map((order, index) => `
-        <div onclick="openDetail(${index})" class="p-4 border border-gray-200 rounded-xl hover:shadow-lg transition-all cursor-pointer hover:border-blue-400">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mb-3">
-            <div>
-              <span class="text-xs text-gray-600">วันที่</span>
-              <p class="font-semibold text-gray-800">${new Date(order.order_date).toLocaleDateString('th-TH')}</p>
-            </div>
-            <div>
-              <span class="text-xs text-gray-600">HN</span>
-              <p class="font-semibold text-gray-800">${order.hn || '-'}</p>
-            </div>
-            <div>
-              <span class="text-xs text-gray-600">ชื่อ-นามสกุล</span>
-              <p class="font-semibold text-gray-800">${order.patient_name || '-'}</p>
-            </div>
-            <div>
-              <span class="text-xs text-gray-600">น้ำหนัก</span>
-              <p class="font-semibold text-gray-800">${order.bw} kg</p>
-            </div>
-            <div class="text-right">
-              <span class="text-xs text-gray-600">คลิกเพื่อดูรายละเอียด</span>
-              <p class="text-sm text-blue-600 font-medium">→ ดูเพิ่มเติม</p>
-            </div>
-          </div>
-          
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-            <div class="bg-purple-50 p-2 rounded">
-              <span class="text-xs text-purple-600">Protein</span>
-              <p class="font-semibold text-purple-700">${order.protein_target} g/kg</p>
-            </div>
-            <div class="bg-amber-50 p-2 rounded">
-              <span class="text-xs text-amber-600">Fat</span>
-              <p class="font-semibold text-amber-700">${order.net_fat.toFixed(1)} g/kg</p>
-            </div>
-            <div class="bg-blue-50 p-2 rounded">
-              <span class="text-xs text-blue-600">GIR</span>
-              <p class="font-semibold text-blue-700">${order.gir.toFixed(2)} mg/kg/min</p>
-            </div>
-            <div class="bg-green-50 p-2 rounded">
-              <span class="text-xs text-green-600">Calories</span>
-              <p class="font-semibold text-green-700">${order.total_calories.toFixed(1)} kcal</p>
-            </div>
-          </div>
-        </div>
-      `).join('');
-
-      // เก็บ orders ไว้สำหรับ detail view
-      window.currentOrderList = orders;
-    }
-
-    // Open Detail Modal
-    function openDetail(index) {
-      if (!window.currentOrderList || !window.currentOrderList[index]) return;
-      
-      const order = window.currentOrderList[index];
-      
-      // Update header
-      document.getElementById('detailPatientInfo').textContent = `HN: ${order.hn} | ${order.patient_name}`;
-      
-      // Update basic info
-      document.getElementById('det-orderDate').textContent = new Date(order.order_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
-      document.getElementById('det-hn').textContent = order.hn || '-';
-      document.getElementById('det-patientName').textContent = order.patient_name || '-';
-      document.getElementById('det-ward').textContent = order.ward || '-';
-      document.getElementById('det-route').textContent = order.route === 'central' ? 'Central Line' : 'Peripheral Line';
-      document.getElementById('det-bw').textContent = `${order.bw} kg`;
-      document.getElementById('det-pnVolume').textContent = `${roundToPlace(order.pn_volume, 1)} ml`;
-      
-      // Update macronutrient
-      document.getElementById('det-protein').textContent = `${order.protein_target} g/kg/day`;
-      document.getElementById('det-netFat').textContent = `${roundToPlace(order.net_fat, 1)} g/kg/day`;
-      document.getElementById('det-dextrose').textContent = `${order.dextrose_percent}%`;
-      document.getElementById('det-gir').textContent = `${roundToPlace(order.gir, 2)} mg/kg/min`;
-      
-      // Update calories
-      document.getElementById('det-totalCalories').textContent = roundToPlace(order.total_calories, 1);
-      document.getElementById('det-calPerKg').textContent = roundToPlace(order.cal_per_kg, 1);
-      
-      // Update rate & volume
-      document.getElementById('det-rateTPN').textContent = `${roundToPlace(order.rate_tpn, 1)} ml/hr`;
-      document.getElementById('det-fatRate').textContent = `${roundToPlace(order.fat_rate, 4)} g/kg/hr`;
-      
-      // Show modal
-      document.getElementById('detailModal').classList.remove('hidden');
-    }
-
-    // Close Detail Modal
-    function closeDetail() {
-      document.getElementById('detailModal').classList.add('hidden');
-    }
-
-    // Print Detail
-    function printDetail() {
-      window.print();
-    }
-
-    // Close modal when clicking outside
-    document.getElementById('detailModal')?.addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeDetail();
-      }
-    });
-
-    // Save Order
-   async function saveOrder() {
+    async function saveOrder() {
       const hn = document.getElementById('hn').value;
       const patientName = document.getElementById('patientName').value;
       
@@ -917,7 +1011,6 @@
         pn_volume: parseFloat(document.getElementById('pnVolume').value) || 0,
         rate_tpn: parseFloat(document.getElementById('rateTPN').value) || 0,
         
-        // Macronutrient
         protein_target: parseFloat(document.getElementById('proteinTarget').value) || 0,
         protein_product: document.querySelector('input[name="proteinProduct"]:checked').value,
         fat_target: parseFloat(document.getElementById('fatTarget').value) || 0,
@@ -929,18 +1022,15 @@
         dextrose_percent: parseFloat(document.getElementById('dextrosePercent').value) || 0,
         gir: parseFloat(document.getElementById('girValue').textContent) || 0,
         
-        // Electrolytes
         phosphorus: parseFloat(document.getElementById('phosphorus').value) || 0,
         sodium: parseFloat(document.getElementById('sodium').value) || 0,
         potassium: parseFloat(document.getElementById('potassium').value) || 0,
         magnesium: parseFloat(document.getElementById('magnesium').value) || 0,
         calcium: parseFloat(document.getElementById('calcium').value) || 0,
         
-        // Vitamins & Trace
         soluvit: parseFloat(document.getElementById('soluvit').value) || 0,
         peditrace: parseFloat(document.getElementById('peditrace').value) || 0,
         
-        // Additives
         is_preterm: document.getElementById('isPreterm').checked,
         zinc_added: document.querySelector('input[name="zinc"]:checked')?.value === 'yes',
         zinc_volume: parseFloat(document.getElementById('zincVolume').value) || 0,
@@ -948,7 +1038,6 @@
         additive_other_name: document.getElementById('additiveOtherName').value || '',
         additive_other_volume: parseFloat(document.getElementById('additiveOtherVolume').value) || 0,
         
-        // Composition
         protein_volume: parseFloat(document.getElementById('proteinVol').textContent) || 0,
         dextrose_volume: parseFloat(document.getElementById('dextroseVol').textContent) || 0,
         electrolytes_volume: parseFloat(document.getElementById('electrolytesVol').textContent) || 0,
@@ -956,12 +1045,10 @@
         additives_volume: parseFloat(document.getElementById('additivesVol').textContent) || 0,
         water_volume: parseFloat(document.getElementById('waterVol').textContent) || 0,
         
-        // Calories & Osmolarity
         total_calories: parseFloat(document.getElementById('totalCalDisplay').textContent) || 0,
         cal_per_kg: parseFloat(document.getElementById('calPerKg').textContent) || 0,
         osmolarity: parseFloat(document.getElementById('finalOsmol').textContent) || 0,
         
-        // Fat Administration
         flush_option: document.querySelector('input[name="flush"]:checked').value,
         flush_volume: parseFloat(document.getElementById('flushVolume').value) || 0,
         drip_duration: parseInt(document.querySelector('input[name="dripDuration"]:checked').value),
@@ -971,16 +1058,35 @@
         timestamp: new Date().toISOString()
       };
 
-      const result = await window.dataSdk.create(orderData);
-      
-      if (result.isOk) {
+      try {
+        console.log('📤 กำลังส่งข้อมูล...');
+        
+        const formData = new URLSearchParams();
+        formData.append('action', 'create');
+        Object.keys(orderData).forEach(key => {
+          formData.append(key, orderData[key]);
+        });
+        
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: formData.toString()
+        });
+        
+        console.log('✅ ส่งข้อมูลสำเร็จ');
         showSaveMessage('✅ บันทึก Order สำเร็จ!', 'success');
+        
         setTimeout(() => {
           resetForm();
           goToHistory();
+          fetchAllOrders();
         }, 1500);
-      } else {
-        showSaveMessage('❌ เกิดข้อผิดพลาด: ' + (result.error?.message || 'ไม่ทราบสาเหตุ'), 'error');
+        
+      } catch (error) {
+        console.error('❌ Save error:', error);
+        showSaveMessage('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
         saveBtn.disabled = false;
         saveBtn.innerHTML = originalText;
       }
@@ -998,78 +1104,193 @@
       msgDiv.textContent = message;
       document.body.appendChild(msgDiv);
 
-      if (type === 'success') {
-        setTimeout(() => msgDiv.remove(), 3000);
-      } else {
-        setTimeout(() => msgDiv.remove(), 5000);
-      }
+      setTimeout(() => msgDiv.remove(), type === 'success' ? 3000 : 5000);
     }
 
-    // Default configuration
-    const defaultConfig = {
-      app_title: 'TPN Calculator - Pediatric',
-      hospital_name: 'โรงพยาบาลศรีนครินทร์',
-      primary_color: '#1e3a5f',
-      secondary_color: '#3b82f6',
-      accent_color: '#10b981',
-      text_color: '#1f2937',
-      background_color: '#f9fafb'
-    };
+    // ========== Navigation ==========
 
-    let config = { ...defaultConfig };
-
-    // Initialize SDK
-    if (window.elementSdk) {
-      window.elementSdk.init({
-        defaultConfig,
-        onConfigChange: async (newConfig) => {
-          config = { ...defaultConfig, ...newConfig };
-          applyConfig();
-        },
-        mapToCapabilities: (cfg) => ({
-          recolorables: [
-            {
-              get: () => cfg.primary_color || defaultConfig.primary_color,
-              set: (v) => { cfg.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); }
-            },
-            {
-              get: () => cfg.secondary_color || defaultConfig.secondary_color,
-              set: (v) => { cfg.secondary_color = v; window.elementSdk.setConfig({ secondary_color: v }); }
-            },
-            {
-              get: () => cfg.accent_color || defaultConfig.accent_color,
-              set: (v) => { cfg.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); }
-            }
-          ],
-          borderables: [],
-          fontEditable: undefined,
-          fontSizeable: undefined
-        }),
-        mapToEditPanelValues: (cfg) => new Map([
-          ['app_title', cfg.app_title || defaultConfig.app_title],
-          ['hospital_name', cfg.hospital_name || defaultConfig.hospital_name]
-        ])
-      });
+    function goToHistory() {
+      document.getElementById('mainContent').classList.add('page-hidden');
+      document.getElementById('historyPage').classList.remove('page-hidden');
+      fetchAllOrders();
     }
 
-    function applyConfig() {
-      const appTitle = document.getElementById('appTitle');
-      const hospitalName = document.getElementById('hospitalName');
+    function goToCalculator() {
+      document.getElementById('historyPage').classList.add('page-hidden');
+      document.getElementById('mainContent').classList.remove('page-hidden');
+    }
+
+    // ========== Filter & Display ==========
+
+    function filterByTab(tab) {
+      currentTab = tab;
       
-      if (appTitle) appTitle.textContent = config.app_title || defaultConfig.app_title;
-      if (hospitalName) hospitalName.textContent = config.hospital_name || defaultConfig.hospital_name;
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+        btn.classList.add('inactive');
+      });
+      event.target.classList.add('active');
+      event.target.classList.remove('inactive');
+      
+      filterHistory();
     }
 
-    // Set today's date as default
-    document.getElementById('orderDate').valueAsDate = new Date();
+    function filterHistory() {
+      const filterDate = document.getElementById('filterDate').value;
+      const searchHN = document.getElementById('searchHN').value.toLowerCase();
+      const searchName = document.getElementById('searchName').value.toLowerCase();
 
-    // Helper function for rounding
+      let filtered = [...allOrders];
+
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      if (currentTab === 'today') {
+        filtered = filtered.filter(order => {
+          const orderDate = new Date(order.order_date);
+          return orderDate.toDateString() === today.toDateString();
+        });
+      } else if (currentTab === 'yesterday') {
+        filtered = filtered.filter(order => {
+          const orderDate = new Date(order.order_date);
+          return orderDate.toDateString() === yesterday.toDateString();
+        });
+      }
+
+      if (filterDate) {
+        filtered = filtered.filter(order => order.order_date === filterDate);
+      }
+
+      if (searchHN) {
+        filtered = filtered.filter(order => 
+          (order.hn || '').toString().toLowerCase().includes(searchHN)
+        );
+      }
+
+      if (searchName) {
+        filtered = filtered.filter(order => 
+          (order.patient_name || '').toLowerCase().includes(searchName)
+        );
+      }
+
+      filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+      displayOrderList(filtered);
+    }
+
+    function displayOrderList(orders) {
+      const container = document.getElementById('orderListContainer');
+      
+      if (orders.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-8">ไม่พบข้อมูล Order ที่ตรงกับเงื่อนไข</p>';
+        return;
+      }
+
+      container.innerHTML = orders.map((order, index) => `
+        <div onclick="openDetail(${index})" class="p-4 border border-gray-200 rounded-xl hover:shadow-lg transition-all cursor-pointer hover:border-blue-400">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 mb-3">
+            <div>
+              <span class="text-xs text-gray-600">วันที่</span>
+              <p class="font-semibold text-gray-800">${order.order_date ? new Date(order.order_date).toLocaleDateString('th-TH') : '-'}</p>
+            </div>
+            <div>
+              <span class="text-xs text-gray-600">HN</span>
+              <p class="font-semibold text-gray-800">${order.hn || '-'}</p>
+            </div>
+            <div>
+              <span class="text-xs text-gray-600">ชื่อ-นามสกุล</span>
+              <p class="font-semibold text-gray-800">${order.patient_name || '-'}</p>
+            </div>
+            <div>
+              <span class="text-xs text-gray-600">น้ำหนัก</span>
+              <p class="font-semibold text-gray-800">${order.bw || 0} kg</p>
+            </div>
+            <div class="text-right">
+              <span class="text-xs text-gray-600">คลิกเพื่อดูรายละเอียด</span>
+              <p class="text-sm text-blue-600 font-medium">→ ดูเพิ่มเติม</p>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+            <div class="bg-purple-50 p-2 rounded">
+              <span class="text-xs text-purple-600">Protein</span>
+              <p class="font-semibold text-purple-700">${order.protein_target || 0} g/kg</p>
+            </div>
+            <div class="bg-amber-50 p-2 rounded">
+              <span class="text-xs text-amber-600">Fat</span>
+              <p class="font-semibold text-amber-700">${parseFloat(order.net_fat || 0).toFixed(1)} g/kg</p>
+            </div>
+            <div class="bg-blue-50 p-2 rounded">
+              <span class="text-xs text-blue-600">GIR</span>
+              <p class="font-semibold text-blue-700">${parseFloat(order.gir || 0).toFixed(2)} mg/kg/min</p>
+            </div>
+            <div class="bg-green-50 p-2 rounded">
+              <span class="text-xs text-green-600">Calories</span>
+              <p class="font-semibold text-green-700">${parseFloat(order.total_calories || 0).toFixed(1)} kcal</p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      window.currentOrderList = orders;
+    }
+
+    // ========== Detail Modal ==========
+
+    function openDetail(index) {
+      if (!window.currentOrderList || !window.currentOrderList[index]) return;
+      
+      const order = window.currentOrderList[index];
+      
+      document.getElementById('detailPatientInfo').textContent = `HN: ${order.hn || '-'} | ${order.patient_name || '-'}`;
+      
+      document.getElementById('det-orderDate').textContent = order.order_date ? new Date(order.order_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) : '-';
+      document.getElementById('det-hn').textContent = order.hn || '-';
+      document.getElementById('det-patientName').textContent = order.patient_name || '-';
+      document.getElementById('det-ward').textContent = order.ward || '-';
+      document.getElementById('det-route').textContent = order.route === 'central' ? 'Central Line' : 'Peripheral Line';
+      document.getElementById('det-bw').textContent = `${order.bw || 0} kg`;
+      document.getElementById('det-pnVolume').textContent = `${roundToPlace(order.pn_volume || 0, 1)} ml`;
+      
+      document.getElementById('det-protein').textContent = `${order.protein_target || 0} g/kg/day`;
+      document.getElementById('det-netFat').textContent = `${roundToPlace(order.net_fat || 0, 1)} g/kg/day`;
+      document.getElementById('det-dextrose').textContent = `${order.dextrose_percent || 0}%`;
+      document.getElementById('det-gir').textContent = `${roundToPlace(order.gir || 0, 2)} mg/kg/min`;
+      
+      document.getElementById('det-totalCalories').textContent = roundToPlace(order.total_calories || 0, 1);
+      document.getElementById('det-calPerKg').textContent = roundToPlace(order.cal_per_kg || 0, 1);
+      
+      document.getElementById('det-rateTPN').textContent = `${roundToPlace(order.rate_tpn || 0, 1)} ml/hr`;
+      document.getElementById('det-fatRate').textContent = `${roundToPlace(order.fat_rate || 0, 4)} g/kg/hr`;
+      document.getElementById('det-vitalipid').textContent = `${roundToPlace(order.vitalipid || 0, 1)} ml`;
+      
+      document.getElementById('detailModal').classList.remove('hidden');
+    }
+
+    function closeDetail() {
+      document.getElementById('detailModal').classList.add('hidden');
+    }
+
+    function printDetail() {
+      window.print();
+    }
+
+    document.getElementById('detailModal')?.addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeDetail();
+      }
+    });
+
+    // ========== Helper Functions ==========
+
     function roundToPlace(num, places) {
       const factor = Math.pow(10, places);
-      return Math.round(num * factor) / factor;
+      return Math.round((num || 0) * factor) / factor;
     }
 
-    // Main calculation function
+    // ========== Calculation Functions ==========
+
     function calculateAll() {
       const bw = parseFloat(document.getElementById('bw').value) || 0;
       const totalVolume = parseFloat(document.getElementById('totalVolume').value) || 0;
@@ -1078,7 +1299,6 @@
       const proteinTarget = parseFloat(document.getElementById('proteinTarget').value) || 0;
       const dextrosePercent = parseFloat(document.getElementById('dextrosePercent').value) || 0;
       
-      // Calculate Net Fat
       let netFat = fatTarget;
       if (deductVitalipid) {
         netFat = Math.max(0, fatTarget - 0.4);
@@ -1086,7 +1306,6 @@
       document.getElementById('netFat').value = roundToPlace(netFat, 1);
       document.getElementById('fatDisplay').value = roundToPlace(netFat, 1);
       
-      // Calculate Fat Volume
       const calculatedFatVol = bw * netFat * 5;
       const fatVolInput = document.getElementById('fatVolume');
       if (document.activeElement !== fatVolInput) {
@@ -1094,7 +1313,6 @@
       }
       const fatVolume = parseFloat(fatVolInput.value) || 0;
       
-      // Calculate Vitalipid
       const calculatedVitalipid = bw * 4;
       const vitalipidInput = document.getElementById('vitalipid');
       if (document.activeElement !== vitalipidInput) {
@@ -1102,7 +1320,6 @@
       }
       const vitalipidVolume = parseFloat(vitalipidInput.value) || 0;
       
-      // Calculate PN Volume
       const calculatedPNVolume = totalVolume - fatVolume - vitalipidVolume;
       const pnVolumeInput = document.getElementById('pnVolume');
       if (document.activeElement !== pnVolumeInput) {
@@ -1110,18 +1327,15 @@
       }
       const pnVolume = parseFloat(pnVolumeInput.value) || 0;
       
-      // Calculate Rate TPN
       const rateTPN = pnVolume / 24;
       document.getElementById('rateTPN').value = roundToPlace(rateTPN, 1);
       
-      // Calculate GIR
       let gir = 0;
       if (bw > 0) {
         gir = (rateTPN * dextrosePercent) / (bw * 6);
       }
       document.getElementById('girValue').textContent = roundToPlace(gir, 2);
       
-      // Show GIR warning
       const girWarning = document.getElementById('girWarning');
       if (gir > 12) {
         girWarning.classList.remove('hidden');
@@ -1129,7 +1343,6 @@
         girWarning.classList.add('hidden');
       }
       
-      // ========== ELECTROLYTES ==========
       const phosphorus = parseFloat(document.getElementById('phosphorus').value) || 0;
       const sodium = parseFloat(document.getElementById('sodium').value) || 0;
       const potassium = parseFloat(document.getElementById('potassium').value) || 0;
@@ -1158,7 +1371,6 @@
       
       const electrolytesVolume = phosVolume + naClVolume + kVolume + mgVolume + caVolume;
       
-      // Electrolytes osmolarity
       const naTotalMeq = naFromGlycophos + naNeeded;
       const osmolNa = pnVolume > 0 ? roundToPlace((2 * naTotalMeq * 1000) / pnVolume, 0) : 0;
       const kTotalMeq = potassium * bw;
@@ -1167,7 +1379,6 @@
       const osmolCa = pnVolume > 0 ? roundToPlace((0.465 * caVolume * 1000) / pnVolume, 0) : 0;
       const electrolytesOsmol = osmolNa + osmolK + osmolMg + osmolCa;
       
-      // ========== VITAMINS & TRACE ==========
       const soluvitVolume = roundToPlace(Math.min(bw * 1, 10), 1);
       const peditraceVolume = roundToPlace(Math.min(bw * 1, 15), 1);
       document.getElementById('soluvit').value = soluvitVolume;
@@ -1177,7 +1388,6 @@
       
       const vitaminTraceVolume = soluvitVolume + peditraceVolume;
       
-      // ========== ADDITIVES ==========
       let additivesVolume = 0;
       
       const isPreterm = document.getElementById('isPreterm').checked;
@@ -1224,7 +1434,6 @@
       
       additivesVolume += heparinVolume;
       
-      // ========== PROTEIN ==========
       const proteinProduct = document.querySelector('input[name="proteinProduct"]:checked').value;
       const totalProteinGrams = bw * proteinTarget;
       let proteinVolume = 0;
@@ -1237,21 +1446,17 @@
       const proteinCalories = totalProteinGrams * 4;
       const proteinOsmol = pnVolume > 0 ? roundToPlace((totalProteinGrams * 10 * 1000) / pnVolume, 0) : 0;
       
-      // ========== DEXTROSE ==========
       const dextroseVolume = roundToPlace((dextrosePercent * pnVolume * 2) / 100, 1);
       const dextroseGrams = roundToPlace((dextrosePercent * pnVolume) / 100, 1);
       const dextroseCalories = dextroseGrams * 3.4;
       const dextroseOsmol = pnVolume > 0 ? roundToPlace((dextroseGrams * 5 * 1000) / pnVolume, 0) : 0;
       
-      // ========== FAT ==========
       const fatGrams = bw * netFat;
       const fatCalories = fatGrams * 10;
       
-      // ========== STERILE WATER ==========
       const allAdditionalVolumes = electrolytesVolume + vitaminTraceVolume + additivesVolume + heparinVolume;
       const waterVolume = roundToPlace(Math.max(0, pnVolume - proteinVolume - dextroseVolume - allAdditionalVolumes), 1);
       
-      // ========== UPDATE TABLE ==========
       document.getElementById('proteinVol').textContent = roundToPlace(proteinVolume, 1);
       document.getElementById('proteinCal').textContent = roundToPlace(proteinCalories, 1);
       document.getElementById('proteinOsmol').textContent = roundToPlace(proteinOsmol, 0);
@@ -1447,12 +1652,21 @@
       calculateAll();
     }
 
+    // ========== Event Listeners ==========
+
     document.querySelectorAll('input[name="route"]').forEach(radio => {
       radio.addEventListener('change', calculateAll);
     });
 
-    calculateAll();
-    applyConfig();
+    // ========== Initialize ==========
+
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🚀 TPN Calculator พร้อมใช้งาน');
+      console.log('📡 เชื่อมต่อกับ:', API_URL);
+      document.getElementById('orderDate').valueAsDate = new Date();
+      calculateAll();
+    });
+
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c088e8e4528a057',t:'MTc2ODg0OTAzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
