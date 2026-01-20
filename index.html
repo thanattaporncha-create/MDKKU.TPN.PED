@@ -1067,27 +1067,41 @@
           formData.append(key, orderData[key]);
         });
         
+        // ส่งข้อมูลโดยใช้ fetch
         const response = await fetch(API_URL, {
-      method: 'POST',
-      mode: 'no-cors', // ปรับเป็น no-cors เพื่อให้ส่งข้อมูลข้าม Domain ได้โดยไม่ติดบล็อก
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: formData.toString()
-    });
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: formData.toString()
+        });
         
-        console.log('✅ ส่งข้อมูลสำเร็จ');
-        showSaveMessage('✅ บันทึก Order สำเร็จ!', 'success');
+        const result = await response.json();
         
-        setTimeout(() => {
-          resetForm();
-          goToHistory();
-          fetchAllOrders();
-        }, 1500);
+        if (result.status === 'success') {
+          console.log('✅ บันทึกสำเร็จ');
+          showSaveMessage('✅ บันทึก Order สำเร็จ!', 'success');
+          
+          // รีเซ็ตปุ่มกลับสู่สถานะปกติ
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = originalText;
+          
+          setTimeout(() => {
+            resetForm();
+            goToHistory();
+            fetchAllOrders();
+          }, 1500);
+        } else {
+          throw new Error(result.message || 'เกิดข้อผิดพลาดในการบันทึก');
+        }
         
       } catch (error) {
         console.error('❌ Save error:', error);
         showSaveMessage('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
+        
+        // รีเซ็ตปุ่มกลับสู่สถานะปกติเมื่อเกิด error
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalText;
       }
     }
 
