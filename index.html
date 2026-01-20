@@ -953,7 +953,7 @@
     // ========================================
     
     // 🔧 Configuration
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwo28vVrwVp82BwqqsXmXv69xXtPqtTPC-xygi6BhN7lrsZSlJARwAkkBvw4c2U501W/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbznohxTrX1isy29RXdA1qgV7FhosE_Tq_vpyWhDv-zcuT_gRJmjZA4uV_vVty2v-VWN/exec';
     
     // Global variables
     let allOrders = [];
@@ -1068,12 +1068,13 @@
         });
         
         const response = await fetch(API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: formData.toString()
-        });
+      method: 'POST',
+      mode: 'no-cors', // ปรับเป็น no-cors เพื่อให้ส่งข้อมูลข้าม Domain ได้โดยไม่ติดบล็อก
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: formData.toString()
+    });
         
         console.log('✅ ส่งข้อมูลสำเร็จ');
         showSaveMessage('✅ บันทึก Order สำเร็จ!', 'success');
