@@ -953,7 +953,7 @@
     // ========================================
     
     // 🔧 Configuration
-    const API_URL = 'https://script.google.com/macros/s/AKfycbznohxTrX1isy29RXdA1qgV7FhosE_Tq_vpyWhDv-zcuT_gRJmjZA4uV_vVty2v-VWN/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbydwSjFccNK4WdGhjVW0tikcYMuZJ5pLKLYdROcjGYVY9qvz4hk0-c0OYKFjVmgV-VN/exec';
     
     // Global variables
     let allOrders = [];
@@ -986,7 +986,7 @@
       }
     }
 
-    async function saveOrder() {
+   async function saveOrder() {
       const hn = document.getElementById('hn').value;
       const patientName = document.getElementById('patientName').value;
       
@@ -1076,17 +1076,26 @@
           body: formData.toString()
         });
         
+        console.log('📨 Response status:', response.status);
+        
+        // ตรวจสอบว่า response เป็น JSON หรือไม่
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('ไม่ได้รับ JSON response จาก server (ตรวจสอบ Google Apps Script)');
+        }
+        
         const result = await response.json();
+        console.log('📦 Result:', result);
         
         if (result.status === 'success') {
           console.log('✅ บันทึกสำเร็จ');
           showSaveMessage('✅ บันทึก Order สำเร็จ!', 'success');
           
-          // รีเซ็ตปุ่มกลับสู่สถานะปกติ
-          saveBtn.disabled = false;
-          saveBtn.innerHTML = originalText;
-          
           setTimeout(() => {
+            // รีเซ็ตปุ่มกลับสู่สถานะปกติ
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = originalText;
+            
             resetForm();
             goToHistory();
             fetchAllOrders();
