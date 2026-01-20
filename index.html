@@ -795,15 +795,12 @@
         <!-- Tab Buttons -->
         <section class="bg-white rounded-2xl card-shadow p-4">
           <div class="flex flex-wrap gap-2">
-            <button onclick="filterByTab('today')" class="tab-button active px-6 py-2 border-2 rounded-lg font-medium transition-all">
-              📅 วันนี้
-            </button>
-            <button onclick="filterByTab('yesterday')" class="tab-button inactive px-6 py-2 border-2 rounded-lg font-medium transition-all">
-              📅 เมื่อวาน
-            </button>
-            <button onclick="filterByTab('all')" class="tab-button inactive px-6 py-2 border-2 rounded-lg font-medium transition-all">
-              📅 ทั้งหมด
-            </button>
+           <button onclick="filterByTab('today')" class="tab-button active px-6 py-2 border-2 rounded-lg font-medium transition-all">
+  📅 วันนี้
+</button>
+<button onclick="filterByTab('all')" class="tab-button inactive px-6 py-2 border-2 rounded-lg font-medium transition-all">
+  📅 แสดงทั้งหมด (ทุกวันที่)
+</button>
           </div>
         </section>
 
@@ -1130,11 +1127,28 @@
 
     // ========== Navigation ==========
 
-    function goToHistory() {
-      document.getElementById('mainContent').classList.add('page-hidden');
-      document.getElementById('historyPage').classList.remove('page-hidden');
-      fetchAllOrders();
-    }
+   async function goToHistory() {
+    document.getElementById('mainContent').classList.add('page-hidden');
+    document.getElementById('historyPage').classList.remove('page-hidden');
+    
+    // 1. ตั้งค่า Tab เริ่มต้นเป็น 'today'
+    currentTab = 'today';
+    
+    // 2. ปรับสถานะปุ่ม Tab ในหน้าจอให้ "วันนี้" ไฮไลท์สีฟ้า
+    const tabs = document.querySelectorAll('.tab-button');
+    tabs.forEach(t => {
+        if(t.innerText.includes('วันนี้')) {
+            t.classList.add('active');
+            t.classList.remove('inactive');
+        } else {
+            t.classList.remove('active');
+            t.classList.add('inactive');
+        }
+    });
+
+    // 3. ดึงข้อมูลใหม่จาก Server
+    await fetchAllOrders(); 
+}
 
     function goToCalculator() {
       document.getElementById('historyPage').classList.add('page-hidden');
@@ -1144,61 +1158,69 @@
     // ========== Filter & Display ==========
 
     function filterByTab(tab) {
-      currentTab = tab;
-      
-      document.querySelectorAll('.tab-button').forEach(btn => {
+    currentTab = tab;
+    
+    // เปลี่ยนสีปุ่ม
+    document.querySelectorAll('.tab-button').forEach(btn => {
         btn.classList.remove('active');
         btn.classList.add('inactive');
-      });
-      event.target.classList.add('active');
-      event.target.classList.remove('inactive');
-      
-      filterHistory();
+    });
+    event.currentTarget.classList.add('active');
+    event.currentTarget.classList.remove('inactive');
+    
+    // ถ้ากด Tab "วันนี้" ให้ล้างค่าปฏิทินที่เคยเลือกไว้ เพื่อไม่ให้เงื่อนไขตีกัน
+    if (tab === 'today') {
+        document.getElementById('filterDate').value = ''; 
+    }
+    
+    filterHistory();
+}
+
+function filterHistory() {
+    const filterDateInput = document.getElementById('filterDate').value; // ค่าจากปฏิทิน (YYYY-MM-DD)
+    const searchHN = document.getElementById('searchHN').value.trim().toLowerCase();
+    const searchName = document.getElementById('searchName').value.trim().toLowerCase();
+
+    let filtered = [...allOrders];
+
+    // 1. กรองตาม Tab (วันนี้ เทียบกับ วันที่ปัจจุบัน)
+    if (currentTab === 'today') {
+        const todayStr = new Date().toISOString().split('T')[0];
+        filtered = filtered.filter(order => {
+            if (!order.order_date) return false;
+            const orderDateStr = new Date(order.order_date).toISOString().split('T')[0];
+            return orderDateStr === todayStr;
+        });
     }
 
-    function filterHistory() {
-      const filterDate = document.getElementById('filterDate').value;
-      const searchHN = document.getElementById('searchHN').value.toLowerCase();
-      const searchName = document.getElementById('searchName').value.toLowerCase();
-
-      let filtered = [...allOrders];
-
-      const today = new Date();
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-
-      if (currentTab === 'today') {
+    // 2. กรองเพิ่มด้วยวันที่จากปฏิทิน (ถ้ามีการเลือกวันที่เจาะจง)
+    if (filterDateInput) {
         filtered = filtered.filter(order => {
-          const orderDate = new Date(order.order_date);
-          return orderDate.toDateString() === today.toDateString();
+            if (!order.order_date) return false;
+            const orderDateStr = new Date(order.order_date).toISOString().split('T')[0];
+            return orderDateStr === filterDateInput;
         });
-      } else if (currentTab === 'yesterday') {
-        filtered = filtered.filter(order => {
-          const orderDate = new Date(order.order_date);
-          return orderDate.toDateString() === yesterday.toDateString();
-        });
-      }
-
-      if (filterDate) {
-        filtered = filtered.filter(order => order.order_date === filterDate);
-      }
-
-      if (searchHN) {
-        filtered = filtered.filter(order => 
-          (order.hn || '').toString().toLowerCase().includes(searchHN)
-        );
-      }
-
-      if (searchName) {
-        filtered = filtered.filter(order => 
-          (order.patient_name || '').toLowerCase().includes(searchName)
-        );
-      }
-
-      filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-      displayOrderList(filtered);
     }
+
+    // 3. กรองเพิ่มด้วย HN
+    if (searchHN) {
+        filtered = filtered.filter(order => 
+            (order.hn || '').toString().toLowerCase().includes(searchHN)
+        );
+    }
+
+    // 4. กรองเพิ่มด้วย ชื่อ-นามสกุล
+    if (searchName) {
+        filtered = filtered.filter(order => 
+            (order.patient_name || '').toLowerCase().includes(searchName)
+        );
+    }
+
+    // จัดเรียงข้อมูลตามลำดับเวลาล่าสุด (Timestamp)
+    filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    displayOrderList(filtered);
+}
 
     function displayOrderList(orders) {
       const container = document.getElementById('orderListContainer');
