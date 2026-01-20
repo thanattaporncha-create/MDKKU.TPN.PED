@@ -1000,12 +1000,7 @@
         console.error('❌ Save error:', error);
         showSaveMessage('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
         
-        // คืนค่าปุ่มกรณีเกิด Error เพื่อให้กดใหม่ได้
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = originalText;
-      }
-
-      const orderData = {
+            const orderData = {
         order_date: document.getElementById('orderDate').value,
         hn: hn,
         patient_name: patientName,
