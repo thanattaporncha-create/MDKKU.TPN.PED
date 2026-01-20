@@ -963,42 +963,47 @@
 
     async function fetchAllOrders() {
       try {
-        console.log('📥 กำลังดึงข้อมูล...');
-        const response = await fetch(`${API_URL}?action=read`);
-        const result = await response.json();
+        console.log('📤 กำลังส่งข้อมูล...');
         
-        if (result.status === 'success') {
-          allOrders = result.data || [];
-          console.log('✅ ดึงข้อมูลสำเร็จ:', allOrders.length, 'รายการ');
-          filterHistory();
-          return allOrders;
-        } else {
-          console.error('❌ Error:', result.message);
-          document.getElementById('orderListContainer').innerHTML = 
-            '<p class="text-red-500 text-center py-8">เกิดข้อผิดพลาดในการดึงข้อมูล</p>';
-          return [];
-        }
+        const formData = new URLSearchParams();
+        formData.append('action', 'create');
+        Object.keys(orderData).forEach(key => {
+          formData.append(key, orderData[key]);
+        });
+        
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: formData.toString()
+        });
+        
+        // --- ส่วนที่ต้องแก้ไข/เพิ่มเติมอยู่ตรงนี้ครับ ---
+        console.log('✅ ส่งข้อมูลสำเร็จ');
+        showSaveMessage('✅ บันทึก Order สำเร็จ!', 'success');
+
+        // คืนค่าปุ่มให้กลับมาใช้งานได้ และเปลี่ยนข้อความเป็นเหมือนเดิม
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalText; 
+        
+        // รอสักครู่แล้วค่อยล้างฟอร์มหรือเปลี่ยนหน้า
+        setTimeout(() => {
+          resetForm();
+          goToHistory();
+          // หมายเหตุ: fetchAllOrders() อาจจะยังไม่เห็นข้อมูลใหม่ทันทีเพราะ Google Sheet ใช้เวลาอัปเดตสักครู่
+          fetchAllOrders(); 
+        }, 1500);
+        
       } catch (error) {
-        console.error('❌ Fetch error:', error);
-        document.getElementById('orderListContainer').innerHTML = 
-          '<p class="text-red-500 text-center py-8">ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์</p>';
-        return [];
+        console.error('❌ Save error:', error);
+        showSaveMessage('❌ เกิดข้อผิดพลาด: ' + error.message, 'error');
+        
+        // คืนค่าปุ่มกรณีเกิด Error เพื่อให้กดใหม่ได้
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalText;
       }
-    }
-
-    async function saveOrder() {
-      const hn = document.getElementById('hn').value;
-      const patientName = document.getElementById('patientName').value;
-      
-      if (!hn || !patientName) {
-        showSaveMessage('⚠️ กรุณากรอก HN และชื่อ-นามสกุล', 'error');
-        return;
-      }
-
-      const saveBtn = document.getElementById('saveOrderBtn');
-      const originalText = saveBtn.innerHTML;
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = '⏳ กำลังบันทึก...';
 
       const orderData = {
         order_date: document.getElementById('orderDate').value,
