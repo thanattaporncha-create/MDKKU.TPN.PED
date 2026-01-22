@@ -131,10 +131,24 @@
     .page-hidden {
       display: none !important;
     }
+    html {
+  height: auto;
+}
+
+body {
+  min-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ปรับให้ Dropdown ของ Ward ลอยอยู่เหนือทุกอย่างจริงๆ */
+#wardDropdown {
+  z-index: 9999 !important;
+}
   </style>
 </head>
-<body class="h-full bg-gray-50">
-  <div id="app" class="h-full overflow-auto">
+<body class="bg-gray-50">
+  <div id="app">
     <!-- Header -->
     <header class="gradient-header text-white py-4 px-6 sticky top-0 z-50 shadow-lg no-print">
       <div class="max-w-6xl mx-auto flex items-center justify-between">
@@ -262,16 +276,15 @@
             </div>
           </div>
     <div>
-  <label class="block text-sm font-medium text-gray-700 mb-1">Vitalipid-N Infant</label>
-  <div class="relative">
-    <input type="number" id="vitalipid" step="0.1" min="0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-12 font-semibold text-blue-700" inputmode="decimal" oninput="handleVitalipidManualChange()">
-    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">ml</span>
-  </div>
-  <p id="vitalipidMaxWarning" class="hidden text-[10px] text-red-600 mt-1 font-bold">⚠️ Max = 10 ml</p>
-</div>
+ <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Vitalipid-N Infant</label>
+          <div class="relative">
+            <input type="number" id="vitalipid" step="0.1" min="0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-12 font-semibold text-blue-700" inputmode="decimal" oninput="handleVitalipidManualChange()">
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">ml</span>
           </div>
+          <p id="vitalipidMaxWarning" class="hidden text-[10px] text-red-600 mt-1 font-bold">⚠️ Max = 10 ml</p>
         </div>
-      </section>
+      </div> </section>
 
       <!-- PN Volume & Rate -->
       <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
@@ -756,7 +769,7 @@
     </main>
 
     <!-- History Page -->
-    <div id="historyPage" class="page-hidden h-full overflow-auto">
+    <div id="historyPage" class="page-hidden">
       <header class="gradient-header text-white py-4 px-6 sticky top-0 z-50 shadow-lg no-print">
         <div class="max-w-6xl mx-auto flex items-center justify-between">
           <div class="flex items-center gap-3">
