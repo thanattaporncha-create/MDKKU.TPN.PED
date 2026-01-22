@@ -163,7 +163,7 @@
     <!-- Main Content -->
     <main id="mainContent" class="max-w-6xl mx-auto p-4 md:p-6 space-y-6">
       <!-- Order Date & Patient Info -->
-      <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
+     <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
         <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">📋 ข้อมูลทั่วไป</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
@@ -178,9 +178,19 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อ-นามสกุล</label>
             <input type="text" id="patientName" placeholder="ชื่อ นามสกุล" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all">
           </div>
-          <div>
+          <div class="relative">
             <label class="block text-sm font-medium text-gray-700 mb-1">Ward</label>
-            <input type="text" id="ward" placeholder="หอผู้ป่วย" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all">
+            <div class="relative">
+              <input type="text" id="wardInput" placeholder="ค้นหาหอผู้ป่วย..." 
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all"
+                onfocus="showWardList()" oninput="filterWardList()" autocomplete="off">
+              <input type="hidden" id="ward"> 
+              
+              <div id="wardDropdown" class="hidden absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+                <div id="wardOptions" class="py-1">
+                  </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -953,6 +963,64 @@
     let allOrders = [];
     let currentTab = 'today';
 
+    // รายชื่อหอผู้ป่วย
+const wardList = [
+  "2ง", "3ก", "3ค", "3ง", "3ฉ", "4ก", "4ค", "5ข", "6ก", "6ข", 
+  "AE1", "AE2", "AE3", "CCU", "CVT-ICU", "HOME PN", "IMC2ง", "IMC3ข", "IMC4ข", 
+  "MICU 1", "MICU 2", "NICU", "PICU", "PICU ศสก.", "SCTU", "SICU 1", "SICU 2", 
+  "กว.6/1", "กว.6/2", "กว.7/1", "กว.7/2", "สว.1/11", "สว.1/12", "สว.1/13", 
+  "สว.1/14", "สว.1/15", "สว.1/8B", "สว.1/8C", "สว.1/9A", "สว.1/9B", "สว.1/9C"
+];
+
+function showWardList() {
+  const dropdown = document.getElementById('wardDropdown');
+  dropdown.classList.remove('hidden');
+  renderWardOptions(wardList);
+}
+
+function filterWardList() {
+  const searchTerm = document.getElementById('wardInput').value.toLowerCase();
+  const filtered = wardList.filter(ward => ward.toLowerCase().includes(searchTerm));
+  renderWardOptions(filtered);
+}
+
+function renderWardOptions(list) {
+  const container = document.getElementById('wardOptions');
+  if (list.length === 0) {
+    container.innerHTML = '<div class="px-4 py-2 text-gray-500 text-sm">ไม่พบข้อมูล</div>';
+    return;
+  }
+  
+  container.innerHTML = list.map(ward => `
+    <div onclick="selectWard('${ward}')" 
+      class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-gray-700 text-sm transition-colors border-b border-gray-50 last:border-0">
+      ${ward}
+    </div>
+  `).join('');
+}
+
+function selectWard(val) {
+  document.getElementById('wardInput').value = val;
+  document.getElementById('ward').value = val; // เก็บค่าลง hidden input
+  document.getElementById('wardDropdown').classList.add('hidden');
+  updateOrderSummary(); // อัปเดตสรุปด้านล่างทันที
+}
+
+// ปิด Dropdown เมื่อคลิกที่อื่น
+document.addEventListener('click', function(e) {
+  const wardContainer = document.getElementById('wardInput').parentElement;
+  if (!wardContainer.contains(e.target)) {
+    document.getElementById('wardDropdown').classList.add('hidden');
+    
+    // ตรวจสอบว่าถ้าพิมพ์ค่าที่ไม่ตรงกับใน List ให้ล้างค่าทิ้ง (บังคับเลือกจาก List)
+    const currentInput = document.getElementById('wardInput').value;
+    if (!wardList.includes(currentInput)) {
+      document.getElementById('wardInput').value = '';
+      document.getElementById('ward').value = '';
+    }
+  }
+});
+
     // ========== API Functions ==========
 
     async function fetchAllOrders() {
@@ -1663,7 +1731,8 @@ function filterHistory() {
       document.getElementById('orderDate').valueAsDate = new Date();
       document.getElementById('hn').value = '';
       document.getElementById('patientName').value = '';
-      document.getElementById('ward').value = '';
+      document.getElementById('wardInput').value = ''; // เพิ่มอันนี้
+      document.getElementById('ward').value = '';      // เพิ่มอันนี้
       document.getElementById('bw').value = '';
       document.getElementById('totalVolume').value = '';
       document.getElementById('fatTarget').value = '';
