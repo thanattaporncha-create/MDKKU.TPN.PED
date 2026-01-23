@@ -270,7 +270,7 @@ body {
             </div>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"> 🔋 Vitalipid-N Infant</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1"> 🔋 Vitalipid® </label>
             <div class="relative">
               <input type="number" id="vitalipid" step="0.1" min="0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-12 font-semibold text-blue-700" inputmode="decimal" oninput="handleVitalipidManualChange()">
               <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">ml</span>
@@ -280,8 +280,8 @@ body {
         </div>
       </section>
 
-      <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
-        <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">💉 วิธีการให้ Fat+</h2>
+     <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
+        <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">💉 วิธีการให้ Fat</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">การไล่สาย</label>
@@ -298,21 +298,18 @@ body {
               </div>
             </div>
           </div>
+
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">IV drip in</label>
-            <div class="space-y-2">
-              <label class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
-                <input type="radio" name="dripDuration" value="12" checked onchange="calculateFatAdmin()">
-                <span class="text-sm">12 ชั่วโมง</span>
-              </label>
-              <label class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
-                <input type="radio" name="dripDuration" value="24" onchange="calculateFatAdmin()">
-                <span class="text-sm">24 ชั่วโมง</span>
-              </label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Total Volume Fat + Vitalipid</label>
+            <div class="relative">
+              <input type="number" id="totalFatPlusVitalipid" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-blue-50 font-bold text-blue-700" readonly>
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">ml</span>
             </div>
+            <p class="text-[10px] text-gray-500 mt-1">(Fat + Flush + Vit)</p>
           </div>
+
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">แบ่งเตรียม</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">แบ่งเตรียม (แนะนำแบ่งเตรียมใน ward NICU, 2ค) </label>
             <div class="space-y-2">
               <label class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
                 <input type="radio" name="prepSplit" value="none" checked onchange="calculateFatAdmin()">
@@ -324,20 +321,20 @@ body {
               </label>
             </div>
           </div>
+
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Fat Rate</label>
-            <div id="fatRateContainer" class="p-3 bg-blue-50 rounded-xl border border-blue-200">
-              <div class="text-2xl font-bold text-blue-700" id="fatRateValue">0.0</div>
-              <div class="text-xs text-blue-600">g/kg/hr</div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Drip Rate</label>
+            <div class="relative">
+              <input type="number" id="manualFatDripRate" step="0.1" placeholder="0.0" class="w-full px-4 py-2.5 border border-blue-300 rounded-xl focus:ring-2 focus:ring-blue-500 font-bold text-blue-700" oninput="calculateFatAdmin()">
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">ml/hr</span>
             </div>
           </div>
         </div>
-        <div id="fatRateWarning" class="hidden p-3 warning-box rounded-xl text-sm">
-          <span class="font-medium">⚠️ Fat Rate สูงเกินไป!</span> ควร ≤ 0.11 g/kg/hr
-        </div>
+
         <div id="prepSummary" class="mt-4 p-4 success-box rounded-xl">
           <h4 class="font-semibold text-green-800 mb-2">📋 สรุปการเตรียม Fat</h4>
-          <div id="prepDetails" class="text-green-700"></div>
+          <div id="prepDetails" class="text-green-700 space-y-1 text-sm">
+            </div>
         </div>
       </section>
 
@@ -1639,59 +1636,48 @@ function filterHistory() {
     }
 
     function calculateFatAdmin() {
-      const bw = parseFloat(document.getElementById('bw').value) || 0;
-      const netFat = parseFloat(document.getElementById('netFat').value) || 0;
-      const fatVolume = parseFloat(document.getElementById('fatVolume').value) || 0;
-      
-      const flushOption = document.querySelector('input[name="flush"]:checked').value;
-      const flushVolume = flushOption === 'custom' ? (parseFloat(document.getElementById('flushVolume').value) || 0) : 0;
-      
-      const dripDuration = parseInt(document.querySelector('input[name="dripDuration"]:checked').value);
-      const prepSplit = document.querySelector('input[name="prepSplit"]:checked').value;
-      
-      const fatGrams = bw * netFat;
-      let fatRate = 0;
-      if (bw > 0 && dripDuration > 0) {
-        fatRate = (fatGrams / bw) / dripDuration;
-      }
-      
-      document.getElementById('fatRateValue').textContent = roundToPlace(fatRate, 4);
-      
-      const fatRateWarning = document.getElementById('fatRateWarning');
-      const fatRateContainer = document.getElementById('fatRateContainer');
-      if (fatRate > 0.11) {
-        fatRateWarning.classList.remove('hidden');
-        fatRateContainer.classList.remove('border-blue-200', 'bg-blue-50');
-        fatRateContainer.classList.add('border-red-300', 'bg-red-50');
-        document.getElementById('fatRateValue').classList.remove('text-blue-700');
-        document.getElementById('fatRateValue').classList.add('text-red-700');
-      } else {
-        fatRateWarning.classList.add('hidden');
-        fatRateContainer.classList.add('border-blue-200', 'bg-blue-50');
-        fatRateContainer.classList.remove('border-red-300', 'bg-red-50');
-        document.getElementById('fatRateValue').classList.add('text-blue-700');
-        document.getElementById('fatRateValue').classList.remove('text-red-700');
-      }
-      
-      const totalFatWithFlush = fatVolume + flushVolume;
-      let prepText = '';
-      
-      if (prepSplit === 'split') {
-        const splitVolume = totalFatWithFlush / 2;
-        prepText = `
-          <p><strong>Fat Volume รวมไล่สาย:</strong> ${roundToPlace(totalFatWithFlush, 1)} ml</p>
-          <p><strong>แบ่งเตรียม:</strong> ${roundToPlace(splitVolume, 1)} ml × 2 syringe/ขวด</p>
-          <p><strong>Rate:</strong> ${roundToPlace(totalFatWithFlush / dripDuration, 1)} ml/hr ใน ${dripDuration} ชั่วโมง</p>
-        `;
-      } else {
-        prepText = `
-          <p><strong>Fat Volume รวมไล่สาย:</strong> ${roundToPlace(totalFatWithFlush, 1)} ml</p>
-          <p><strong>Rate:</strong> ${roundToPlace(totalFatWithFlush / dripDuration, 1)} ml/hr ใน ${dripDuration} ชั่วโมง</p>
-        `;
-      }
-      
-      document.getElementById('prepDetails').innerHTML = prepText;
-    }
+  // 1. ดึงค่า Volume ต่างๆ มาเตรียมไว้
+  const fatVolume = parseFloat(document.getElementById('fatVolume').value) || 0;
+  const vitalipidVolume = parseFloat(document.getElementById('vitalipid').value) || 0;
+  const flushOption = document.querySelector('input[name="flush"]:checked').value;
+  const flushVolume = flushOption === 'custom' ? (parseFloat(document.getElementById('flushVolume').value) || 0) : 0;
+  
+  const prepSplit = document.querySelector('input[name="prepSplit"]:checked').value;
+  const manualRate = document.getElementById('manualFatDripRate').value || '0.0';
+  
+  // 2. คำนวณผลรวม Volume อัตโนมัติ
+  const totalVolPlusFlush = fatVolume + flushVolume; // Fat + ไล่สาย
+  const grandTotalFatVit = totalVolPlusFlush + vitalipidVolume; // รวมทั้งหมด
+  
+  // 3. ส่งค่าที่คำนวณได้ไปแสดงในช่อง "Total Volume Fat + Vitalipid"
+  document.getElementById('totalFatPlusVitalipid').value = roundToPlace(grandTotalFatVit, 1);
+  
+  // 4. สร้างข้อความสรุปการเตรียม Fat เพื่อแสดงในกล่องสีเขียว
+  let prepText = `
+    <p>• Fat Volume รวมไล่สาย: <strong>${roundToPlace(totalVolPlusFlush, 1)}</strong> ml</p>
+    <p>• Vitalipid®: <strong>${roundToPlace(vitalipidVolume, 1)}</strong> ml</p>
+    <p>• Total Volume Fat + ไล่สาย + Vitalipid: <span class="text-lg font-bold">${roundToPlace(grandTotalFatVit, 1)}</span> ml</p>
+  `;
+  
+  // ตรวจสอบเรื่องการแบ่งเตรียม
+  if (prepSplit === 'split') {
+    const splitValue = grandTotalFatVit / 2;
+    prepText += `<p>• <strong>แบ่งเตรียม:</strong> ${roundToPlace(splitValue, 1)} ml × 2 syringe/ขวด</p>`;
+  } else {
+    prepText += `<p>• <strong>แบ่งเตรียม:</strong> ไม่แบ่ง</p>`;
+  }
+  
+  // แสดง Drip Rate ที่คุณขิมกรอกเอง
+  prepText += `<p>• <strong>Drip Rate:</strong> <span class="text-blue-700 font-bold">${manualRate}</span> ml/hr</p>`;
+  
+  // พ่นข้อความทั้งหมดลงไปในหน้าจอ
+  document.getElementById('prepDetails').innerHTML = prepText;
+
+  // [สำคัญมาก] สั่งให้ส่วนสรุป Order สีน้ำเงินอัปเดตตามทันที
+  if (typeof updateOrderSummary === "function") {
+    updateOrderSummary();
+  }
+}
 
     function updateOrderSummary() {
       const orderDate = document.getElementById('orderDate').value;
