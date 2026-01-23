@@ -317,7 +317,7 @@ body {
               </label>
               <label class="flex items-center gap-2 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
                 <input type="radio" name="prepSplit" value="split" onchange="calculateFatAdmin()">
-                <span class="text-sm">แบ่งเตรียม</span>
+                <span class="text-sm">แบ่งเตรียม เป็น 2 syr/ขวด</span>
               </label>
             </div>
           </div>
@@ -329,12 +329,6 @@ body {
               <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm">ml/hr</span>
             </div>
           </div>
-        </div>
-
-        <div id="prepSummary" class="mt-4 p-4 success-box rounded-xl">
-          <h4 class="font-semibold text-green-800 mb-2">📋 สรุปการเตรียม Fat</h4>
-          <div id="prepDetails" class="text-green-700 space-y-1 text-sm">
-            </div>
         </div>
       </section>
 
@@ -761,6 +755,14 @@ body {
 </tbody>
           </table>
         </div>
+        <div id="prepSummary" class="mt-6 p-6 success-box rounded-xl border-2 border-green-200">
+  <h4 class="font-bold text-green-800 mb-3 text-lg flex items-center gap-2">
+    <span>🧈</span> สรุปการเตรียม Fat
+  </h4>
+  
+  <div id="prepDetails" class="text-green-700 space-y-2 text-base">
+     </div>
+</div>
         <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="p-4 bg-green-50 rounded-xl border border-green-200">
             <div class="text-sm text-green-600 mb-1">Total Calories</div>
