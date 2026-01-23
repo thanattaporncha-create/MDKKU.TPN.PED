@@ -368,7 +368,7 @@ body {
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Rate TPN (PN ÷ 24)</label>
             <div class="relative">
-              <input type="number" id="rateTPN" step="0.01" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-blue-50 pr-16 font-semibold text-blue-700" readonly>
+              <input type="number" id="rateTPN" step="0.01" class="w-full px-4 py-2.5 border border-blue-300 rounded-xl input-focus transition-all pr-16 font-bold text-blue-700" oninput="handleRateManualChange()">
               <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">ml/hr</span>
             </div>
           </div>
@@ -981,6 +981,7 @@ body {
     let allOrders = [];
     let currentTab = 'today';
     let isVitalipidManual = false; // ตัวแปรคุมสถานะการแก้ช่อง Vitalipid เอง
+    let isRateManual = false; // ตัวแปรคุมสถานะการแก้ Rate เอง
 
     // รายชื่อหอผู้ป่วย
 const wardList = [
@@ -1821,6 +1822,10 @@ function filterHistory() {
 // --- ฟังก์ชันสำหรับล็อคสถานะเมื่อผู้ใช้พิมพ์ค่า Vitalipid เอง ---
 function handleVitalipidManualChange() {
   isVitalipidManual = true; 
+  function handleRateManualChange() {
+  isRateManual = true; // เมื่อมีการพิมพ์ในช่อง Rate ให้ล็อคสถานะ Manual ทันที
+  updateOrderSummary(); // อัปเดตสรุปด้านล่างตามเลขที่พิมพ์ใหม่
+}
   calculateAll();
 }
   </script>
