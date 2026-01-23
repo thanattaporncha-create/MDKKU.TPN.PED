@@ -758,6 +758,40 @@ body {
     <td id="totalPNCal" class="px-4 py-3 text-right font-mono">0.0</td>
     <td id="totalOsmol" class="px-4 py-3 text-right font-mono">0</td>
   </tr>
+
+              <div class="mt-8 overflow-x-auto rounded-xl border border-gray-200">
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="bg-gradient-to-r from-amber-600 to-amber-500 text-white">
+        <th class="px-4 py-3 text-left font-semibold rounded-tl-xl">องค์ประกอบ Fat Syringe / Bottle</th>
+        <th class="px-4 py-3 text-right font-semibold">ปริมาตร (ml)</th>
+        <th class="px-4 py-3 text-right font-semibold rounded-tr-xl">แคลอรี่ (kcal)</th>
+      </tr>
+    </thead>
+    <tbody id="fatCompositionTable">
+      <tr class="border-b border-gray-100 hover:bg-gray-50">
+        <td id="fatProductNameCell" class="px-4 py-2 pl-8 text-amber-700 font-medium">🧈 Fat Product</td>
+        <td id="fatVolCell" class="px-4 py-2 text-right font-mono text-amber-700">0.0</td>
+        <td id="fatCalCell" class="px-4 py-2 text-right font-mono text-amber-700">0.0</td>
+      </tr>
+      <tr class="border-b border-gray-100 hover:bg-gray-50">
+        <td class="px-4 py-2 pl-8 text-blue-700 font-medium">🔋 Vitalipid® N Infant</td>
+        <td id="vitalipidVolCell" class="px-4 py-2 text-right font-mono text-blue-700">0.0</td>
+        <td class="px-4 py-2 text-right font-mono">-</td>
+      </tr>
+      <tr class="border-b border-gray-100 bg-gray-50">
+        <td class="px-4 py-2 pl-8 text-gray-500">🚿 บวกปริมาตรไล่สาย (Flush)</td>
+        <td id="fatFlushVolCell" class="px-4 py-2 text-right font-mono text-gray-500">0.0</td>
+        <td class="px-4 py-2 text-right font-mono">-</td>
+      </tr>
+      <tr class="bg-amber-800 text-white font-bold">
+        <td class="px-4 py-3">รวมปริมาตร Fat สำหรับเตรียม</td>
+        <td id="totalFatSyringeVol" class="px-4 py-3 text-right font-mono text-yellow-400">0.0</td>
+        <td id="totalFatSyringeCal" class="px-4 py-3 text-right font-mono">0.0</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 </tbody>
           </table>
         </div>
@@ -1705,7 +1739,27 @@ function filterHistory() {
       } else {
         osmolWarning.classList.add('hidden');
       }
+// --- อัปเดตตารางองค์ประกอบ Fat (ส่วนเพิ่มใหม่) ---
+      
+      // ดึงชื่อผลิตภัณฑ์ Fat ที่เลือกมาโชว์
+      const selectedFatProduct = document.querySelector('input[name="fatProduct"]:checked');
+      const fatName = selectedFatProduct.parentElement.querySelector('.font-medium').textContent;
+      document.getElementById('fatProductNameCell').textContent = "🧈 " + fatName;
 
+      // ส่งค่าปริมาตรและแคลอรี่
+      document.getElementById('fatVolCell').textContent = roundToPlace(fatVolume, 1);
+      document.getElementById('fatCalCell').textContent = roundToPlace(fatCalories, 1);
+      document.getElementById('vitalipidVolCell').textContent = roundToPlace(vitalipidVolume, 1);
+      
+      // ดึงค่าปริมาตรไล่สาย Fat (Flush)
+      const fatFlushOption = document.querySelector('input[name="flush"]:checked').value;
+      const fatFlushVal = fatFlushOption === 'custom' ? (parseFloat(document.getElementById('flushVolume').value) || 0) : 0;
+      document.getElementById('fatFlushVolCell').textContent = roundToPlace(fatFlushVal, 1);
+
+      // ยอดรวมท้ายตาราง Fat
+      const totalFatPrep = fatVolume + vitalipidVolume + fatFlushVal;
+      document.getElementById('totalFatSyringeVol').textContent = roundToPlace(totalFatPrep, 1);
+      document.getElementById('totalFatSyringeCal').textContent = roundToPlace(fatCalories, 1);
       // เรียกฟังก์ชันอื่นๆ ที่เกี่ยวข้อง
       calculateFatAdmin();
       updateOrderSummary();
