@@ -1734,12 +1734,12 @@ function filterHistory() {
   
   // 4. สร้างข้อความสรุปการเตรียม Fat เพื่อแสดงในกล่องสีเขียว
   let prepText = `
-    <p>• Fat Volume รวมไล่สาย: <strong>${roundToPlace(totalVolPlusFlush, 1)}</strong> ml</p>
+    <p>• Fat Volume รวมไล่สาย (${roundToPlace(flushVolume, 0)} ml): <strong>${roundToPlace(totalVolPlusFlush, 1)}</strong> ml</p>
     <p>• Vitalipid®: <strong>${roundToPlace(vitalipidVolume, 1)}</strong> ml</p>
     <p>• Total Volume Fat + ไล่สาย + Vitalipid: <span class="text-lg font-bold">${roundToPlace(grandTotalFatVit, 1)}</span> ml</p>
   `;
-  
-  // ตรวจสอบเรื่องการแบ่งเตรียม
+
+  // ส่วนอื่นๆ ให้คงเลข 1 ไว้ตามที่คุณขิมต้องการค่ะ
   if (prepSplit === 'split') {
     const splitValue = grandTotalFatVit / 2;
     prepText += `<p>• <strong>แบ่งเตรียม:</strong> ${roundToPlace(splitValue, 1)} ml × 2 syringe/ขวด</p>`;
