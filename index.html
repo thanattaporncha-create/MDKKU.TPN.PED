@@ -1509,15 +1509,24 @@ function filterHistory() {
       const pnPrepVolume = pnVolume + pnFlush;
       document.getElementById('pnPrepVolume').value = roundToPlace(pnPrepVolume, 1);
 
-      // Rate TPN ใช้ค่า PN สุทธิ (ไม่รวมไล่สาย) หาร 24
-      const rateTPN = pnVolume / 24;
-      document.getElementById('rateTPN').value = roundToPlace(rateTPN, 1);
-      // ------------------------------------------
-      
-      let gir = 0;
-      if (bw > 0) {
-        gir = (rateTPN * dextrosePercent) / (bw * 6);
-      }
+   // --- ส่วนที่แก้ไข: คำนวณ Rate TPN และปัดเศษก่อนนำไปคิด GIR ---
+const rateInput = document.getElementById('rateTPN');
+
+// ถ้าคุณขิมไม่ได้พิมพ์แก้เอง (isRateManual เป็น false) ให้ระบบคำนวณและปัดเศษ 1 ตำแหน่งให้เลย
+if (!isRateManual) {
+    const calculatedRate = pnVolume / 24;
+    rateInput.value = roundToPlace(calculatedRate, 1); 
+}
+
+// ดึงค่า "ที่แสดงอยู่บนหน้าจอ" (ซึ่งปัดเศษแล้ว หรือถูกคุณขิมแก้แล้ว) มาใช้คำนวณ GIR
+const rateForGIR = parseFloat(rateInput.value) || 0;
+
+let gir = 0;
+if (bw > 0) {
+    // ใช้ rateForGIR แทน rateTPN ตัวเดิม
+    gir = (rateForGIR * dextrosePercent) / (bw * 6);
+}
+// -------------------------------------------------------
       document.getElementById('girValue').textContent = roundToPlace(gir, 2);
       
       const girWarning = document.getElementById('girWarning');
