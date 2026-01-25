@@ -270,7 +270,7 @@ body {
             </div>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"> 🔋 Vitalipid® </label>
+            <label class="block text-sm font-medium text-gray-700 mb-1"> 🔋 Vitalipid®(Max = 10ml) </label>
             <div class="relative">
               <input type="number" id="vitalipid" step="0.1" min="0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all pr-12 font-semibold text-blue-700" inputmode="decimal" oninput="handleVitalipidManualChange()">
               <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">ml</span>
@@ -293,7 +293,7 @@ body {
               <div class="flex items-center gap-2">
                 <input type="radio" name="flush" value="custom" onchange="calculateFatAdmin()">
                 <span class="text-sm">+</span>
-                <input type="number" id="flushVolume" min="0" step="1" placeholder="0" class="w-20 px-2 py-1 border border-gray-300 rounded-lg text-sm" inputmode="decimal" oninput="calculateFatAdmin()">
+                <input type="number" id="flushVolume" ... oninput="isFlushManual = true; calculateFatAdmin()">
                 <span class="text-sm text-gray-600">ml ไล่สาย</span>
               </div>
             </div>
@@ -1050,6 +1050,7 @@ body {
 let isPhosNaManual = false, isNaVolManual = false, isKVolManual = false, isMgVolManual = false, isCaVolManual = false;
     let isSoluvitManual = false;
 let isPeditraceManual = false;
+    let isFlushManual = false; // เพิ่มตัวแปรนี้ไว้ด้านบนสุดของ Script
 
     // รายชื่อหอผู้ป่วย
 const wardList = [
@@ -1748,23 +1749,44 @@ function filterHistory() {
     }
 
    function calculateFatAdmin() {
+    // 1. ดึงค่า Volume ต่างๆ
     const fatVolume = parseFloat(document.getElementById('fatVolume').value) || 0;
     const vitalipidVolume = parseFloat(document.getElementById('vitalipid').value) || 0;
+    const currentWard = document.getElementById('ward').value; // ดึงค่า Ward ปัจจุบัน
+    const flushRadioCustom = document.querySelector('input[name="flush"][value="custom"]');
+    const flushInput = document.getElementById('flushVolume');
+
+    // 2. Logic อัตโนมัติสำหรับ Ward เฉพาะ (2ง, 3ง, IMC2ง)
+    const specialWards = ["2ง", "3ง", "IMC2ง"];
+    if (specialWards.includes(currentWard) && !isFlushManual) {
+        const sumFatVit = fatVolume + vitalipidVolume;
+        
+        // เลือก Custom อัตโนมัติ
+        flushRadioCustom.checked = true;
+        
+        if (sumFatVit <= 39) {
+            flushInput.value = 6;
+        } else {
+            flushInput.value = 30;
+        }
+    }
+
+    // 3. คำนวณผลรวม
     const flushOption = document.querySelector('input[name="flush"]:checked').value;
-    const flushVolume = flushOption === 'custom' ? (parseFloat(document.getElementById('flushVolume').value) || 0) : 0;
+    const flushVolume = flushOption === 'custom' ? (parseFloat(flushInput.value) || 0) : 0;
     const prepSplit = document.querySelector('input[name="prepSplit"]:checked').value;
     const manualRate = document.getElementById('manualFatDripRate').value || '0.0';
     
-    // ดึงชื่อ Fat Product ที่เลือก
     const selectedFat = document.querySelector('input[name="fatProduct"]:checked');
     const fatName = selectedFat.parentElement.querySelector('.font-medium').textContent;
     
     const totalVolPlusFlush = fatVolume + flushVolume;
     const grandTotalFatVit = totalVolPlusFlush + vitalipidVolume;
-    const fatCalories = fatVolume * 2; // Logic: 20% Lipid = 2 kcal/ml
+    const fatCalories = fatVolume * 2; 
 
     document.getElementById('totalFatPlusVitalipid').value = roundToPlace(grandTotalFatVit, 1);
 
+    // 4. สรุปข้อความสีเขียว
     let prepText = `
         <p>• <strong>${fatName}</strong>: ${roundToPlace(fatVolume, 1)} ml + รวมไล่สาย (${roundToPlace(flushVolume, 0)} ml): <strong>${roundToPlace(totalVolPlusFlush, 1)}</strong> ml</p>
         <p>• Vitalipid®: <strong>${roundToPlace(vitalipidVolume, 1)}</strong> ml</p>
@@ -1780,6 +1802,8 @@ function filterHistory() {
     
     prepText += `<p>• <strong>Drip Rate:</strong> <span class="text-blue-700 font-bold">${manualRate}</span> ml/hr</p>`;
     document.getElementById('prepDetails').innerHTML = prepText;
+
+    if (typeof updateOrderSummary === "function") updateOrderSummary();
 }
 
     function updateOrderSummary() {
@@ -1887,6 +1911,7 @@ function filterHistory() {
   isCaVolManual = false;
   isRateManual = false;
   isVitalipidManual = false;
+  isFlushManual = false;
 
   
   // 5. คำนวณใหม่เพื่อให้หน้าจอสะอาด
