@@ -419,7 +419,7 @@ body {
         <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">🧬 เลือกผลิตภัณฑ์</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="p-4 bg-purple-50 rounded-xl border border-purple-200">
-            <h3 class="font-semibold text-purple-800 mb-3 flex items-center gap-2"><span>🥩</span> Protein Product</h3>
+            <h3 class="font-semibold text-purple-800 mb-3 flex items-center gap-2"><span> </span> Protein Product</h3>
             <div class="space-y-2">
               <label class="flex items-start gap-3 p-3 bg-white rounded-lg cursor-pointer hover:bg-purple-100 transition-all border border-transparent hover:border-purple-300">
                 <input type="radio" name="proteinProduct" value="aminoven" class="mt-1" checked onchange="calculateAll()">
@@ -643,7 +643,7 @@ body {
 
       <!-- Composition Table -->
       <section class="bg-white rounded-2xl card-shadow p-6 animate-fade-in">
-        <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">📊 องค์ประกอบ TPN</h2>
+        <h2 class="section-title text-lg font-semibold text-gray-800 mb-4">📊 สรุปข้อมูล Order TPN</h2>
         <div class="overflow-x-auto rounded-xl border border-gray-200">
           <table class="w-full text-sm">
             <thead>
@@ -657,17 +657,17 @@ body {
 </thead>
             <tbody id="compositionTable">
   <tr class="border-b border-gray-100 font-bold bg-gray-50">
-    <td colspan="5" class="px-4 py-2 text-gray-800">🍎 Macronutrients</td>
+    <td colspan="5" class="px-4 py-2 text-gray-800">Macronutrients</td>
   </tr>
   <tr class="border-b border-gray-100 hover:bg-gray-50">
-    <td id="row-protein-name" class="px-4 py-2 pl-8 text-purple-700 font-medium">🥩 Protein Product</td>
+    <td id="row-protein-name" class="px-4 py-2 pl-8 text-purple-700 font-medium">Protein Product</td>
     <td id="proteinVol" class="px-4 py-2 text-right font-mono text-gray-600">0.0</td>
     <td id="prep-proteinVol" class="px-4 py-2 text-right font-mono text-blue-600 bg-blue-50/30">0.0</td>
     <td id="proteinCal" class="px-4 py-2 text-right font-mono">0.0</td>
     <td id="proteinOsmol" class="px-4 py-2 text-right font-mono">0</td>
   </tr>
   <tr class="border-b border-gray-100 hover:bg-gray-50">
-    <td class="px-4 py-2 pl-8 text-blue-700">🍬 50% Dextrose</td>
+    <td class="px-4 py-2 pl-8 text-blue-700">50% Dextrose</td>
     <td id="dextroseVol" class="px-4 py-2 text-right font-mono text-gray-600">0.0</td>
     <td id="prep-dextroseVol" class="px-4 py-2 text-right font-mono text-blue-600 bg-blue-50/30 font-bold">0.0</td>
     <td id="dextroseCal" class="px-4 py-2 text-right font-mono">0.0</td>
@@ -770,7 +770,7 @@ body {
   </tr>
 
   <tr class="bg-gray-800 text-white font-bold">
-    <td class="px-4 py-3">รวมปริมาตร PN Bag</td>
+    <td class="px-4 py-3">สรุปข้อมูล</td>
     <td class="px-4 py-3 text-right font-mono text-yellow-400">
       <span id="totalPNVol">0.0</span> <span class="text-[10px] ml-1">ml</span>
     </td>
@@ -1648,7 +1648,7 @@ function filterHistory() {
       // 11. อัปเดตตาราง (ปริมาตรสุทธิ และ ชื่อผลิตภัณฑ์)
       const selectedProt = document.querySelector('input[name="proteinProduct"]:checked');
       const protName = selectedProt.parentElement.querySelector('.font-medium').textContent;
-      document.getElementById('row-protein-name').textContent = "🥩 " + protName;
+      document.getElementById('row-protein-name').textContent = " " + protName;
 
       const otherNameInput = document.getElementById('additiveOtherName').value;
       document.getElementById('row-other-name').textContent = otherNameInput ? "- " + otherNameInput : "- Other Additive";
