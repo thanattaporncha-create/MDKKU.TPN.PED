@@ -1144,7 +1144,7 @@ document.addEventListener('click', function(e) {
     }
 
  async function saveOrder() {
-    // 1. ตรวจสอบข้อมูลเบื้องต้น
+    // 1. ตรวจสอบข้อมูลเบื้องต้นก่อนส่ง
     const hn = document.getElementById('hn').value;
     const patientName = document.getElementById('patientName').value;
     
@@ -1153,86 +1153,86 @@ document.addEventListener('click', function(e) {
         return;
     }
 
-    // 2. รวบรวมข้อมูล (ปรับ ID ให้ตรงกับ HTML ของขิมเป๊ะๆ)
+    // 2. รวบรวมข้อมูลให้ตรงกับหัวตารางใน Google Sheets (41 คอลัมน์)
+    // หมายเหตุ: ชื่อ Key (ด้านซ้าย) ต้องตรงกับหัวตารางใน Sheet เป๊ะๆ
     const data = {
-        action: 'create',
+        action: 'create', // บอก Apps Script ว่าให้ทำส่วนบันทึก
         order_date: document.getElementById('orderDate').value,
         hn: hn,
         patient_name: patientName,
-        ward: document.getElementById('ward').value || document.getElementById('wardInput').value,
+        ward: document.getElementById('ward').value,
         bw: document.getElementById('bw').value,
-        route: document.querySelector('input[name="route"]:checked')?.value,
+        route: document.getElementById('route').value,
         
-        // Targets & Plan (ปรับ ID ให้ตรงกับ HTML)
-        total_volume: document.getElementById('totalVolume').value,
+        // Targets & Plan
+        total_volume: document.getElementById('totalVol').value,
         protein_target: document.getElementById('proteinTarget').value,
         fat_target: document.getElementById('fatTarget').value,
         dextrose_percent: document.getElementById('dextrosePercent').value,
-        phosphorus: document.getElementById('phosphorus').value,
-        sodium: document.getElementById('sodium').value,
-        potassium: document.getElementById('potassium').value,
-        magnesium: document.getElementById('magnesium').value,
-        calcium: document.getElementById('calcium').value,
+        phosphorus: document.getElementById('phosTarget').value,
+        sodium: document.getElementById('naTarget').value,
+        potassium: document.getElementById('kTarget').value,
+        magnesium: document.getElementById('mgTarget').value,
+        calcium: document.getElementById('caTarget').value,
         
-        // Products & Volumes
-        soluvit: document.getElementById('soluvit').value,
-        peditrace: document.getElementById('peditrace').value,
-        vitalipid: document.getElementById('vitalipid').value,
-        zinc_added: document.getElementById('isPreterm').checked, 
-        zinc_volume: document.getElementById('zincVolume').value,
-        heparin_added: document.querySelector('input[name="heparin"]:checked')?.value === 'yes',
-        heparin_units: document.getElementById('heparinUnits').innerText,
-        additive_other_name: document.getElementById('additiveOtherName').value,
-        additive_other_volume: document.getElementById('additiveOtherVolume').value,
-        is_preterm: document.getElementById('isPreterm').checked,
-        protein_product: document.querySelector('input[name="proteinProduct"]:checked')?.value,
-        fat_product: document.querySelector('input[name="fatProduct"]:checked')?.value,
+        // Products & Volumes (ส่วนที่สำคัญมากสำหรับฉลากยา)
+        soluvit: document.getElementById('soluvitVol').innerText,
+        peditrace: document.getElementById('peditraceVol').innerText,
+        vitalipid: document.getElementById('vitalipidVol').innerText,
+        zinc_added: document.getElementById('zincCheck').checked, // ส่ง TRUE/FALSE
+        zinc_volume: document.getElementById('zincVol').innerText,
+        heparin_added: document.getElementById('heparinCheck').checked,
+        heparin_units: document.getElementById('heparinUnitValue').innerText, // จำนวน Unit จริง
+        additive_other_name: document.getElementById('otherName').value,
+        additive_other_volume: document.getElementById('otherVol').value,
+        is_preterm: document.getElementById('pretermCheck').checked,
+        protein_product: document.getElementById('proteinProduct').value,
+        fat_product: document.getElementById('fatProduct').value,
         
-        // Calculated Result (ดึงจาก <span> หรือ <td>)
+        // Calculated Result (ส่วนเตรียมยา)
         pn_volume: document.getElementById('totalPNVol').innerText,
-        fat_volume: document.getElementById('fatVolume').value,
-        rate_tpn: document.getElementById('rateTPN').value,
-        fat_rate: document.getElementById('manualFatDripRate').value,
-        drip_duration: 24, // ค่าคงที่ตาม Logic ในโค้ด
-        prep_dextrose_vol: document.getElementById('prep-dextroseVol').innerText,
-        prep_water_vol: document.getElementById('prep-waterVol').innerText,
+        fat_volume: document.getElementById('totalFatVol').innerText,
+        rate_tpn: document.getElementById('rateTPN').innerText,
+        fat_rate: document.getElementById('rateFat').innerText,
+        drip_duration: document.getElementById('dripHours').value || 24,
+        prep_dextrose_vol: document.getElementById('dextrose50Vol').innerText, // ตัวเลขที่ขิมคำนวณมาเตรียม
+        prep_water_vol: document.getElementById('sterileWaterVol').innerText,  // ตัวเลขน้ำที่ต้องเติม
         
         // Safety & Summary
-        total_calories: document.getElementById('totalCalDisplay').innerText,
+        total_calories: document.getElementById('totalCalories').innerText,
         cal_per_kg: document.getElementById('calPerKg').innerText,
-        osmolarity: document.getElementById('finalOsmol').innerText.replace('~', '').trim(),
-        prep_split: document.querySelector('input[name="prepSplit"]:checked')?.value === 'split',
-        flush_option: document.querySelector('input[name="flush"]:checked')?.value,
-        flush_volume: document.getElementById('flushVolume').value
+        osmolarity: document.getElementById('totalOsmolarity').innerText.replace('~', '').trim(),
+        prep_split: document.getElementById('splitCheck').checked,
+        flush_option: document.getElementById('flushOption').value,
+        flush_volume: document.getElementById('flushVol').innerText
     };
 
     // 3. เริ่มส่งข้อมูล
-    // 🔥 ขิมอย่าลืมเอา URL จากการ Deploy ใน Apps Script มาใส่ตรงนี้แทนอันเดิมนะคะ
-    const scriptURL = API_URL; 
+    const scriptURL = 'ใส่_URL_ของ_APPS_SCRIPT_ที่_DEPLOY_แล้ว_ตรงนี้';
     
-    const saveBtn = document.getElementById('saveOrderBtn');
-    const originalBtnText = saveBtn.innerHTML;
+    // เปลี่ยนปุ่มเป็นสถานะกำลังบันทึกเพื่อป้องกันการกดซ้ำ
+    const saveBtn = document.querySelector('button[onclick="saveOrder()"]');
+    const originalBtnText = saveBtn.innerText;
     saveBtn.disabled = true;
     saveBtn.innerText = "⏳ กำลังบันทึก...";
 
-    try {
-        // ใช้ URLSearchParams เพื่อส่งแบบ Form Data ให้ตรงกับ Apps Script
-        const response = await fetch(scriptURL, {
-            method: 'POST',
-            body: new URLSearchParams(data)
-        });
-        
-        // ถ้าใช้ mode: 'no-cors' จะไม่เห็น response จาก server 
-        // แต่ถ้าเซ็ต Apps Script ดีๆ จะแจ้งเตือนได้ค่ะ
+    fetch(scriptURL, {
+        method: 'POST',
+        mode: 'no-cors', // สำคัญ: เพื่อเลี่ยงปัญหา CORS
+        body: new URLSearchParams(data)
+    })
+    .then(() => {
         alert('✅ บันทึกข้อมูลสำเร็จ! ข้อมูลถูกส่งไปยังระบบ Dashboard เรียบร้อยค่ะ');
-        
-    } catch (error) {
-        console.error('Error!', error.message);
-        alert('❌ เกิดข้อผิดพลาดในการบันทึก: ' + error.message);
-    } finally {
         saveBtn.disabled = false;
-        saveBtn.innerHTML = originalBtnText;
-    }
+        saveBtn.innerText = originalBtnText;
+        // (Optional) สั่ง Reset ฟอร์ม หรือล้างค่า HN หลังบันทึกสำเร็จ
+    })
+    .catch(error => {
+        console.error('Error!', error.message);
+        alert('❌ เกิดข้อผิดพลาดในการบันทึก กรุณาลองใหม่อีกครั้ง');
+        saveBtn.disabled = false;
+        saveBtn.innerText = originalBtnText;
+    });
 }
     function showSaveMessage(message, type) {
       let existingMsg = document.getElementById('saveMessage');
@@ -1938,4 +1938,6 @@ function handleRateManualChange() {
   </script>
 </body>
 </html>
+
+
 
