@@ -478,7 +478,7 @@ body {
             </div>
             <div class="text-xs bg-blue-50 p-2 rounded-lg border border-blue-200">
               <p class="text-gray-700"><strong>Vol:</strong> <span id="phosvol">0.0</span> ml</p>
-              <p class="text-gray-700"><strong>Na from P:</strong> <span id="phoNa">0</span> mEq</p>
+              <p class="text-gray-700"><strong>Na from P:</strong> <input type="number" id="phoNa" step="0.1" class="w-16 px-1 border-b border-blue-300 bg-transparent text-blue-700 font-bold focus:outline-none" oninput="isPhosNaManual = true; calculateAll()"> mEq</p>
             </div>
           </div>
           <div>
@@ -488,7 +488,7 @@ body {
               <input type="number" id="sodium" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" inputmode="decimal" oninput="calculateAll()">
             </div>
             <div class="text-xs bg-blue-50 p-2 rounded-lg border border-blue-200">
-              <p class="text-gray-700"><strong>Vol:</strong> <span id="navol">0.0</span> ml</p>
+             <p class="text-gray-700"><strong>Vol:</strong> <input type="number" id="navol" step="0.1" class="w-16 px-1 border-b border-blue-300 bg-transparent text-blue-700 font-bold focus:outline-none" oninput="isNaVolManual = true; calculateAll()"> ml</p>
             </div>
           </div>
           <div>
@@ -498,7 +498,7 @@ body {
               <input type="number" id="potassium" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" inputmode="decimal" oninput="calculateAll()">
             </div>
             <div class="text-xs bg-blue-50 p-2 rounded-lg border border-blue-200">
-              <p class="text-gray-700"><strong>Vol:</strong> <span id="kvol">0.0</span> ml</p>
+              <p class="text-gray-700"><strong>Vol:</strong> <input type="number" id="kvol" step="0.1" class="w-16 px-1 border-b border-blue-300 bg-transparent text-blue-700 font-bold focus:outline-none" oninput="isKVolManual = true; calculateAll()"> ml</p>
             </div>
           </div>
           <div>
@@ -508,7 +508,7 @@ body {
               <input type="number" id="magnesium" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" inputmode="decimal" oninput="calculateAll()">
             </div>
             <div class="text-xs bg-blue-50 p-2 rounded-lg border border-blue-200">
-              <p class="text-gray-700"><strong>Vol:</strong> <span id="mgvol">0.0</span> ml</p>
+              <p class="text-gray-700"><strong>Vol:</strong> <input type="number" id="mgvol" step="0.01" class="w-16 px-1 border-b border-blue-300 bg-transparent text-blue-700 font-bold focus:outline-none" oninput="isMgVolManual = true; calculateAll()"> ml</p>
             </div>
           </div>
           <div>
@@ -518,7 +518,7 @@ body {
               <input type="number" id="calcium" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" inputmode="decimal" oninput="calculateAll()">
             </div>
             <div class="text-xs bg-blue-50 p-2 rounded-lg border border-blue-200">
-              <p class="text-gray-700"><strong>Vol:</strong> <span id="cavol">0.0</span> ml</p>
+              <p class="text-gray-700"><strong>Vol:</strong> <input type="number" id="cavol" step="0.1" class="w-16 px-1 border-b border-blue-300 bg-transparent text-blue-700 font-bold focus:outline-none" oninput="isCaVolManual = true; calculateAll()"> ml</p>
             </div>
           </div>
         </div>
@@ -1014,6 +1014,8 @@ body {
     let currentTab = 'today';
     let isVitalipidManual = false; // ตัวแปรคุมสถานะการแก้ช่อง Vitalipid เอง
     let isRateManual = false; // ตัวแปรคุมสถานะการแก้ Rate เอง
+    // เพิ่มตัวแปรคุมสถานะการแก้เลข Electrolytes เอง
+let isPhosNaManual = false, isNaVolManual = false, isKVolManual = false, isMgVolManual = false, isCaVolManual = false;
 
     // รายชื่อหอผู้ป่วย
 const wardList = [
