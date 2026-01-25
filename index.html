@@ -536,7 +536,7 @@ body {
               <div>
                 <label class="text-sm font-medium text-gray-700 block mb-1">Soluvit® N</label>
                 <div class="flex items-center gap-2">
-                  <input type="number" id="soluvit" step="0.1" class="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" readonly inputmode="decimal">
+                  <input type="number" id="soluvit" step="0.1" class="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" inputmode="decimal" oninput="isSoluvitManual = true; calculateAll()">
                   <span class="text-gray-600 whitespace-nowrap font-medium">ml</span>
                 </div>
                 <p class="text-xs text-gray-600 mt-1">= 1 × BW (Max 10 ml)</p>
@@ -550,7 +550,8 @@ body {
               <div>
                 <label class="text-sm font-medium text-gray-700 block mb-1">Peditrace®</label>
                 <div class="flex items-center gap-2">
-                  <input type="number" id="peditrace" step="0.1" class="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" readonly inputmode="decimal">
+                  <input type="number" id="peditrace" step="0.1" class="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" inputmode="decimal" oninput="isPeditraceManual = true; calculateAll()">
+
                   <span class="text-gray-600 whitespace-nowrap font-medium">ml</span>
                 </div>
                 <p class="text-xs text-gray-600 mt-1">= 1 × BW (Max 15 ml)</p>
@@ -658,8 +659,8 @@ body {
     <td colspan="4" class="px-4 py-2 text-gray-800">🍎 Macronutrients</td>
   </tr>
   <tr class="border-b border-gray-100 hover:bg-gray-50">
-    <td class="px-4 py-2 pl-8 text-purple-700">🥩 Protein Product</td>
-    <td id="proteinVol" class="px-4 py-2 text-right font-mono">0.0</td>
+  <td id="row-protein-name" class="px-4 py-2 pl-8 text-purple-700 font-medium">🥩 Protein Product</td>
+  <td id="proteinVol" class="px-4 py-2 text-right font-mono">0.0</td>
     <td id="proteinCal" class="px-4 py-2 text-right font-mono">0.0</td>
     <td id="proteinOsmol" class="px-4 py-2 text-right font-mono">0</td>
   </tr>
@@ -736,8 +737,8 @@ body {
     <td class="text-right">-</td>
   </tr>
   <tr class="border-b border-gray-100 text-xs">
-    <td id="row-other-name" class="px-4 py-1 pl-8">- Other Additive</td>
-    <td id="row-other-vol" class="px-4 py-1 text-right font-mono">0.0</td>
+  <td id="row-other-name" class="px-4 py-1 pl-8">- Other Additive</td>
+  <td id="row-other-vol" class="px-4 py-1 text-right font-mono">0.0</td>
     <td class="text-right">-</td>
     <td class="text-right">-</td>
   </tr>
@@ -1028,6 +1029,8 @@ body {
     let isRateManual = false; // ตัวแปรคุมสถานะการแก้ Rate เอง
     // เพิ่มตัวแปรคุมสถานะการแก้เลข Electrolytes เอง
 let isPhosNaManual = false, isNaVolManual = false, isKVolManual = false, isMgVolManual = false, isCaVolManual = false;
+    let isSoluvitManual = false;
+let isPeditraceManual = false;
 
     // รายชื่อหอผู้ป่วย
 const wardList = [
@@ -1569,13 +1572,22 @@ const caVolume = parseFloat(caInput.value) || 0;
 
       const electrolytesVolume = phosVolume + naClVolume + kVolume + mgVolume + caVolume;
 
-      // 7. Vitamins & Trace
-      const soluvitVolume = roundToPlace(Math.min(bw * 1, 10), 1);
-      const peditraceVolume = roundToPlace(Math.min(bw * 1, 15), 1);
-      document.getElementById('soluvit').value = soluvitVolume;
-      document.getElementById('peditrace').value = peditraceVolume;
-      document.getElementById('soluvitWarning').classList.toggle('hidden', !(bw * 1 > 10));
-      document.getElementById('peditraceWarning').classList.toggle('hidden', !(bw * 1 > 15));
+      // --- 7. Vitamins & Trace (ปรับให้แก้ได้) ---
+const soluvitInput = document.getElementById('soluvit');
+if (!isSoluvitManual) {
+    soluvitInput.value = roundToPlace(Math.min(bw * 1, 10), 1);
+}
+const soluvitVolume = parseFloat(soluvitInput.value) || 0;
+
+const peditraceInput = document.getElementById('peditrace');
+if (!isPeditraceManual) {
+    peditraceInput.value = roundToPlace(Math.min(bw * 1, 15), 1);
+}
+const peditraceVolume = parseFloat(peditraceInput.value) || 0;
+
+// แสดงคำเตือนถ้าค่าคำนวณพื้นฐานเกินกำหนด (แม้จะแก้เอง)
+document.getElementById('soluvitWarning').classList.toggle('hidden', !(soluvitVolume > 10));
+document.getElementById('peditraceWarning').classList.toggle('hidden', !(peditraceVolume > 15));
 
       // 8. Additives (Zinc, Heparin, Other)
       let additivesVolume = 0;
@@ -1640,6 +1652,14 @@ const caVolume = parseFloat(caInput.value) || 0;
 const waterVolDisplay = document.getElementById('waterVolDisplay');
 const waterLimitWarning = document.getElementById('waterLimitWarning');
 
+// --- 11. อัปเดตชื่อผลิตภัณฑ์ในตารางองค์ประกอบ ---
+const selectedProt = document.querySelector('input[name="proteinProduct"]:checked');
+const protName = selectedProt.parentElement.querySelector('.font-medium').textContent;
+document.getElementById('row-protein-name').textContent = "🥩 " + protName;
+
+const otherNameInput = document.getElementById('additiveOtherName').value;
+document.getElementById('row-other-name').textContent = otherNameInput ? "- " + otherNameInput : "- Other Additive";
+
 // แสดงค่า Sterile Water ทศนิยม 1 ตำแหน่ง
 waterVolDisplay.textContent = roundToPlace(waterVolume, 1);
 
@@ -1700,48 +1720,39 @@ if (waterVolume < 0) {
       updateOrderSummary();
     } // <--- ปิดฟังก์ชัน calculateAll
 
-    function calculateFatAdmin() {
-  // 1. ดึงค่า Volume ต่างๆ มาเตรียมไว้
-  const fatVolume = parseFloat(document.getElementById('fatVolume').value) || 0;
-  const vitalipidVolume = parseFloat(document.getElementById('vitalipid').value) || 0;
-  const flushOption = document.querySelector('input[name="flush"]:checked').value;
-  const flushVolume = flushOption === 'custom' ? (parseFloat(document.getElementById('flushVolume').value) || 0) : 0;
-  
-  const prepSplit = document.querySelector('input[name="prepSplit"]:checked').value;
-  const manualRate = document.getElementById('manualFatDripRate').value || '0.0';
-  
-  // 2. คำนวณผลรวม Volume อัตโนมัติ
-  const totalVolPlusFlush = fatVolume + flushVolume; // Fat + ไล่สาย
-  const grandTotalFatVit = totalVolPlusFlush + vitalipidVolume; // รวมทั้งหมด
-  
-  // 3. ส่งค่าที่คำนวณได้ไปแสดงในช่อง "Total Volume Fat + Vitalipid"
-  document.getElementById('totalFatPlusVitalipid').value = roundToPlace(grandTotalFatVit, 1);
-  
-  // 4. สร้างข้อความสรุปการเตรียม Fat เพื่อแสดงในกล่องสีเขียว
-  let prepText = `
-    <p>• Fat Volume รวมไล่สาย (${roundToPlace(flushVolume, 0)} ml): <strong>${roundToPlace(totalVolPlusFlush, 1)}</strong> ml</p>
-    <p>• Vitalipid®: <strong>${roundToPlace(vitalipidVolume, 1)}</strong> ml</p>
-    <p>• Total Volume Fat + ไล่สาย + Vitalipid: <span class="text-lg font-bold">${roundToPlace(grandTotalFatVit, 1)}</span> ml</p>
-  `;
+   function calculateFatAdmin() {
+    const fatVolume = parseFloat(document.getElementById('fatVolume').value) || 0;
+    const vitalipidVolume = parseFloat(document.getElementById('vitalipid').value) || 0;
+    const flushOption = document.querySelector('input[name="flush"]:checked').value;
+    const flushVolume = flushOption === 'custom' ? (parseFloat(document.getElementById('flushVolume').value) || 0) : 0;
+    const prepSplit = document.querySelector('input[name="prepSplit"]:checked').value;
+    const manualRate = document.getElementById('manualFatDripRate').value || '0.0';
+    
+    // ดึงชื่อ Fat Product ที่เลือก
+    const selectedFat = document.querySelector('input[name="fatProduct"]:checked');
+    const fatName = selectedFat.parentElement.querySelector('.font-medium').textContent;
+    
+    const totalVolPlusFlush = fatVolume + flushVolume;
+    const grandTotalFatVit = totalVolPlusFlush + vitalipidVolume;
+    const fatCalories = fatVolume * 2; // Logic: 20% Lipid = 2 kcal/ml
 
-  // ส่วนอื่นๆ ให้คงเลข 1 ไว้ตามที่คุณขิมต้องการค่ะ
-  if (prepSplit === 'split') {
-    const splitValue = grandTotalFatVit / 2;
-    prepText += `<p>• <strong>แบ่งเตรียม:</strong> ${roundToPlace(splitValue, 1)} ml × 2 syringe/ขวด</p>`;
-  } else {
-    prepText += `<p>• <strong>แบ่งเตรียม:</strong> ไม่แบ่ง</p>`;
-  }
-  
-  // แสดง Drip Rate ที่คุณขิมกรอกเอง
-  prepText += `<p>• <strong>Drip Rate:</strong> <span class="text-blue-700 font-bold">${manualRate}</span> ml/hr</p>`;
-  
-  // พ่นข้อความทั้งหมดลงไปในหน้าจอ
-  document.getElementById('prepDetails').innerHTML = prepText;
+    document.getElementById('totalFatPlusVitalipid').value = roundToPlace(grandTotalFatVit, 1);
 
-  // [สำคัญมาก] สั่งให้ส่วนสรุป Order สีน้ำเงินอัปเดตตามทันที
-  if (typeof updateOrderSummary === "function") {
-    updateOrderSummary();
-  }
+    let prepText = `
+        <p>• <strong>${fatName}</strong>: ${roundToPlace(fatVolume, 1)} ml + รวมไล่สาย (${roundToPlace(flushVolume, 0)} ml): <strong>${roundToPlace(totalVolPlusFlush, 1)}</strong> ml</p>
+        <p>• Vitalipid®: <strong>${roundToPlace(vitalipidVolume, 1)}</strong> ml</p>
+        <p>• Total Volume Fat + ไล่สาย + Vitalipid: <span class="text-lg font-bold">${roundToPlace(grandTotalFatVit, 1)}</span> ml</p>
+        <p>• <strong>Calories from fat:</strong> <span class="text-amber-700 font-bold">${roundToPlace(fatCalories, 1)}</span> kcal</p>
+    `;
+
+    if (prepSplit === 'split') {
+        prepText += `<p>• <strong>แบ่งเตรียม:</strong> ${roundToPlace(grandTotalFatVit / 2, 1)} ml × 2 syringe/ขวด</p>`;
+    } else {
+        prepText += `<p>• <strong>แบ่งเตรียม:</strong> ไม่แบ่ง</p>`;
+    }
+    
+    prepText += `<p>• <strong>Drip Rate:</strong> <span class="text-blue-700 font-bold">${manualRate}</span> ml/hr</p>`;
+    document.getElementById('prepDetails').innerHTML = prepText;
 }
 
     function updateOrderSummary() {
