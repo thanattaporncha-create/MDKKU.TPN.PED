@@ -1735,12 +1735,18 @@ function filterHistory() {
       const naTotalMeq = phosNa + (naClVolume * 0.5); 
       const naOsmol = pnPrepVol > 0 ? (2 * naTotalMeq * 1000 / pnPrepVol) : 0;
       const kOsmol = pnPrepVol > 0 ? (2 * (potassium * bw) * 1000 / pnPrepVol) : 0;
+      const mgOsmol = pnPrepVol > 0 ? (mgVolume * 4 * 1000 / pnPrepVol) : 0; //
+      const caOsmol = pnPrepVol > 0 ? (caVolume * 0.651 * 1000 / pnPrepVol) : 0; //
 
-      const totalOsmolValue = Math.round(protOsmol + dexOsmol + naOsmol + kOsmol);
+      // 3. รวมค่าทั้งหมด (รวม Mg และ Ca เข้าไปด้วย)
+      const totalOsmolValue = Math.round(protOsmol + dexOsmol + naOsmol + kOsmol + mgOsmol + caOsmol);
       document.getElementById('proteinOsmol').textContent = "~ " + Math.round(protOsmol);
       document.getElementById('dextroseOsmol').textContent = "~ " + Math.round(dexOsmol);
       document.getElementById('row-na-osmol').textContent = "~ " + Math.round(naOsmol);
       document.getElementById('row-k-osmol').textContent = "~ " + Math.round(kOsmol);
+     // เพิ่มบรรทัดแสดงผลของ Mg และ Ca ตรงนี้ค่ะ
+      document.getElementById('row-mg-osmol').textContent = "~ " + Math.round(mgOsmol);
+      document.getElementById('row-ca-osmol').textContent = "~ " + Math.round(caOsmol);
       document.getElementById('totalOsmol').textContent = "~ " + totalOsmolValue;
       document.getElementById('finalOsmol').textContent = "~ " + totalOsmolValue;
 
