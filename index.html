@@ -1433,46 +1433,14 @@ if (specialWards.includes(currentWard) && !isFlushManual) {
     }
 
     function resetForm() {
-  // 1. คืนค่าวันที่และข้อมูลผู้ป่วย
+  // 1. คืนค่าวันที่และข้อมูลพื้นฐาน
   document.getElementById('orderDate').valueAsDate = new Date();
   document.getElementById('hn').value = '';
   document.getElementById('patientName').value = '';
   document.getElementById('wardInput').value = ''; 
   document.getElementById('ward').value = '';      
 
-  // 2. คืนค่าสถานะ Manual และค่า Fat ของ Vitalipid (ที่เพิ่มใหม่)
-  isVitalipidManual = false; 
-  document.getElementById('vitalipidFatValue').value = "0.4";
-  document.getElementById('deductVitalipid').checked = false;
-
-  // 3. คืนค่าตัวเลขอื่นๆ
-  document.getElementById('bw').value = '';
-  document.getElementById('totalVolume').value = '';
-  document.getElementById('fatTarget').value = '';
-  document.getElementById('proteinTarget').value = '';
-  document.getElementById('dextrosePercent').value = '';
-  document.getElementById('flushVolume').value = '';
-  document.getElementById('phosphorus').value = '';
-  document.getElementById('sodium').value = '';
-  document.getElementById('potassium').value = '';
-  document.getElementById('magnesium').value = '';
-  document.getElementById('calcium').value = '';
-  document.getElementById('isPreterm').checked = false;
-  document.getElementById('additiveOtherName').value = '';
-  document.getElementById('additiveOtherVolume').value = '';
-  
-  // 4. คืนค่า Radio Buttons
-  document.querySelector('input[name="route"][value="central"]').checked = true;
-  document.querySelector('input[name="proteinProduct"][value="aminoven"]').checked = true;
-  document.querySelector('input[name="fatProduct"][value="smof"]').checked = true;
-  document.querySelector('input[name="flush"][value="none"]').checked = true;
-  document.querySelector('input[name="dripDuration"][value="12"]').checked = true;
-  document.querySelector('input[name="prepSplit"][value="none"]').checked = true;
-  document.querySelector('input[name="heparin"][value="no"]').checked = true;
-  document.querySelector('input[name="zinc"][value="no"]').checked = true;
-  document.getElementById('pnFlushVolume').value = 30; // เพิ่มบรรทัดนี้
-
-  // เพิ่มใน resetForm()
+  // 2. รีเซ็ตสถานะ Manual Flags ทั้งหมดให้เป็น false
   isPhosNaManual = false;
   isNaVolManual = false;
   isKVolManual = false;
@@ -1480,11 +1448,90 @@ if (specialWards.includes(currentWard) && !isFlushManual) {
   isCaVolManual = false;
   isRateManual = false;
   isVitalipidManual = false;
+  isSoluvitManual = false;
+  isPeditraceManual = false;
   isFlushManual = false;
 
-  
-  // 5. คำนวณใหม่เพื่อให้หน้าจอสะอาด
+  // 3. ล้างค่าตัวเลขใน Inputs
+  const inputsToClear = [
+    'bw', 'totalVolume', 'fatTarget', 'proteinTarget', 'dextrosePercent',
+    'phosphorus', 'sodium', 'potassium', 'magnesium', 'calcium',
+    'flushVolume', 'vitalipid', 'soluvit', 'peditrace', 'zincVolume',
+    'manualFatDripRate', 'additiveOtherName', 'additiveOtherVolume', 'rateTPN'
+  ];
+  inputsToClear.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  // 4. คืนค่า Default ให้ฟิลด์ที่มีค่าเริ่มต้นเฉพาะ
+  document.getElementById('pnFlushVolume').value = 30;
+  document.getElementById('vitalipidFatValue').value = 0.4;
+  document.getElementById('deductVitalipid').checked = false;
+  document.getElementById('isPreterm').checked = false;
+
+  // 5. คืนค่า Radio Buttons
+  document.querySelector('input[name="route"][value="central"]').checked = true;
+  document.querySelector('input[name="proteinProduct"][value="aminoven"]').checked = true;
+  document.querySelector('input[name="fatProduct"][value="smof"]').checked = true;
+  document.querySelector('input[name="flush"][value="none"]').checked = true;
+  document.querySelector('input[name="prepSplit"][value="none"]').checked = true;
+  document.querySelector('input[name="heparin"][value="no"]').checked = true;
+  document.querySelector('input[name="zinc"][value="no"]').checked = true;
+
+  // 6. ล้างตัวเลขในตารางสรุป (Composition Table)
+  const tableCells = [
+    'proteinVol', 'prep-proteinVol', 'proteinCal', 'proteinOsmol',
+    'dextroseVol', 'prep-dextroseVol', 'dextroseCal', 'dextroseOsmol',
+    'row-phos-vol', 'prep-phos-vol', 'row-phos-osmol',
+    'row-na-vol', 'prep-na-vol', 'row-na-osmol',
+    'row-k-vol', 'prep-k-vol', 'row-k-osmol',
+    'row-mg-vol', 'prep-mg-vol', 'row-mg-osmol',
+    'row-ca-vol', 'prep-ca-vol', 'row-ca-osmol',
+    'row-soluvit-vol', 'prep-soluvit-vol',
+    'row-peditrace-vol', 'prep-peditrace-vol',
+    'row-zinc-vol', 'prep-zinc-vol',
+    'row-heparin-vol', 'prep-heparin-vol',
+    'row-other-vol', 'prep-other-vol',
+    'waterVolDisplay', 'prep-waterVol',
+    'totalPNVol', 'totalPrepVolDisplay', 'totalPNCal', 'totalOsmol'
+  ];
+  tableCells.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '0.0';
+  });
+
+  // 7. ล้างค่าสรุปด้านล่างสุด
+  document.getElementById('totalCalDisplay').textContent = '0.0';
+  document.getElementById('calPerKg').textContent = '0.0';
+  document.getElementById('finalOsmol').textContent = '0';
+  document.getElementById('girValue').textContent = '0.00';
+  document.getElementById('heparinUnits').textContent = '0';
+  document.getElementById('heparinVolume').textContent = '0.00';
+  document.getElementById('phosvol').textContent = '0.0';
+
+  // 8. ซ่อน Warning และส่วนเสริมต่างๆ
+  const elementsToHide = [
+    'girWarning', 'osmolWarning', 'caMaxWarning', 'vitalipidMaxWarning',
+    'soluvitWarning', 'peditraceWarning', 'waterLimitWarning',
+    'zincOptions', 'zincVolumeDiv', 'heparinValueDiv'
+  ];
+  elementsToHide.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+  });
+
+  // 9. ล้างหน้าตาของ input flush (ที่เคยเปลี่ยนสีไว้)
+  const flushInput = document.getElementById('flushVolume');
+  flushInput.classList.remove('bg-amber-50', 'border-amber-300', 'bg-blue-50', 'border-blue-400');
+  flushInput.classList.add('bg-blue-50', 'border-blue-200');
+
+  // 10. สั่งคำนวณใหม่ 1 ครั้งเพื่อให้ UI อัปเดตสถานะเริ่มต้น
   calculateAll();
+  
+  // เลื่อนหน้าจอขึ้นไปบนสุด
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  console.log("🧹 ล้างข้อมูลทั้งหมดเรียบร้อยแล้วค่ะ");
 }
 
     // ========== Event Listeners ==========
