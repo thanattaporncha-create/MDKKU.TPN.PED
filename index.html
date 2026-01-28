@@ -1465,75 +1465,80 @@ if (specialWards.includes(currentWard) && !isFlushManual) {
     }
 
  // 1. ปรับปรุงฟังก์ชัน Reset ให้ล้างค่า Fat Admin ได้ครบถ้วน
-function resetForm() {
-    // คืนค่าวันที่เป็น "วันนี้"
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('orderDate').value = today;
+// --- จุดที่ 1: ฟังก์ชัน Reset ที่ล้างค่าได้เกลี้ยง 100% ---
+    function resetForm() {
+        // คืนค่าวันที่เป็น "วันนี้"
+        const today = new Date().toLocaleDateString('en-CA'); // รูปแบบ YYYY-MM-DD ที่แน่นอนที่สุด
+        document.getElementById('orderDate').value = today;
 
-    // ล้างข้อมูลผู้ป่วย
-    document.getElementById('hn').value = '';
-    document.getElementById('patientName').value = '';
-    document.getElementById('wardInput').value = ''; 
-    document.getElementById('ward').value = '';     
+        // ล้างข้อมูลผู้ป่วย
+        document.getElementById('hn').value = '';
+        document.getElementById('patientName').value = '';
+        document.getElementById('wardInput').value = ''; 
+        document.getElementById('ward').value = '';     
 
-    // คืนค่าสถานะ Manual ทั้งหมด
-    isPhosNaManual = false; isNaVolManual = false; isKVolManual = false;
-    isMgVolManual = false; isCaVolManual = false; isRateManual = false;
-    isVitalipidManual = false; isFlushManual = false; isSoluvitManual = false;
-    isPeditraceManual = false;
+        // คืนค่าสถานะ Manual ทั้งหมด
+        isPhosNaManual = false; isNaVolManual = false; isKVolManual = false;
+        isMgVolManual = false; isCaVolManual = false; isRateManual = false;
+        isVitalipidManual = false; isFlushManual = false; isSoluvitManual = false;
+        isPeditraceManual = false;
 
-    // ล้างค่าตัวเลข Macronutrients & Electrolytes
-    document.getElementById('bw').value = '';
-    document.getElementById('totalVolume').value = '';
-    document.getElementById('fatTarget').value = '';
-    document.getElementById('proteinTarget').value = '';
-    document.getElementById('dextrosePercent').value = '';
-    document.getElementById('phosphorus').value = '';
-    document.getElementById('sodium').value = '';
-    document.getElementById('potassium').value = '';
-    document.getElementById('magnesium').value = '';
-    document.getElementById('calcium').value = '';
+        // ล้างค่าตัวเลขทั้งหมด
+        const fieldsToClear = [
+            'bw', 'totalVolume', 'fatTarget', 'proteinTarget', 'dextrosePercent',
+            'phosphorus', 'sodium', 'potassium', 'magnesium', 'calcium',
+            'flushVolume', 'manualFatDripRate', 'additiveOtherName', 'additiveOtherVolume'
+        ];
+        fieldsToClear.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
 
-    // --- จุดที่แก้ไข: ล้างค่า Fat Admin ---
-    document.getElementById('flushVolume').value = ''; // ล้าง Vol ไล่สาย fat
-    document.getElementById('manualFatDripRate').value = ''; // ล้าง Drip rate fat
-    
-    // รีเซ็ตสีพื้นหลังของช่องไล่สายให้เป็นปกติ
-    const flushInput = document.getElementById('flushVolume');
-    flushInput.classList.remove('bg-amber-50', 'border-amber-300', 'border-blue-400');
-    flushInput.classList.add('bg-blue-50');
+        // คืนสีพื้นหลังของช่องไล่สาย
+        const flushInput = document.getElementById('flushVolume');
+        flushInput.classList.remove('bg-amber-50', 'border-amber-300', 'border-blue-400');
+        flushInput.classList.add('bg-blue-50');
 
-    // คืนค่า Default อื่นๆ
-    document.getElementById('pnFlushVolume').value = 30;
-    document.getElementById('vitalipidFatValue').value = "0.4";
-    document.getElementById('deductVitalipid').checked = false;
-    document.getElementById('isPreterm').checked = false;
-    document.getElementById('additiveOtherName').value = '';
-    document.getElementById('additiveOtherVolume').value = '';
+        // คืนค่า Default
+        document.getElementById('pnFlushVolume').value = 30;
+        document.getElementById('vitalipidFatValue').value = "0.4";
 
-    // คืนค่า Radio Buttons
-    document.querySelector('input[name="route"][value="central"]').checked = true;
-    document.querySelector('input[name="proteinProduct"][value="aminoven"]').checked = true;
-    document.querySelector('input[name="fatProduct"][value="smof"]').checked = true;
-    document.querySelector('input[name="flush"][value="none"]').checked = true;
-    document.querySelector('input[name="prepSplit"][value="none"]').checked = true;
-    document.querySelector('input[name="heparin"][value="no"]').checked = true;
+        // คืนค่า Radio
+        document.querySelector('input[name="route"][value="central"]').checked = true;
+        document.querySelector('input[name="proteinProduct"][value="aminoven"]').checked = true;
+        document.querySelector('input[name="fatProduct"][value="smof"]').checked = true;
+        document.querySelector('input[name="flush"][value="none"]').checked = true;
+        document.querySelector('input[name="prepSplit"][value="none"]').checked = true;
+        document.querySelector('input[name="heparin"][value="no"]').checked = true;
+        document.getElementById('isPreterm').checked = false;
 
-    // คำนวณใหม่
-    calculateAll();
-    document.getElementById('hn').focus();
-}
+        // คำนวณใหม่ และ Focus HN
+        calculateAll();
+        document.getElementById('hn').focus();
+    }
 
-// 2. ตรวจสอบให้แน่ใจว่าโหลดหน้าแรกแล้ววันที่ขึ้น Today ทันที
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 TPN Calculator พร้อมใช้งาน');
-    
-    const dateInput = document.getElementById('orderDate');
-    const today = new Date().toISOString().split('T')[0];
-    dateInput.value = today;
+    // --- จุดที่ 2: ส่วน DOMContentLoaded (สำหรับวันที่ขึ้นทันทีที่เปิดหน้า) ---
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('🚀 TPN Calculator พร้อมใช้งาน');
+        
+        // ตั้งค่าวันที่เป็นวันนี้ทันที
+        const dateInput = document.getElementById('orderDate');
+        const today = new Date().toLocaleDateString('en-CA'); 
+        dateInput.value = today;
 
-    calculateAll(); // คำนวณค่าเริ่มต้น
-});
+        // เรียกคำนวณตั้งต้น
+        calculateAll();
+    });
+
+    // เพิ่ม Event Listeners สำหรับ Route
+    document.querySelectorAll('input[name="route"]').forEach(radio => {
+        radio.addEventListener('change', calculateAll);
+    });
+
+    // ฟังก์ชันล็อคสถานะ Manual
+    function handleVitalipidManualChange() { isVitalipidManual = true; calculateAll(); }
+    function handleRateManualChange() { isRateManual = true; calculateAll(); }
+
   </script>
 </body>
 </html>
