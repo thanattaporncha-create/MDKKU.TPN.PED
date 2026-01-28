@@ -842,7 +842,7 @@ body {
     </main>
 
     <!-- History Page -->
-    <div id="historyPage" class="page-hidden">
+    <div id="historyPage" class="page-hidden" style="display: none;">
       <header class="gradient-header text-white py-4 px-6 sticky top-0 z-50 shadow-lg no-print">
         <div class="max-w-6xl mx-auto flex items-center justify-between">
           <div class="flex items-center gap-3">
@@ -1043,7 +1043,7 @@ body {
     // ========================================
     
     // 🔧 Configuration
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwKlO0u9E4fb4jANoKRPZC1loVzt3JobhmAmtccIhHM_YhM1nDfVsNYgztFF5YHekc/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyHf_GCfSlb3OV-WExV9yZSaI9Vq3n3qxbMN7iGtPvCC_bivB-b1f6zwn99jih_RLgY/exec';
     
     // Global variables
     let allOrders = [];
@@ -1208,7 +1208,7 @@ document.addEventListener('click', function(e) {
     };
 
     // 3. เริ่มส่งข้อมูล
-    const scriptURL = 'ใส่_URL_ของ_APPS_SCRIPT_ที่_DEPLOY_แล้ว_ตรงนี้';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyHf_GCfSlb3OV-WExV9yZSaI9Vq3n3qxbMN7iGtPvCC_bivB-b1f6zwn99jih_RLgY/exec';
     
     // เปลี่ยนปุ่มเป็นสถานะกำลังบันทึกเพื่อป้องกันการกดซ้ำ
     const saveBtn = document.querySelector('button[onclick="saveOrder()"]');
@@ -1251,14 +1251,18 @@ document.addEventListener('click', function(e) {
 
     // ========== Navigation ==========
 
-   async function goToHistory() {
-    document.getElementById('mainContent').classList.add('page-hidden');
-    document.getElementById('historyPage').classList.remove('page-hidden');
+  async function goToHistory() {
+    // 1. สั่งซ่อนหน้าคำนวณแบบเด็ดขาด (ลบพื้นที่ทิ้งไปเลย)
+    const mainSection = document.getElementById('mainContent');
+    mainSection.style.display = 'none'; 
     
-    // 1. ตั้งค่า Tab เริ่มต้นเป็น 'today'
+    // 2. แสดงหน้า Dashboard
+    const historyPage = document.getElementById('historyPage');
+    historyPage.classList.remove('page-hidden');
+    historyPage.style.display = 'block'; 
+    
+    // 3. ปรับสถานะปุ่ม Tab ให้สีฟ้าอยู่ที่ "วันนี้"
     currentTab = 'today';
-    
-    // 2. ปรับสถานะปุ่ม Tab ในหน้าจอให้ "วันนี้" ไฮไลท์สีฟ้า
     const tabs = document.querySelectorAll('.tab-button');
     tabs.forEach(t => {
         if(t.innerText.includes('วันนี้')) {
@@ -1270,14 +1274,22 @@ document.addEventListener('click', function(e) {
         }
     });
 
-    // 3. ดึงข้อมูลใหม่จาก Server
+    // 4. ดึงข้อมูลใหม่มาแสดง
     await fetchAllOrders(); 
 }
 
-    function goToCalculator() {
-      document.getElementById('historyPage').classList.add('page-hidden');
-      document.getElementById('mainContent').classList.remove('page-hidden');
-    }
+function goToCalculator() {
+    // 1. ซ่อนหน้า Dashboard
+    const historyPage = document.getElementById('historyPage');
+    historyPage.style.display = 'none';
+    
+    // 2. แสดงหน้าคำนวณหลักกลับมา
+    const mainSection = document.getElementById('mainContent');
+    mainSection.style.display = 'block';
+    
+    // 3. รีเฟรชการคำนวณ
+    if (typeof calculateAll === "function") calculateAll();
+}
 
     // ========== Filter & Display ==========
 
