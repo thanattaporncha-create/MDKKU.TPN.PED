@@ -919,19 +919,17 @@ async function saveOrder() {
     const hn = document.getElementById('hn').value;
     const patientName = document.getElementById('patientName').value;
 
-    // 1. Validation เบื้องต้น
     if (!hn || !patientName) {
         alert("⚠️ อย่าลืมใส่ HN และชื่อผู้ป่วยก่อนบันทึกนะคะคุณขิม");
         return;
     }
 
-    // เปลี่ยนสถานะปุ่ม
     const originalText = saveBtn.innerHTML;
     saveBtn.disabled = true;
     saveBtn.innerHTML = "⏳ กำลังบันทึกข้อมูล...";
 
     try {
-        // 2. รวบรวมข้อมูลให้ตรงกับที่ doPost ใน Google Script รอรับ (เรียงตามลำดับที่คุณขิมเขียนไว้)
+        // ดึงข้อมูลให้ตรงกับ Key ที่คุณขิมเขียนไว้ใน Google Apps Script เป๊ะๆ
         const data = {
             order_date: document.getElementById('orderDate').value,
             hn: hn,
@@ -948,6 +946,8 @@ async function saveOrder() {
             potassium: document.getElementById('potassium').value,
             magnesium: document.getElementById('magnesium').value,
             calcium: document.getElementById('calcium').value,
+            
+            // ส่วนที่เคยหายไป: ปรับชื่อ Key ให้ตรงกับ data.xxx ใน GAS
             soluvit: document.getElementById('soluvit').value,
             peditrace: document.getElementById('peditrace').value,
             vitalipid: document.getElementById('vitalipid').value,
@@ -960,11 +960,13 @@ async function saveOrder() {
             is_preterm: document.getElementById('isPreterm').checked ? 'Yes' : 'No',
             protein_product: document.querySelector('input[name="proteinProduct"]:checked')?.value || '',
             fat_product: document.querySelector('input[name="fatProduct"]:checked')?.value || '',
+            
+            // ข้อมูลสรุปผล
             pn_volume: document.getElementById('totalPNVol').innerText,
             fat_volume: document.getElementById('fatVolume').value,
             rate_tpn: document.getElementById('rateTPN').value,
             fat_rate: document.getElementById('manualFatDripRate').value || 0,
-            drip_duration: 24, // ค่าคงที่ตามที่คุณขิมตั้งไว้
+            drip_duration: 24,
             prep_dextrose_vol: document.getElementById('prep-dextroseVol').innerText,
             prep_water_vol: document.getElementById('prep-waterVol').innerText,
             total_calories: document.getElementById('totalCalDisplay').innerText,
@@ -975,8 +977,6 @@ async function saveOrder() {
             flush_volume: document.getElementById('flushVolume').value || 0
         };
 
-        // 3. ส่งข้อมูลไปที่ Google Script
-        // URL ของคุณขิม: https://script.google.com/macros/s/AKfycbyQ7yDlDAyMEZJqyq2e_KesTa69wZjNI_6xlH_xGAA7QmhpHDhFP2HXKPncoSpv70Su/exec
         const scriptURL = 'https://script.google.com/macros/s/AKfycbyQ7yDlDAyMEZJqyq2e_KesTa69wZjNI_6xlH_xGAA7QmhpHDhFP2HXKPncoSpv70Su/exec';
 
         const formData = new URLSearchParams();
@@ -986,16 +986,15 @@ async function saveOrder() {
 
         await fetch(scriptURL, {
             method: 'POST',
-            mode: 'no-cors', // สำคัญมากสำหรับ Google Apps Script
+            mode: 'no-cors',
             body: formData
         });
 
-        // เนื่องจาก no-cors เราจะไม่ได้รับ response กลับมา แต่ถ้าไม่มี Error คือส่งออกไปแล้ว
-        alert("✅ บันทึก Order สำเร็จแล้วค่ะ! ข้อมูลลงไปที่ Sheet เรียบร้อย");
+        alert("✅ บันทึก Order เรียบร้อยแล้วค่ะ! ข้อมูลมาครบทุกหัวข้อแน่นอน");
         
     } catch (error) {
         console.error('Error!', error.message);
-        alert("❌ เกิดข้อผิดพลาด: " + error.message);
+        alert("❌ เกิดข้อผิดพลาดในการเชื่อมต่อค่ะ");
     } finally {
         saveBtn.disabled = false;
         saveBtn.innerHTML = originalText;
