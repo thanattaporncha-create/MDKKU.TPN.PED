@@ -1538,7 +1538,35 @@ if (specialWards.includes(currentWard) && !isFlushManual) {
     // ฟังก์ชันล็อคสถานะ Manual
     function handleVitalipidManualChange() { isVitalipidManual = true; calculateAll(); }
     function handleRateManualChange() { isRateManual = true; calculateAll(); }
+// --- จุดที่ 2: ส่วนจัดการเมื่อเปิดหน้าเว็บครั้งแรก (รวมร่างใหม่) ---
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('🚀 TPN Calculator พร้อมใช้งาน - กำลังตั้งค่าเริ่มต้น');
+        
+        // 1. ตั้งค่าวันที่ปัจจุบัน (วันนี้)
+        const dateInput = document.getElementById('orderDate');
+        if (dateInput) {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            dateInput.value = `${year}-${month}-${day}`;
+        }
 
+        // 2. ตั้งค่า Event Listeners สำหรับ Route (กดเลือกแล้วให้คำนวณทันที)
+        document.querySelectorAll('input[name="route"]').forEach(radio => {
+            radio.addEventListener('change', calculateAll);
+        });
+
+        // 3. สั่งคำนวณค่าเริ่มต้นทันที
+        calculateAll();
+        
+        // 4. Focus ไปที่ช่อง HN เพื่อให้สแกนบาร์โค้ดได้ทันที
+        document.getElementById('hn').focus();
+    });
+
+    // ฟังก์ชันล็อคสถานะ Manual เมื่อคุณขิมแก้ไขตัวเลขเอง
+    function handleVitalipidManualChange() { isVitalipidManual = true; calculateAll(); }
+    function handleRateManualChange() { isRateManual = true; calculateAll(); }
   </script>
 </body>
 </html>
