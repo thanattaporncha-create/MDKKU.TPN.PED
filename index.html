@@ -477,7 +477,12 @@ body {
               <input type="number" id="phosphorus" step="0.1" min="0" placeholder="0.0" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl input-focus transition-all" inputmode="decimal" oninput="calculateAll()">
             </div>
             <div class="text-xs bg-blue-50 p-2 rounded-lg border border-blue-200">
-              <p class="text-gray-700"><strong>Vol:</strong> <span id="phosvol">0.0</span> ml</p>
+             <p class="text-gray-700">
+  <strong>Vol:</strong> 
+  <input type="number" id="phosvol" step="0.1" 
+    class="w-16 px-1 border-b border-blue-300 bg-transparent text-blue-700 font-bold focus:outline-none" 
+    oninput="isPhosVolManual = true; calculateAll()"> ml
+</p>
               <p class="text-gray-700"><strong>Na from P:</strong> <input type="number" id="phoNa" step="0.1" class="w-16 px-1 border-b border-blue-300 bg-transparent text-blue-700 font-bold focus:outline-none" oninput="isPhosNaManual = true; calculateAll()"> mEq</p>
             </div>
           </div>
@@ -851,13 +856,13 @@ body {
     const API_URL = 'https://script.google.com/macros/s/AKfycbwPoO9myjOqM_eBI1H5hI2W_5EEUxCxevz21OFj75dvV7IyLL2oI8NEkbrzu6VaEhVC/exec';
     
     // Global variables
-    let isVitalipidManual = false; // ตัวแปรคุมสถานะการแก้ช่อง Vitalipid เอง
-    let isRateManual = false; // ตัวแปรคุมสถานะการแก้ Rate เอง
-    // เพิ่มตัวแปรคุมสถานะการแก้เลข Electrolytes เอง
-let isPhosNaManual = false, isNaVolManual = false, isKVolManual = false, isMgVolManual = false, isCaVolManual = false;
+    let isVitalipidManual = false;
+    let isRateManual = false;
+  let isPhosNaManual = false, isNaVolManual = false, isKVolManual = false, isMgVolManual = false, isCaVolManual = false;
     let isSoluvitManual = false;
 let isPeditraceManual = false;
     let isFlushManual = false; // เพิ่มตัวแปรนี้ไว้ด้านบนสุดของ Script
+    let isPhosVolManual = false;
 
     // รายชื่อหอผู้ป่วย
 const wardList = [
@@ -1095,7 +1100,12 @@ document.addEventListener('click', function(e) {
       const magnesium = parseFloat(document.getElementById('magnesium').value) || 0;
       const calcium = parseFloat(document.getElementById('calcium').value) || 0;
 
-      const phosVolume = roundToPlace(phosphorus * bw, 1);
+      // ส่วนคำนวณ Phosphorus
+const phosInput = document.getElementById('phosvol');
+if (!isPhosVolManual) {
+    phosInput.value = roundToPlace(phosphorus * bw, 1);
+}
+const phosVolume = parseFloat(phosInput.value) || 0;
       document.getElementById('phosvol').textContent = phosVolume;
       
       const phoNaInput = document.getElementById('phoNa');
@@ -1433,6 +1443,8 @@ if (specialWards.includes(currentWard) && !isFlushManual) {
     }
 
     function resetForm() {
+      isPhosVolManual = false; // คืนค่าสถานะ Manual
+document.getElementById('phosvol').value = ''; // ล้างค่าในช่อง
   // 1. คืนค่าวันที่และข้อมูลพื้นฐาน
   document.getElementById('orderDate').valueAsDate = new Date();
   document.getElementById('hn').value = '';
