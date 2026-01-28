@@ -916,22 +916,45 @@ document.addEventListener('click', function(e) {
     // ========== API Functions ==========
 async function saveOrder() {
     const saveBtn = document.getElementById('saveOrderBtn');
-    const hn = document.getElementById('hn').value;
-    const patientName = document.getElementById('patientName').value;
+    
+    // --- 1. ดึงค่าจาก Field ต่างๆ เพื่อเตรียมตรวจสอบ ---
+    const orderDate = document.getElementById('orderDate').value;
+    const hn = document.getElementById('hn').value.trim();
+    const patientName = document.getElementById('patientName').value.trim();
+    const waterVol = parseFloat(document.getElementById('waterVolDisplay').textContent) || 0;
 
-    if (!hn || !patientName) {
-        alert("⚠️ อย่าลืมใส่ HN และชื่อผู้ป่วยก่อนบันทึกนะคะคุณขิม");
+    // --- 2. Validation (การตรวจสอบความถูกต้องก่อนบันทึก) ---
+    
+    // ตรวจสอบวันที่
+    if (!orderDate) {
+        alert("⚠️ กรุณาระบุ 'วันที่ Order' ก่อนบันทึก Order");
+        document.getElementById('orderDate').focus();
         return;
     }
 
+    // ตรวจสอบ HN และชื่อ
+    if (!hn || !patientName) {
+        alert("⚠️ กรุณากรอกข้อมูล 'HN' และ 'ชื่อผู้ป่วย' ให้ครบถ้วนก่อนบันทึก");
+        if (!hn) document.getElementById('hn').focus();
+        else document.getElementById('patientName').focus();
+        return;
+    }
+
+    // ตรวจสอบว่าสูตรเตรียมได้จริงไหม (น้ำห้ามติดลบ)
+    if (waterVol < 0) {
+        alert("❌ ไม่สามารถบันทึกได้: ปริมาตรสารอาหารรวมเกินกว่า Total Volume (ค่าน้ำติดลบ) กรุณาตรวจสอบสูตรอีกครั้งค่ะ");
+        return;
+    }
+
+    // --- 3. การเตรียมส่งข้อมูล ---
     const originalText = saveBtn.innerHTML;
     saveBtn.disabled = true;
     saveBtn.innerHTML = "⏳ กำลังบันทึกข้อมูล...";
 
     try {
-        // ดึงข้อมูลให้ตรงกับ Key ที่คุณขิมเขียนไว้ใน Google Apps Script เป๊ะๆ
+        // รวบรวมข้อมูลทั้งหมดตามโครงสร้างที่คุณขิมต้องการ
         const data = {
-            order_date: document.getElementById('orderDate').value,
+            order_date: orderDate,
             hn: hn,
             patient_name: patientName,
             ward: document.getElementById('ward').value,
@@ -946,8 +969,6 @@ async function saveOrder() {
             potassium: document.getElementById('potassium').value,
             magnesium: document.getElementById('magnesium').value,
             calcium: document.getElementById('calcium').value,
-            
-            // ส่วนที่เคยหายไป: ปรับชื่อ Key ให้ตรงกับ data.xxx ใน GAS
             soluvit: document.getElementById('soluvit').value,
             peditrace: document.getElementById('peditrace').value,
             vitalipid: document.getElementById('vitalipid').value,
@@ -961,7 +982,7 @@ async function saveOrder() {
             protein_product: document.querySelector('input[name="proteinProduct"]:checked')?.value || '',
             fat_product: document.querySelector('input[name="fatProduct"]:checked')?.value || '',
             
-            // ข้อมูลสรุปผล
+            // ข้อมูลสรุปผลการคำนวณ
             pn_volume: document.getElementById('totalPNVol').innerText,
             fat_volume: document.getElementById('fatVolume').value,
             rate_tpn: document.getElementById('rateTPN').value,
@@ -979,26 +1000,34 @@ async function saveOrder() {
 
         const scriptURL = 'https://script.google.com/macros/s/AKfycbyQ7yDlDAyMEZJqyq2e_KesTa69wZjNI_6xlH_xGAA7QmhpHDhFP2HXKPncoSpv70Su/exec';
 
+        // สร้าง FormData สำหรับส่งแบบ POST
         const formData = new URLSearchParams();
         for (const key in data) {
             formData.append(key, data[key]);
         }
 
+        // ส่งข้อมูลไปยัง Google Apps Script
         await fetch(scriptURL, {
             method: 'POST',
-            mode: 'no-cors',
+            mode: 'no-cors', // ตามที่คุณขิมกำหนดไว้เดิม
             body: formData
         });
 
-        alert("✅ บันทึก Order เรียบร้อยแล้วค่ะ! ข้อมูลมาครบทุกหัวข้อแน่นอน");
+        alert("✅ บันทึก Order เรียบร้อยแล้วค่ะ! ข้อมูลถูกส่งไปที่ฐานข้อมูลแล้ว");
         
     } catch (error) {
         console.error('Error!', error.message);
-        alert("❌ เกิดข้อผิดพลาดในการเชื่อมต่อค่ะ");
+        alert("❌ เกิดข้อผิดพลาดในการเชื่อมต่อค่ะ กรุณาลองใหม่อีกครั้ง");
     } finally {
         saveBtn.disabled = false;
         saveBtn.innerHTML = originalText;
     }
+}
+  // เพิ่มไว้ในฟังก์ชัน saveOrder()
+const waterVol = parseFloat(document.getElementById('waterVolDisplay').textContent);
+if (waterVol < 0) {
+    alert("❌ ไม่สามารถบันทึกได้: ปริมาตรสารอาหารเกิน Total Volume (Sterile Water ติดลบ) กรุณาปรับลดสารอาหารหรือเพิ่ม Total Volume ค่ะ");
+    return;
 }
     function showSaveMessage(message, type) {
       let existingMsg = document.getElementById('saveMessage');
