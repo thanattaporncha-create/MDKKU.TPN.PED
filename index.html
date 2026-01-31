@@ -173,7 +173,7 @@ body {
 <body class="bg-gray-50">
   <div id="app">
     <!-- Header -->
-    <header class="gradient-header text-white py-4 px-6 sticky top-0 z-50 shadow-lg no-print">
+   <header class="gradient-header text-white py-4 px-6 sticky top-0 z-50 shadow-lg no-print">
       <div class="max-w-6xl mx-auto flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
@@ -186,11 +186,15 @@ body {
             <p id="hospitalName" class="text-blue-100 text-sm">โรงพยาบาลศรีนครินทร์</p>
           </div>
         </div>
+        
         <div class="flex items-center gap-2">
-          <button onclick="resetForm()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium backdrop-blur-sm">
+          <a href="dashboard.html" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-all text-sm font-bold shadow-lg flex items-center gap-2">
+            📊 ดูรายการทั้งหมด
+          </a>
+          <button onclick="resetForm()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all text-sm font-medium backdrop-blur-sm border border-white/20">
             🔄 รีเซ็ต
           </button>
-       </div>
+        </div>
       </div>
     </header>
 
