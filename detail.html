@@ -110,7 +110,7 @@
     </div>
   </div>
 
-  <script>
+ <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycby5VHSu21HRdyIYzJvrloomNF_zw1LmZA97aDgyfMGrTPMuzwZGdhPdUz0ucNS3RX8D7g/exec';
 
     document.addEventListener('DOMContentLoaded', fetchOrderDetail);
@@ -126,9 +126,9 @@
     }
 
     function displayReport(o) {
-      // Basic Info - ดึงค่าจากหัวตารางใน Sheet
+      // 1. Header & Patient Info (ใช้ชื่อคอลัมน์เป๊ะๆ)
       document.getElementById('pDate').innerText = o.order_date ? new Date(o.order_date).toLocaleDateString('th-TH') : '-';
-      document.getElementById('pWard').innerText = o.ward || '-'; // แก้ไขให้โชว์ Ward
+      document.getElementById('pWard').innerText = o.ward || '-';
       document.getElementById('pName').innerText = o.patient_name || '-';
       document.getElementById('pHN').innerText = o.hn || '-';
       document.getElementById('pBW').innerText = o.bw || '-';
@@ -137,44 +137,75 @@
       document.getElementById('rate-pn').innerText = o.rate_tpn || '0';
       document.getElementById('genTime').innerText = new Date().toLocaleString('th-TH');
 
-      // Summary
+      // 2. Summary Stats
       document.getElementById('val-cal').innerText = (o.total_calories || 0) + ' kcal';
       document.getElementById('val-osmol').innerText = (o.osmolarity || 0) + ' mOsm/L';
       const gir = o.bw > 0 ? ((o.rate_tpn * o.dextrose_percent) / (o.bw * 6)).toFixed(1) : 0;
       document.getElementById('val-gir').innerText = gir;
 
-      // Table Data (Mapping ตามค่าจริงใน Sheet)
+      // 3. Table Mapping (ดึงจากคอลัมน์ที่คุณขิมส่งมา)
       const table = document.getElementById('tpnTable');
-      const items = [
-        { n: "10% Aminoven® infant", d: `${o.protein_target} g/kg`, v: o.protein_volume, p: o.protein_volume, note: "" },
-        { n: "50% Dextrose", d: `${o.dextrose_percent} %`, v: o.dextrose_volume, p: (o.dextrose_volume * 1.25).toFixed(1), note: `GIR: ${gir}` },
-        { n: "Glycophos® (P)", d: `${o.phosphorus} mmol/kg`, v: o.phosphorus_volume, p: o.phosphorus_volume, note: "" },
-        { n: "Sodium Chloride (NaCl)", d: `${o.sodium} mEq/kg`, v: o.sodium_volume, p: o.sodium_volume, note: "" },
-        { n: "Potassium Chloride (KCl)", d: `${o.potassium} mEq/kg`, v: o.potassium_volume, p: o.potassium_volume, note: "" },
-        { n: "Calcium Gluconate", d: `${o.calcium} mmol/kg`, v: o.calcium_volume, p: o.calcium_volume, note: "" },
-        { n: "Magnesium Sulfate", d: `${o.magnesium} mmol/kg`, v: o.magnesium_volume, p: o.magnesium_volume, note: "" },
-        { n: "Sterile Water", d: "-", v: o.water_volume, p: (o.water_volume * 1.1).toFixed(1), note: "" }
+      
+      const categories = [
+        { label: "Macronutrients", items: [
+          { n: o.protein_product || "Amino Acid", d: `${o.protein_target} g/kg`, v: o.protein_volume, p: o.protein_volume, k: (o.protein_target * o.bw * 4).toFixed(1), m: "~ 283" },
+          { n: "50% Dextrose", d: `${o.dextrose_percent} %`, v: o.dextrose_volume, p: o.prep_dextrose_vol, k: (o.total_calories * 0.5).toFixed(1), m: "~ 293" }
+        ]},
+        { label: "Electrolytes", items: [
+          { n: "- Glycophos (P)", d: `${o.phosphorus} mmol/kg`, v: o.phosphorus_volume, p: o.phosphorus_volume, k: "-", m: "0" },
+          { n: "- 3% NaCl (Na)", d: `${o.sodium} mEq/kg`, v: o.sodium_volume, p: o.sodium_volume, k: "-", m: "~ 57" },
+          { n: "- KCl (K)", d: `${o.potassium} mEq/kg`, v: o.potassium_volume, p: o.potassium_volume, k: "-", m: "~ 57" },
+          { n: "- 50% MgSO4 (Mg)", d: `${o.magnesium} mmol/kg`, v: o.magnesium_volume, p: o.magnesium_volume, k: "-", m: "~ 4" },
+          { n: "- 10% Ca Gluconate (Ca)", d: `${o.calcium} mmol/kg`, v: o.calcium_volume, p: o.calcium_volume, k: "-", m: "~ 25" }
+        ]},
+        { label: "Vitamins & Trace Element", items: [
+          { n: "- Soluvit N", d: "-", v: o.soluvit, p: o.soluvit, k: "-", m: "-" },
+          { n: "- Peditrace", d: "-", v: o.peditrace, p: o.peditrace, k: "-", m: "-" }
+        ]},
+        { label: "Additives", items: [
+          { n: `- Zinc (${o.zinc_added})`, d: "-", v: o.zinc_volume, p: o.zinc_volume, k: "-", m: "-" },
+          { n: `- Heparin (${o.heparin_added})`, d: `${o.heparin_units} units`, v: o.heparin_volume, p: o.heparin_volume, k: "-", m: "-" },
+          { n: `- ${o.additive_other_name || 'สารอื่นๆ'}`, d: "-", v: o.additive_other_volume, p: o.additive_other_volume, k: "-", m: "-" }
+        ]},
+        { label: "Sterile Water", items: [
+          { n: "Sterile Water", d: "-", v: o.water_volume, p: o.prep_water_vol, k: "-", m: "-" }
+        ]}
       ];
 
-      table.innerHTML = items.map(i => `
-        <tr class="${!i.v || i.v == 0 ? 'text-gray-400' : ''}">
-          <td class="font-bold">${i.n}</td>
-          <td class="text-center">${i.d || '-'}</td>
-          <td class="text-center font-black">${i.v || 0} ml</td>
-          <td class="text-center font-bold text-blue-800">${i.p || 0} ml</td>
-          <td class="text-[9px] italic">${i.note}</td>
-        </tr>
-      `).join('');
+      let tableHtml = "";
+      categories.forEach(cat => {
+        tableHtml += `<tr class="category-row"><td colspan="6" class="bg-gray-100 font-bold px-2 py-1 text-[10px] uppercase">${cat.label}</td></tr>`;
+        cat.items.forEach(i => {
+          const val = parseFloat(i.v) || 0;
+          tableHtml += `
+            <tr class="${val === 0 ? 'text-gray-400' : ''}">
+              <td class="pl-4 font-bold">${i.n}</td>
+              <td class="text-center font-mono">${i.d || '-'}</td>
+              <td class="text-center font-black">${val} ml</td>
+              <td class="text-center font-bold text-blue-800 bg-blue-50/50">${i.p || 0} ml</td>
+              <td class="text-center text-gray-600">${i.k || '-'}</td>
+              <td class="text-center text-gray-600">${i.m || '-'}</td>
+            </tr>`;
+        });
+      });
+      table.innerHTML = tableHtml;
 
-      // Lipid / Fat Section
+      // 4. Lipid / Fat Section (ใช้หัวคอลัมน์ใหม่)
       if (o.fat_volume > 0) {
         document.getElementById('fatSection').classList.remove('hidden');
         document.getElementById('fat-vol-base').innerText = o.fat_volume;
-        document.getElementById('fat-vita').innerText = o.vita_fat_volume || '0';
-        document.getElementById('fat-total-all').innerText = (parseFloat(o.fat_volume) + 6).toFixed(1);
-        document.getElementById('fat-rate').innerText = o.fat_rate || '1';
-        document.getElementById('fat-kcal').innerText = o.fat_calories || '0';
-        document.getElementById('fat-split').innerText = o.fat_split || 'ไม่แบ่ง';
+        // รวมไล่สาย (บวก 6 อัตโนมัติ หรือตามสูตรคุณขิม)
+        document.getElementById('fat-plus-line').innerText = (parseFloat(o.fat_volume) + 6).toFixed(1);
+        document.getElementById('fat-vita').innerText = o.vitalipid || '0';
+        // Total = Fat + 6 + Vitalipid
+        const totalFatAll = parseFloat(o.fat_volume) + 6 + (parseFloat(o.vitalipid) || 0);
+        document.getElementById('fat-total-all').innerText = totalFatAll.toFixed(1);
+        
+        document.getElementById('fat-rate').innerText = o.fat_rate || '-';
+        // คำนวณแคลอรี่จาก Fat (Fat target * BW * 9 kcal/g หรือตามที่บันทึก)
+        const fatKcal = (o.fat_target * o.bw * 9).toFixed(1);
+        document.getElementById('fat-kcal').innerText = fatKcal;
+        document.getElementById('fat-split').innerText = o.prep_split || 'ไม่ระบุ';
       }
     }
   </script>
