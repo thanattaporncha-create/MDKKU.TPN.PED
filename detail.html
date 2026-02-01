@@ -126,7 +126,7 @@
     }
 
     function displayReport(o) {
-      // 1. Header & Patient Info (ใช้ชื่อคอลัมน์เป๊ะๆ)
+      // 1. ข้อมูลพื้นฐาน (ใช้ชื่อคอลัมน์ตามที่คุณขิมส่งมาเป๊ะๆ)
       document.getElementById('pDate').innerText = o.order_date ? new Date(o.order_date).toLocaleDateString('th-TH') : '-';
       document.getElementById('pWard').innerText = o.ward || '-';
       document.getElementById('pName').innerText = o.patient_name || '-';
@@ -137,75 +137,78 @@
       document.getElementById('rate-pn').innerText = o.rate_tpn || '0';
       document.getElementById('genTime').innerText = new Date().toLocaleString('th-TH');
 
-      // 2. Summary Stats
+      // 2. ข้อมูลสรุปด้านล่าง
       document.getElementById('val-cal').innerText = (o.total_calories || 0) + ' kcal';
       document.getElementById('val-osmol').innerText = (o.osmolarity || 0) + ' mOsm/L';
       const gir = o.bw > 0 ? ((o.rate_tpn * o.dextrose_percent) / (o.bw * 6)).toFixed(1) : 0;
       document.getElementById('val-gir').innerText = gir;
 
-      // 3. Table Mapping (ดึงจากคอลัมน์ที่คุณขิมส่งมา)
+      // 3. ตาราง TPN Composition (PN Solution)
       const table = document.getElementById('tpnTable');
       
       const categories = [
-        { label: "Macronutrients", items: [
-          { n: o.protein_product || "Amino Acid", d: `${o.protein_target} g/kg`, v: o.protein_volume, p: o.protein_volume, k: (o.protein_target * o.bw * 4).toFixed(1), m: "~ 283" },
-          { n: "50% Dextrose", d: `${o.dextrose_percent} %`, v: o.dextrose_volume, p: o.prep_dextrose_vol, k: (o.total_calories * 0.5).toFixed(1), m: "~ 293" }
+        { label: "MACRONUTRIENTS", items: [
+          // เปลี่ยนชื่อตัวแปรให้ตรงกับ Sheet: protein_volume, dextrose_volume, prep_dextrose_vol
+          { n: o.protein_product || "Aminoven", d: `${o.protein_target} g/kg`, v: o.protein_volume, p: o.protein_volume, note: "" },
+          { n: "50% Dextrose", d: `${o.dextrose_percent} %`, v: o.dextrose_volume, p: o.prep_dextrose_vol, note: `GIR: ${gir}` }
         ]},
-        { label: "Electrolytes", items: [
-          { n: "- Glycophos (P)", d: `${o.phosphorus} mmol/kg`, v: o.phosphorus_volume, p: o.phosphorus_volume, k: "-", m: "0" },
-          { n: "- 3% NaCl (Na)", d: `${o.sodium} mEq/kg`, v: o.sodium_volume, p: o.sodium_volume, k: "-", m: "~ 57" },
-          { n: "- KCl (K)", d: `${o.potassium} mEq/kg`, v: o.potassium_volume, p: o.potassium_volume, k: "-", m: "~ 57" },
-          { n: "- 50% MgSO4 (Mg)", d: `${o.magnesium} mmol/kg`, v: o.magnesium_volume, p: o.magnesium_volume, k: "-", m: "~ 4" },
-          { n: "- 10% Ca Gluconate (Ca)", d: `${o.calcium} mmol/kg`, v: o.calcium_volume, p: o.calcium_volume, k: "-", m: "~ 25" }
+        { label: "ELECTROLYTES", items: [
+          { n: "- Glycophos (P)", d: `${o.phosphorus} mmol/kg`, v: o.phosphorus_volume, p: o.phosphorus_volume, note: "" },
+          { n: "- 3% NaCl (Na)", d: `${o.sodium} mEq/kg`, v: o.sodium_volume, p: o.sodium_volume, note: "" },
+          { n: "- KCl (K)", d: `${o.potassium} mEq/kg`, v: o.potassium_volume, p: o.potassium_volume, note: "" },
+          { n: "- 50% MgSO4 (Mg)", d: `${o.magnesium} mmol/kg`, v: o.magnesium_volume, p: o.magnesium_volume, note: "" },
+          { n: "- 10% Ca Gluconate (Ca)", d: `${o.calcium} mmol/kg`, v: o.calcium_volume, p: o.calcium_volume, note: "" }
         ]},
-        { label: "Vitamins & Trace Element", items: [
-          { n: "- Soluvit N", d: "-", v: o.soluvit, p: o.soluvit, k: "-", m: "-" },
-          { n: "- Peditrace", d: "-", v: o.peditrace, p: o.peditrace, k: "-", m: "-" }
+        { label: "VITAMINS & TRACE ELEMENT", items: [
+          { n: "- Soluvit N", d: "-", v: o.soluvit, p: o.soluvit, note: "" },
+          { n: "- Peditrace", d: "-", v: o.peditrace, p: o.peditrace, note: "" }
         ]},
-        { label: "Additives", items: [
-          { n: `- Zinc (${o.zinc_added})`, d: "-", v: o.zinc_volume, p: o.zinc_volume, k: "-", m: "-" },
-          { n: `- Heparin (${o.heparin_added})`, d: `${o.heparin_units} units`, v: o.heparin_volume, p: o.heparin_volume, k: "-", m: "-" },
-          { n: `- ${o.additive_other_name || 'สารอื่นๆ'}`, d: "-", v: o.additive_other_volume, p: o.additive_other_volume, k: "-", m: "-" }
+        { label: "ADDITIVES", items: [
+          { n: `- Zinc (${o.zinc_added})`, d: "-", v: o.zinc_volume, p: o.zinc_volume, note: "" },
+          { n: `- Heparin (${o.heparin_added})`, d: `${o.heparin_units} units`, v: o.heparin_volume, p: o.heparin_volume, note: "" },
+          { n: `- ${o.additive_other_name || 'Additives อื่นๆ'}`, d: "-", v: o.additive_other_volume, p: o.additive_other_volume, note: "" }
         ]},
-        { label: "Sterile Water", items: [
-          { n: "Sterile Water", d: "-", v: o.water_volume, p: o.prep_water_vol, k: "-", m: "-" }
+        { label: "STERILE WATER", items: [
+          { n: "Sterile Water", d: "-", v: o.water_volume, p: o.prep_water_vol, note: "" }
         ]}
       ];
 
       let tableHtml = "";
       categories.forEach(cat => {
-        tableHtml += `<tr class="category-row"><td colspan="6" class="bg-gray-100 font-bold px-2 py-1 text-[10px] uppercase">${cat.label}</td></tr>`;
+        tableHtml += `<tr class="category-row bg-gray-100 font-bold"><td colspan="5" class="px-2 py-1 text-[10px] uppercase border border-black">${cat.label}</td></tr>`;
         cat.items.forEach(i => {
-          const val = parseFloat(i.v) || 0;
+          const vol = parseFloat(i.v) || 0;
           tableHtml += `
-            <tr class="${val === 0 ? 'text-gray-400' : ''}">
-              <td class="pl-4 font-bold">${i.n}</td>
-              <td class="text-center font-mono">${i.d || '-'}</td>
-              <td class="text-center font-black">${val} ml</td>
-              <td class="text-center font-bold text-blue-800 bg-blue-50/50">${i.p || 0} ml</td>
-              <td class="text-center text-gray-600">${i.k || '-'}</td>
-              <td class="text-center text-gray-600">${i.m || '-'}</td>
+            <tr class="${vol === 0 ? 'text-gray-400' : ''}">
+              <td class="pl-4 font-bold border border-black">${i.n}</td>
+              <td class="text-center font-mono border border-black">${i.d || '-'}</td>
+              <td class="text-center font-black border border-black">${vol} ml</td>
+              <td class="text-center font-bold text-blue-800 border border-black">${parseFloat(i.p) || 0} ml</td>
+              <td class="text-[9px] italic border border-black">${i.note}</td>
             </tr>`;
         });
       });
       table.innerHTML = tableHtml;
 
-      // 4. Lipid / Fat Section (ใช้หัวคอลัมน์ใหม่)
+      // 4. Lipid / Fat Preparation Section
       if (o.fat_volume > 0) {
         document.getElementById('fatSection').classList.remove('hidden');
         document.getElementById('fat-vol-base').innerText = o.fat_volume;
-        // รวมไล่สาย (บวก 6 อัตโนมัติ หรือตามสูตรคุณขิม)
-        document.getElementById('fat-plus-line').innerText = (parseFloat(o.fat_volume) + 6).toFixed(1);
+        // ปรับการคำนวณบวกสาย (6ml) ให้ตรงตาม Sheet
+        const totalWithLine = (parseFloat(o.fat_volume) + 6).toFixed(1);
+        document.getElementById('fat-plus-line').innerText = totalWithLine;
         document.getElementById('fat-vita').innerText = o.vitalipid || '0';
-        // Total = Fat + 6 + Vitalipid
-        const totalFatAll = parseFloat(o.fat_volume) + 6 + (parseFloat(o.vitalipid) || 0);
-        document.getElementById('fat-total-all').innerText = totalFatAll.toFixed(1);
+        
+        // Total All = Fat + 6 + Vitalipid
+        const totalAll = parseFloat(totalWithLine) + (parseFloat(o.vitalipid) || 0);
+        document.getElementById('fat-total-all').innerText = totalAll.toFixed(1);
         
         document.getElementById('fat-rate').innerText = o.fat_rate || '-';
-        // คำนวณแคลอรี่จาก Fat (Fat target * BW * 9 kcal/g หรือตามที่บันทึก)
-        const fatKcal = (o.fat_target * o.bw * 9).toFixed(1);
-        document.getElementById('fat-kcal').innerText = fatKcal;
-        document.getElementById('fat-split').innerText = o.prep_split || 'ไม่ระบุ';
+        // คำนวณแคลอรี่จาก Fat (9 kcal/g)
+        document.getElementById('fat-kcal').innerText = (o.fat_target * o.bw * 9).toFixed(1);
+        document.getElementById('fat-split').innerText = o.prep_split || 'ไม่แบ่ง';
+      } else {
+        document.getElementById('fatSection').classList.add('hidden');
       }
     }
   </script>
