@@ -9,27 +9,28 @@
   <style>
     * { font-family: 'Sarabun', sans-serif; color: #000; line-height: 1.2; }
     @media print {
-      @page { size: A4; margin: 10mm; }
+      @page { size: A4; margin: 8mm; }
       body { background-color: white; }
       .no-print { display: none !important; }
       .print-container { border: none !important; width: 100% !important; margin: 0 !important; padding: 0 !important; box-shadow: none !important; }
     }
     .print-container { width: 210mm; min-height: 297mm; margin: 0 auto; background: white; padding: 10mm; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
-    th, td { border: 1px solid #000; padding: 4px 8px; font-size: 11px; }
-    th { background-color: #f2f2f2; font-weight: 800; }
-    .section-header { background-color: #1e3a5f; color: white !important; padding: 4px 10px; font-weight: 800; font-size: 12px; margin-top: 10px; border-radius: 4px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 5px; }
+    th, td { border: 1px solid #000; padding: 3px 6px; font-size: 11px; }
+    th { background-color: #f2f2f2; font-weight: 800; text-transform: uppercase; }
+    .section-header { background-color: #1e3a5f; color: white !important; padding: 3px 10px; font-weight: 800; font-size: 12px; margin-top: 8px; border-radius: 4px; }
+    .category-row { background-color: #f9f9f9; font-weight: 800; font-size: 10px; }
   </style>
 </head>
 <body class="bg-gray-100">
 
   <div class="max-w-[210mm] mx-auto my-4 flex justify-between no-print px-4">
     <button onclick="window.close()" class="font-bold text-gray-500">← กลับ Dashboard</button>
-    <button onclick="window.print()" class="bg-blue-600 text-white px-8 py-2 rounded-full font-black shadow-lg">🖨️ พิมพ์รายงาน A4</button>
+    <button onclick="window.print()" class="bg-blue-600 text-white px-8 py-2 rounded-full font-black shadow-lg">🖨️ พิมพ์รายงาน (A4)</button>
   </div>
 
-  <div class="print-container">
-    <div class="flex justify-between items-start border-b-2 border-black pb-2 mb-4">
+  <div class="print-container border border-gray-200 shadow-xl">
+    <div class="flex justify-between items-start border-b-2 border-black pb-2 mb-3">
       <div>
         <h1 class="text-xl font-extrabold tracking-tighter uppercase">TPN Order Report</h1>
         <p class="text-[11px] font-bold">โรงพยาบาลศรีนครินทร์ คณะแพทยศาสตร์ มหาวิทยาลัยขอนแก่น</p>
@@ -41,19 +42,19 @@
         </div>
         <div class="text-center border-2 border-black px-4 py-1 rounded-lg">
           <p class="text-[9px] font-black uppercase text-gray-500">Ward</p>
-          <p id="pWard" class="text-3xl font-black leading-none text-black">-</p>
+          <p id="pWard" class="text-2xl font-black leading-none">-</p>
         </div>
       </div>
     </div>
 
-    <div class="grid grid-cols-4 gap-4 text-[12px] mb-4 bg-gray-50 p-3 rounded-xl border border-gray-200">
-      <div class="col-span-2"><span class="font-bold">Name:</span> <span id="pName" class="font-black">-</span></div>
-      <div><span class="font-bold">HN:</span> <span id="pHN" class="font-black font-mono">-</span></div>
-      <div><span class="font-bold">Weight:</span> <span id="pBW" class="font-black">-</span> kg</div>
-      <div><span class="font-bold">Route:</span> <span id="pRoute" class="font-black uppercase">-</span></div>
-      <div><span class="font-bold">PN Vol:</span> <span id="vol-pn" class="font-black">-</span> ml</div>
-      <div><span class="font-bold">Total Rate:</span> <span id="rate-pn" class="font-black">-</span> ml/hr</div>
-      <div class="italic text-[9px] text-gray-400 text-right">Gen: <span id="genTime"></span></div>
+    <div class="grid grid-cols-4 gap-3 text-[11px] mb-3 bg-gray-50 p-3 rounded-lg border border-gray-200 font-black">
+      <div class="col-span-2">Name: <span id="pName" class="text-sm text-blue-900">-</span></div>
+      <div>HN: <span id="pHN" class="font-mono">-</span></div>
+      <div>Weight: <span id="pBW">-</span> kg</div>
+      <div>Route: <span id="pRoute" class="uppercase">-</span></div>
+      <div>PN Vol: <span id="vol-pn" class="text-blue-800">-</span> ml</div>
+      <div>Total Rate: <span id="rate-pn" class="text-blue-800">-</span> ml/hr</div>
+      <div class="italic text-[8px] text-gray-400 text-right">Gen: <span id="genTime"></span></div>
     </div>
 
     <div class="section-header">🧪 TPN Composition (PN Solution)</div>
@@ -61,10 +62,10 @@
       <thead>
         <tr>
           <th class="text-left">องค์ประกอบ</th>
-          <th>Dosage</th>
-          <th>ปริมาณ (ml)</th>
-          <th>สำหรับเตรียม (ml)</th>
-          <th>Calories / Note</th>
+          <th class="w-20">Dosage</th>
+          <th class="w-24">ปริมาณ (ml)</th>
+          <th class="w-24">สำหรับเตรียม (ml)</th>
+          <th class="w-24">Note</th>
         </tr>
       </thead>
       <tbody id="tpnTable"></tbody>
@@ -72,14 +73,15 @@
 
     <div id="fatSection" class="hidden">
       <div class="section-header">🧈 สรุปการเตรียม Fat (Lipid Emulsion)</div>
-      <div class="grid grid-cols-2 gap-4 p-3 border-2 border-dashed border-green-600 rounded-xl mt-2 bg-green-50/30">
-        <div class="text-sm space-y-1">
-          <p><span class="font-bold">20% SMOF Lipid:</span> <span id="fat-vol-base" class="font-black">-</span> ml</p>
-          <p><span class="font-bold">Vitalipid-N Infant:</span> <span id="fat-vita" class="font-black">-</span> ml</p>
-          <p class="text-blue-700 font-bold border-t border-blue-200 pt-1">Total Fat + รวมไล่สาย (6ml): <span id="fat-total-all" class="text-lg">-</span> ml</p>
+      <div class="p-3 border-2 border-dashed border-green-600 rounded-lg mt-1 bg-green-50/20 grid grid-cols-2 gap-4">
+        <div class="text-[11px] space-y-1">
+          <p><span class="font-bold">Lipid Product:</span> <span id="fat-product" class="font-black text-green-800">-</span></p>
+          <p><span class="font-bold">20% SMOF Lipid:</span> <span id="fat-vol-base" class="font-black">-</span> ml + รวมไล่สาย (6 ml): <span id="fat-plus-line" class="font-black">-</span> ml</p>
+          <p><span class="font-bold">Vitalipid-N Infant:</span> <span id="fat-vita" class="font-black text-blue-700">-</span> ml</p>
+          <p class="text-blue-900 font-bold border-t border-blue-200 pt-1 text-sm">Total Fat + รวมไล่สาย + Vitalipid: <span id="fat-total-all" class="text-base">-</span> ml</p>
         </div>
-        <div class="text-sm space-y-1 border-l border-green-200 pl-4">
-          <p><span class="font-bold text-green-700">Drip Rate:</span> <span id="fat-rate" class="font-bold text-lg">-</span> ml/hr</p>
+        <div class="text-[11px] space-y-1 border-l border-green-200 pl-4">
+          <p><span class="font-bold text-green-700">Drip Rate:</span> <span id="fat-rate" class="font-bold text-base">-</span> ml/hr</p>
           <p><span class="font-bold">Calories from fat:</span> <span id="fat-kcal" class="font-black">-</span> kcal</p>
           <p><span class="font-bold">การแบ่งเตรียม:</span> <span id="fat-split" class="font-black">-</span></p>
         </div>
@@ -87,22 +89,22 @@
     </div>
 
     <div class="section-header">📊 Clinical Summary</div>
-    <div class="grid grid-cols-3 gap-2 mt-2">
+    <div class="grid grid-cols-3 gap-2 mt-1">
       <div class="border border-black p-2 text-center bg-gray-50">
-        <p class="text-[9px] font-bold uppercase">Total Calories</p>
+        <p class="text-[9px] font-bold uppercase text-gray-400">Total Calories</p>
         <p id="val-cal" class="text-lg font-black">-</p>
       </div>
       <div class="border border-black p-2 text-center bg-gray-50">
-        <p class="text-[9px] font-bold uppercase">Osmolarity</p>
+        <p class="text-[9px] font-bold uppercase text-gray-400">Osmolarity</p>
         <p id="val-osmol" class="text-lg font-black">-</p>
       </div>
       <div class="border border-black p-2 text-center bg-gray-50">
-        <p class="text-[9px] font-bold uppercase">GIR (mg/kg/min)</p>
+        <p class="text-[9px] font-bold uppercase text-gray-400">GIR (mg/kg/min)</p>
         <p id="val-gir" class="text-lg font-black">-</p>
       </div>
     </div>
 
-    <div class="mt-auto pt-12 grid grid-cols-4 gap-4 text-center">
+    <div class="mt-auto pt-10 grid grid-cols-4 gap-4 text-center">
       <div class="border-t border-black pt-1"><p class="text-[9px] font-black uppercase">Physician</p></div>
       <div class="border-t border-black pt-1"><p class="text-[9px] font-black uppercase">Verified By (Phar)</p></div>
       <div class="border-t border-black pt-1"><p class="text-[9px] font-black uppercase">Prepared By</p></div>
@@ -110,7 +112,7 @@
     </div>
   </div>
 
- <script>
+  <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycby5VHSu21HRdyIYzJvrloomNF_zw1LmZA97aDgyfMGrTPMuzwZGdhPdUz0ucNS3RX8D7g/exec';
 
     document.addEventListener('DOMContentLoaded', fetchOrderDetail);
@@ -126,7 +128,6 @@
     }
 
     function displayReport(o) {
-      // 1. ข้อมูลพื้นฐาน (ใช้ชื่อคอลัมน์ตามที่คุณขิมส่งมาเป๊ะๆ)
       document.getElementById('pDate').innerText = o.order_date ? new Date(o.order_date).toLocaleDateString('th-TH') : '-';
       document.getElementById('pWard').innerText = o.ward || '-';
       document.getElementById('pName').innerText = o.patient_name || '-';
@@ -137,78 +138,69 @@
       document.getElementById('rate-pn').innerText = o.rate_tpn || '0';
       document.getElementById('genTime').innerText = new Date().toLocaleString('th-TH');
 
-      // 2. ข้อมูลสรุปด้านล่าง
       document.getElementById('val-cal').innerText = (o.total_calories || 0) + ' kcal';
       document.getElementById('val-osmol').innerText = (o.osmolarity || 0) + ' mOsm/L';
       const gir = o.bw > 0 ? ((o.rate_tpn * o.dextrose_percent) / (o.bw * 6)).toFixed(1) : 0;
       document.getElementById('val-gir').innerText = gir;
 
-      // 3. ตาราง TPN Composition (PN Solution)
       const table = document.getElementById('tpnTable');
-      
+      // รายการสารอาหารตามหัวคอลัมน์เป๊ะๆ จากคุณขิม
       const categories = [
-        { label: "MACRONUTRIENTS", items: [
-          // เปลี่ยนชื่อตัวแปรให้ตรงกับ Sheet: protein_volume, dextrose_volume, prep_dextrose_vol
-          { n: o.protein_product || "Aminoven", d: `${o.protein_target} g/kg`, v: o.protein_volume, p: o.protein_volume, note: "" },
+        { label: "Macronutrients", items: [
+          { n: o.protein_product || "Amino Acid", d: `${o.protein_target} g/kg`, v: o.protein_volume, p: o.protein_volume, note: "" },
           { n: "50% Dextrose", d: `${o.dextrose_percent} %`, v: o.dextrose_volume, p: o.prep_dextrose_vol, note: `GIR: ${gir}` }
         ]},
-        { label: "ELECTROLYTES", items: [
+        { label: "Electrolytes", items: [
           { n: "- Glycophos (P)", d: `${o.phosphorus} mmol/kg`, v: o.phosphorus_volume, p: o.phosphorus_volume, note: "" },
-          { n: "- 3% NaCl (Na)", d: `${o.sodium} mEq/kg`, v: o.sodium_volume, p: o.sodium_volume, note: "" },
-          { n: "- KCl (K)", d: `${o.potassium} mEq/kg`, v: o.potassium_volume, p: o.potassium_volume, note: "" },
-          { n: "- 50% MgSO4 (Mg)", d: `${o.magnesium} mmol/kg`, v: o.magnesium_volume, p: o.magnesium_volume, note: "" },
-          { n: "- 10% Ca Gluconate (Ca)", d: `${o.calcium} mmol/kg`, v: o.calcium_volume, p: o.calcium_volume, note: "" }
+          { n: "- Sodium Chloride (Na)", d: `${o.sodium} mEq/kg`, v: o.sodium_volume, p: o.sodium_volume, note: "" },
+          { n: "- Potassium Chloride (K)", d: `${o.potassium} mEq/kg`, v: o.potassium_volume, p: o.potassium_volume, note: "" },
+          { n: "- Magnesium Sulfate (Mg)", d: `${o.magnesium} mmol/kg`, v: o.magnesium_volume, p: o.magnesium_volume, note: "" },
+          { n: "- Calcium Gluconate (Ca)", d: `${o.calcium} mmol/kg`, v: o.calcium_volume, p: o.calcium_volume, note: "" }
         ]},
-        { label: "VITAMINS & TRACE ELEMENT", items: [
+        { label: "Vitamins & Trace Elements", items: [
           { n: "- Soluvit N", d: "-", v: o.soluvit, p: o.soluvit, note: "" },
           { n: "- Peditrace", d: "-", v: o.peditrace, p: o.peditrace, note: "" }
         ]},
-        { label: "ADDITIVES", items: [
+        { label: "Additives", items: [
           { n: `- Zinc (${o.zinc_added})`, d: "-", v: o.zinc_volume, p: o.zinc_volume, note: "" },
           { n: `- Heparin (${o.heparin_added})`, d: `${o.heparin_units} units`, v: o.heparin_volume, p: o.heparin_volume, note: "" },
-          { n: `- ${o.additive_other_name || 'Additives อื่นๆ'}`, d: "-", v: o.additive_other_volume, p: o.additive_other_volume, note: "" }
+          { n: `- ${o.additive_other_name || "Additives อื่นๆ"}`, d: "-", v: o.additive_other_volume, p: o.additive_other_volume, note: "" }
         ]},
-        { label: "STERILE WATER", items: [
+        { label: "Sterile Water", items: [
           { n: "Sterile Water", d: "-", v: o.water_volume, p: o.prep_water_vol, note: "" }
         ]}
       ];
 
       let tableHtml = "";
       categories.forEach(cat => {
-        tableHtml += `<tr class="category-row bg-gray-100 font-bold"><td colspan="5" class="px-2 py-1 text-[10px] uppercase border border-black">${cat.label}</td></tr>`;
+        tableHtml += `<tr class="category-row"><td colspan="5" class="px-2 py-0.5">${cat.label}</td></tr>`;
         cat.items.forEach(i => {
-          const vol = parseFloat(i.v) || 0;
+          const val = parseFloat(i.v) || 0;
           tableHtml += `
-            <tr class="${vol === 0 ? 'text-gray-400' : ''}">
-              <td class="pl-4 font-bold border border-black">${i.n}</td>
-              <td class="text-center font-mono border border-black">${i.d || '-'}</td>
-              <td class="text-center font-black border border-black">${vol} ml</td>
-              <td class="text-center font-bold text-blue-800 border border-black">${parseFloat(i.p) || 0} ml</td>
-              <td class="text-[9px] italic border border-black">${i.note}</td>
+            <tr class="${val === 0 ? 'text-gray-400' : ''}">
+              <td class="pl-4 font-bold">${i.n}</td>
+              <td class="text-center font-mono">${i.d || '-'}</td>
+              <td class="text-center font-black">${val} ml</td>
+              <td class="text-center font-bold text-blue-800 bg-blue-50/50">${i.p || 0} ml</td>
+              <td class="text-[9px] italic">${i.note}</td>
             </tr>`;
         });
       });
       table.innerHTML = tableHtml;
 
-      // 4. Lipid / Fat Preparation Section
+      // Fat Section - ดึงตามหัวคอลัมน์ vitalipidzinc_added
       if (o.fat_volume > 0) {
         document.getElementById('fatSection').classList.remove('hidden');
+        document.getElementById('fat-product').innerText = o.fat_product || 'Lipid';
         document.getElementById('fat-vol-base').innerText = o.fat_volume;
-        // ปรับการคำนวณบวกสาย (6ml) ให้ตรงตาม Sheet
-        const totalWithLine = (parseFloat(o.fat_volume) + 6).toFixed(1);
-        document.getElementById('fat-plus-line').innerText = totalWithLine;
-        document.getElementById('fat-vita').innerText = o.vitalipid || '0';
-        
-        // Total All = Fat + 6 + Vitalipid
-        const totalAll = parseFloat(totalWithLine) + (parseFloat(o.vitalipid) || 0);
-        document.getElementById('fat-total-all').innerText = totalAll.toFixed(1);
-        
+        document.getElementById('fat-plus-line').innerText = (parseFloat(o.fat_volume) + 6).toFixed(1);
+        // ดึงจากคอลัมน์ vitalipidzinc_added (ที่พิมพ์ติดกัน)
+        document.getElementById('fat-vita').innerText = o.vitalipidzinc_added || '0';
+        const totalFat = parseFloat(o.fat_volume) + 6 + (parseFloat(o.vitalipidzinc_added) || 0);
+        document.getElementById('fat-total-all').innerText = totalFat.toFixed(1);
         document.getElementById('fat-rate').innerText = o.fat_rate || '-';
-        // คำนวณแคลอรี่จาก Fat (9 kcal/g)
         document.getElementById('fat-kcal').innerText = (o.fat_target * o.bw * 9).toFixed(1);
         document.getElementById('fat-split').innerText = o.prep_split || 'ไม่แบ่ง';
-      } else {
-        document.getElementById('fatSection').classList.add('hidden');
       }
     }
   </script>
